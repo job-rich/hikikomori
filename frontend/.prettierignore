@@ -1,0 +1,11 @@
+# dependencies
+node_modules
+
+# build output
+.next
+out
+build
+
+# misc
+*.min.js
+package-lock.json
