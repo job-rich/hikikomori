@@ -1,0 +1,94 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from '@testing-library/react';
+import NicknameGenerator from '@/Components/NicknameGenerator/NicknameGenerator';
+import { generateNickname } from '@/lib/utils/nickname';
+import { generateSnowflakeId } from '@/lib/utils/snowflake';
+
+const pushMock = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: pushMock,
+  }),
+}));
+
+vi.mock('@/lib/utils/nickname');
+vi.mock('@/lib/utils/snowflake');
+
+const mockGenerateNickname = vi.mocked(generateNickname);
+const mockGenerateSnowflakeId = vi.mocked(generateSnowflakeId);
+
+describe('NicknameGenerator', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    pushMock.mockClear();
+    mockGenerateNickname.mockReset();
+    mockGenerateSnowflakeId.mockReset();
+
+    mockGenerateNickname
+      .mockReturnValueOnce('위대한 아인슈타인')
+      .mockReturnValueOnce('전설적인 뉴턴')
+      .mockReturnValue('용감한 테슬라');
+
+    mockGenerateSnowflakeId
+      .mockReturnValueOnce('123456789')
+      .mockReturnValueOnce('987654321')
+      .mockReturnValue('111111111');
+  });
+
+  it('닉네임이 화면에 표시되어야 한다', async () => {
+    render(<NicknameGenerator />);
+    await waitFor(() => {
+      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
+    });
+  });
+
+  it('Snowflake 키값이 화면에 노출되지 않아야 한다', async () => {
+    render(<NicknameGenerator />);
+    await waitFor(() => {
+      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('123456789')).not.toBeInTheDocument();
+  });
+
+  it('"확인" 버튼이 존재해야 한다', () => {
+    render(<NicknameGenerator />);
+    expect(screen.getByRole('button', { name: '확인' })).toBeInTheDocument();
+  });
+
+  it('"닉네임 재생성" 버튼이 존재해야 한다', () => {
+    render(<NicknameGenerator />);
+    expect(
+      screen.getByRole('button', { name: '닉네임 재생성' })
+    ).toBeInTheDocument();
+  });
+
+  it('재생성 클릭 시 닉네임이 변경되어야 한다', async () => {
+    render(<NicknameGenerator />);
+    await waitFor(() => {
+      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '닉네임 재생성' }));
+    expect(screen.getByText('전설적인 뉴턴')).toBeInTheDocument();
+  });
+
+  it('확인 클릭 시 /home으로 이동해야 한다', async () => {
+    render(<NicknameGenerator />);
+    await waitFor(() => {
+      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '확인' }));
+    expect(pushMock).toHaveBeenCalledWith('/home');
+  });
+});

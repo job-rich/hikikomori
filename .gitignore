@@ -1,3 +1,11 @@
+# Ignore Mac system files
 .DS_Store
 
+# Ignore AI 
+.claude 
+findings.md
+progress.md
+task_plan.md
+
+# Ignore Gradle build files
 .gradle

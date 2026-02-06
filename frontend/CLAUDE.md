@@ -21,6 +21,16 @@ npm run lint
 # Format (Prettier)
 npm run format
 npm run format:check
+
+# Test (Vitest + React Testing Library)
+npm test              # 전체 테스트 실행
+npm run test:watch    # watch 모드
+
+# 단일 테스트 파일 실행
+npx vitest run lib/utils/__tests__/snowflake.test.ts
+
+# 패턴 매칭으로 실행
+npx vitest run nickname
 ```
 
 ## Architecture
@@ -29,8 +39,8 @@ npm run format:check
 
 - **Next.js 16.1.6** with App Router — all routes live in `app/`
 - Root layout (`app/layout.tsx`) loads Geist Sans/Mono fonts via `next/font/google`
-- Root page (`app/page.tsx`) renders the top-level `<Home />` component
-- Currently single-page; no nested routes, route groups, API routes, or middleware
+- `/` (`app/page.tsx`) — 닉네임 생성 화면 (`NicknameGenerator`)
+- `/home` (`app/home/page.tsx`) — 메인 Home 화면 (`Navbar` + `Body` + `Footer`)
 
 ### Component Organization
 
@@ -44,13 +54,26 @@ Components/
 ```
 
 - `Components/Home/` — Home feature (`Home.tsx`, `Navbar/`, `Body/`, `Footer/`)
+- `Components/NicknameGenerator/` — 닉네임 생성 화면
 - `Components/Common/` — Shared components (`Button/`, `Modals/`)
 - Server Components by default; only add `'use client'` when React hooks or browser APIs are needed (e.g., `Body.tsx` uses `useState` for modal state)
 
-### Type Definitions
+### Utilities & Data
 
-- Shared types live in `lib/types/` (e.g., `lib/types/button.ts` exports `ButtonProps`)
-- Import types with `@/lib/types/...`
+- `lib/utils/` — 유틸리티 함수 (`nickname.ts`, `snowflake.ts`)
+- `lib/data/` — 정적 데이터 (`nicknameDictionaries.ts`)
+- `lib/types/` — 공유 타입 정의 (`button.ts`)
+- Import with `@/lib/...`
+
+### Testing
+
+- **Vitest** + **React Testing Library** + **jsdom**
+- 설정: `vitest.config.ts`, `vitest.setup.ts`
+- 테스트 파일 위치: 대상 파일과 동일 경로의 `__tests__/` 디렉토리
+  - `lib/utils/__tests__/snowflake.test.ts`
+  - `lib/utils/__tests__/nickname.test.ts`
+  - `Components/NicknameGenerator/__tests__/NicknameGenerator.test.tsx`
+- TDD 방식: 테스트 먼저 작성 → Red(실패) → 구현 → Green(통과)
 
 ### Import Conventions
 
