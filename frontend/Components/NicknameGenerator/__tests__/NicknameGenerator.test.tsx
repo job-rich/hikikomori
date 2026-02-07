@@ -9,12 +9,15 @@ import {
 import NicknameGenerator from '@/Components/NicknameGenerator/NicknameGenerator';
 import { generateNickname } from '@/lib/utils/nickname';
 import { generateSnowflakeId } from '@/lib/utils/snowflake';
+import { useUserStore } from '@/lib/stores/userStore';
 
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: pushMock,
+    replace: replaceMock,
   }),
 }));
 
@@ -31,8 +34,10 @@ describe('NicknameGenerator', () => {
 
   beforeEach(() => {
     pushMock.mockClear();
+    replaceMock.mockClear();
     mockGenerateNickname.mockReset();
     mockGenerateSnowflakeId.mockReset();
+    useUserStore.setState({ nickname: null, snowflakeId: null });
 
     mockGenerateNickname
       .mockReturnValueOnce('위대한 아인슈타인')
@@ -45,18 +50,14 @@ describe('NicknameGenerator', () => {
       .mockReturnValue('111111111');
   });
 
-  it('닉네임이 화면에 표시되어야 한다', async () => {
+  it('닉네임이 화면에 표시되어야 한다', () => {
     render(<NicknameGenerator />);
-    await waitFor(() => {
-      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
-    });
+    expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
   });
 
-  it('Snowflake 키값이 화면에 노출되지 않아야 한다', async () => {
+  it('Snowflake 키값이 화면에 노출되지 않아야 한다', () => {
     render(<NicknameGenerator />);
-    await waitFor(() => {
-      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
-    });
+    expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
     expect(screen.queryByText('123456789')).not.toBeInTheDocument();
   });
 
@@ -72,23 +73,36 @@ describe('NicknameGenerator', () => {
     ).toBeInTheDocument();
   });
 
-  it('재생성 클릭 시 닉네임이 변경되어야 한다', async () => {
+  it('재생성 클릭 시 닉네임이 변경되어야 한다', () => {
     render(<NicknameGenerator />);
-    await waitFor(() => {
-      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
-    });
+    expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '닉네임 재생성' }));
     expect(screen.getByText('전설적인 뉴턴')).toBeInTheDocument();
   });
 
-  it('확인 클릭 시 /home으로 이동해야 한다', async () => {
+  it('확인 클릭 시 store에 저장 후 /home으로 이동해야 한다', () => {
     render(<NicknameGenerator />);
-    await waitFor(() => {
-      expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
-    });
+    expect(screen.getByText('위대한 아인슈타인')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '확인' }));
     expect(pushMock).toHaveBeenCalledWith('/home');
+
+    const { nickname, snowflakeId } = useUserStore.getState();
+    expect(nickname).toBe('위대한 아인슈타인');
+    expect(snowflakeId).toBe('123456789');
+  });
+
+  it('재방문 시 (store에 데이터 있으면) /home으로 리다이렉트해야 한다', async () => {
+    useUserStore.setState({
+      nickname: '기존닉네임',
+      snowflakeId: '999999999',
+    });
+
+    render(<NicknameGenerator />);
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('/home');
+    });
   });
 });

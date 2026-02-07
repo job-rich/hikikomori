@@ -1,44 +1,66 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateNickname } from '@/lib/utils/nickname';
 import { generateSnowflakeId } from '@/lib/utils/snowflake';
+import { useUserStore } from '@/lib/stores/userStore';
+import { useReducer } from 'react';
+
+interface UserValues {
+  nickname: string;
+  snowflakeId: string;
+}
+
+function generateValues(): UserValues {
+  const values = {
+    nickname: generateNickname(),
+    snowflakeId: generateSnowflakeId(),
+  };
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`닉네임: ${values.nickname}, id: ${values.snowflakeId}`);
+  }
+  return values;
+}
+
+function valuesReducer(_state: UserValues, action: 'regenerate'): UserValues {
+  if (action === 'regenerate') {
+    return generateValues();
+  }
+  return _state;
+}
 
 export default function NicknameGenerator() {
   const router = useRouter();
-  const [nickname, setNickname] = useState('');
-  const [snowflakeId, setSnowflakeId] = useState('');
+  const { setUser } = useUserStore();
+  const [values, dispatch] = useReducer(valuesReducer, null, generateValues);
+  const redirected = useRef(false);
 
   useEffect(() => {
-    const name = generateNickname();
-    const id = generateSnowflakeId();
-    setNickname(name);
-    setSnowflakeId(id);
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`닉네임: ${name}, id: ${id}`);
+    if (redirected.current) return;
+    if (useUserStore.getState().isLoggedIn()) {
+      redirected.current = true;
+      router.replace('/home');
     }
-  }, []);
+  }, [router]);
 
   const handleRegenerate = () => {
-    const name = generateNickname();
-    const id = generateSnowflakeId();
-    setNickname(name);
-    setSnowflakeId(id);
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`닉네임: ${name}, id: ${id}`);
-    }
+    dispatch('regenerate');
   };
 
   const handleConfirm = () => {
+    setUser(values.nickname, values.snowflakeId);
     router.push('/home');
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
       <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-lg border border-zinc-200 bg-white px-8 py-12 dark:border-zinc-800 dark:bg-zinc-950">
+        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
+          명예로운 이름을 선정하세요
+        </h1>
         <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          {nickname}
+          {values.nickname}
         </p>
         <div className="flex gap-3">
           <button
