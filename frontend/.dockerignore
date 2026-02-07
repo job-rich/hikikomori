@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+*.md
+.env*
+.gitignore
+vitest.config.*
+__tests__
+**/*.test.*
+**/*.spec.*
+coverage
+.github

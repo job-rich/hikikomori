@@ -1,0 +1,9 @@
+.gradle
+build
+.git
+*.md
+.env*
+.gitignore
+compose.yaml
+.github
+src/test
