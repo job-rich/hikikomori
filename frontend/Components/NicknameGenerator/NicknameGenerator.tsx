@@ -13,6 +13,9 @@ interface UserValues {
 }
 
 function generateValues(): UserValues {
+  if (useUserStore.getState().isLoggedIn()) {
+    return { nickname: '', snowflakeId: '' };
+  }
   const values = {
     nickname: generateNickname(),
     snowflakeId: generateSnowflakeId(),
