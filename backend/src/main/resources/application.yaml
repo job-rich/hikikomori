@@ -1,3 +1,14 @@
 spring:
   application:
     name: community
+  docker:
+    compose:
+      file: backend/compose.yaml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/community
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
