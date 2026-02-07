@@ -1,9 +1,9 @@
-import Home from '@/Components/Home/Home';
+import NicknameGenerator from '@/Components/NicknameGenerator/NicknameGenerator';
 
 export default function Page() {
   return (
     <>
-      <Home />
+      <NicknameGenerator />
     </>
   );
 }
