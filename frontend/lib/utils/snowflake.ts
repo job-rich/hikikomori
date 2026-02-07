@@ -1,4 +1,4 @@
-const EPOCH = BigInt(1704067200000); // 2024-01-01T00:00:00Z
+const EPOCH = BigInt(1767225600000); // 2026-01-01T00:00:00Z
 let sequence = BigInt(0);
 let lastTimestamp = BigInt(0);
 
