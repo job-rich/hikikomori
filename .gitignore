@@ -1,1 +1,18 @@
+# IDE
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+*.log
+
+# OS
 .DS_Store
+
+# Env
+.env
+*.env.local
