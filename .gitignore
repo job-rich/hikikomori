@@ -6,6 +6,8 @@
 findings.md
 progress.md
 task_plan.md
+.serena
+
 
 # Ignore Gradle build files
 .gradle
@@ -27,3 +29,6 @@ build/
 # Env
 .env
 *.env.local
+
+# Ignore VSCode settings
+.vscode/
