@@ -29,20 +29,6 @@ jobs:
   backend-test:
     if: ${{ !startsWith(github.head_ref, 'chore/') }}
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: community
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     defaults:
       run:
         working-directory: backend
@@ -54,11 +40,5 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-          cache: gradle
-          cache-dependency-path: backend/build.gradle
-      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew test
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/community
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
