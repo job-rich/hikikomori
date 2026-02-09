@@ -3,13 +3,29 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Overlay (RealityGlitch, FloatingEntity) */
+  --neon: 142 76% 36%;
+  --glitch: 280 80% 50%;
+  --destructive: 0 72% 51%;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-neon: hsl(var(--neon));
+  --color-glitch: hsl(var(--glitch));
+  --color-destructive: hsl(var(--destructive));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Overlay animations */
+  --animate-static-noise: static-noise 0.15s steps(4) infinite;
+  --animate-float-entity: float-entity 4s ease-in-out infinite;
+  --animate-breathe: breathe 3s ease-in-out infinite;
+  --animate-flicker: flicker 0.5s ease-in-out infinite;
+  /* ScanLine */
+  --animate-scanline: scanline 4s linear infinite;
+  --animate-scanline-thick: scanline 6s linear infinite;
+  --animate-drift: drift 8s ease-in-out infinite;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +39,38 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- Overlay: RealityGlitch, FloatingEntity --- */
+@keyframes static-noise {
+  0%, 100% { transform: translate(0, 0); opacity: 1; }
+  25% { transform: translate(-2px, 2px); opacity: 0.8; }
+  50% { transform: translate(2px, -2px); opacity: 1; }
+  75% { transform: translate(-2px, -2px); opacity: 0.9; }
+}
+
+@keyframes float-entity {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* ScanLine overlay */
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100vh); }
+}
+
+@keyframes drift {
+  0%, 100% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
 }
