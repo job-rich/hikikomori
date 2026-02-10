@@ -1,25 +1,30 @@
 package org.hikikomori.community.controller.data;
 
 import java.util.List;
+import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
 import org.hikikomori.community.domain.Comment;
 
-public record CommentResponse(
-        Long id,
-        String content,
-        String createdAt,
-        List<CommentResponse> children
-) {
+@Getter
+@Builder
+public class CommentResponse {
+
+    private final UUID id;
+    private final String content;
+    private final String createdAt;
+    private final List<CommentResponse> children;
 
     public static CommentResponse from(Comment comment) {
         List<CommentResponse> childResponses = comment.getChildren().stream()
                 .map(CommentResponse::from)
                 .toList();
 
-        return new CommentResponse(
-                comment.getId(),
-                comment.getContent(),
-                comment.getCreatedAt().toString(),
-                childResponses
-        );
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt().toString())
+                .children(childResponses)
+                .build();
     }
 }
