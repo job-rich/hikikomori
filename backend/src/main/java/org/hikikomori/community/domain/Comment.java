@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String content;
@@ -35,6 +34,7 @@ public class Comment {
 
     @Builder
     public Comment(String content, Post post, Comment parent) {
+        this.id = UUIDGenerator.generate();
         this.content = content;
         this.post = post;
         this.parent = parent;

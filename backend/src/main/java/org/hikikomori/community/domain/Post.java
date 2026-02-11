@@ -1,8 +1,6 @@
 package org.hikikomori.community.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String title;
@@ -27,6 +24,7 @@ public class Post {
 
     @Builder
     public Post(String title, String content) {
+        this.id = UUIDGenerator.generate();
         this.title = title;
         this.content = content;
         this.createdAt = LocalDateTime.now();
