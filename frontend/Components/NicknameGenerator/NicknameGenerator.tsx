@@ -6,6 +6,8 @@ import { generateNickname } from '@/lib/utils/nickname';
 import { generateSnowflakeId } from '@/lib/utils/snowflake';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useReducer } from 'react';
+import CenteredLayout from '@/Components/Common/Layout/CenteredLayout';
+import Card from '@/Components/Common/Card/Card';
 
 interface UserValues {
   nickname: string;
@@ -57,8 +59,8 @@ export default function NicknameGenerator() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-      <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-lg border border-zinc-200 bg-white px-8 py-12 dark:border-zinc-800 dark:bg-zinc-950">
+    <CenteredLayout>
+      <Card>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
           명예로운 이름을 선정하세요
         </h1>
@@ -79,7 +81,7 @@ export default function NicknameGenerator() {
             닉네임 재생성
           </button>
         </div>
-      </div>
-    </div>
+      </Card>
+    </CenteredLayout>
   );
 }
