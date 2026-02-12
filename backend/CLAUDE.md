@@ -22,7 +22,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # PostgreSQL만 별도 실행
 docker-compose -f backend/compose.yaml up
+
+# Docker로 실행 (루트 디렉토리에서)
+docker compose up --build backend
 ```
+
+### Docker
+
+- `Dockerfile`: 멀티스테이지 빌드 (build → runtime), eclipse-temurin:25 기반
+- 빌드 시 테스트 스킵 (`-x test`), bootJar로 실행 가능 JAR 생성
+- `docker-compose.yml`에서 postgres 의존성 설정 (healthcheck 대기 후 기동)
 
 ## Tech Stack
 

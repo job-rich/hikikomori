@@ -31,7 +31,16 @@ npx vitest run lib/utils/__tests__/snowflake.test.ts
 
 # 패턴 매칭으로 실행
 npx vitest run nickname
+
+# Docker로 실행 (루트 디렉토리에서)
+docker compose up --build frontend
 ```
+
+### Docker
+
+- `Dockerfile`: 멀티스테이지 빌드 (deps → build → runtime), node:22-alpine 기반
+- `next.config.ts`의 `output: "standalone"` 설정으로 경량 프로덕션 이미지 생성
+- `.dockerignore`: node_modules, .next, 테스트 파일 등 제외
 
 ## Architecture
 

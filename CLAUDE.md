@@ -60,6 +60,29 @@ docker compose -f infra/stress-tool/docker-compose.yml up --build
 docker compose -f infra/stress-tool/docker-compose.yml up --build --scale worker=4
 ```
 
+### Docker Compose (전체 서비스)
+
+```bash
+# 전체 서비스 빌드 및 실행 (postgres + backend + frontend)
+docker compose up --build
+
+# 백그라운드 실행
+docker compose up --build -d
+
+# 특정 서비스만 실행
+docker compose up --build frontend
+
+# 종료
+docker compose down
+
+# 볼륨 포함 종료 (DB 데이터 삭제)
+docker compose down -v
+```
+
+- **postgres**: `localhost:5432` (DB: community, User: postgres)
+- **backend**: `localhost:8080`
+- **frontend**: `localhost:3000` (standalone 모드)
+
 ## Architecture
 
 ### Backend (Spring Boot MVC)

@@ -1,6 +1,7 @@
 package org.hikikomori.community.service;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
@@ -22,7 +23,7 @@ public class PostService {
         return postRepository.findAll(pageable);
     }
 
-    public Post findById(Long id) {
+    public Post findById(UUID id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
     }
@@ -37,12 +38,11 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public List<Comment> findCommentsByPostId(Long postId) {
+    public List<Comment> findCommentsByPostId(UUID postId) {
         return commentRepository.findByPostIdAndParentIsNull(postId);
     }
 
-    @Transactional
-    public Comment createComment(Long postId, Long parentId, String content) {
+    public Comment createComment(UUID postId, UUID parentId, String content) {
         Post post = findById(postId);
         Comment parent = findParentComment(parentId);
         Comment comment = Comment.builder()
@@ -54,7 +54,7 @@ public class PostService {
         return commentRepository.save(comment);
     }
 
-    private Comment findParentComment(Long parentId) {
+    private Comment findParentComment(UUID parentId) {
         if (parentId == null) {
             return null;
         }
