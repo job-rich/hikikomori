@@ -1,0 +1,15 @@
+# Linux
+.DS_Store
+
+
+# uv
+.venv/
+uv.lock
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Locust report
+locust_report_*.html

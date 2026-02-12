@@ -8,11 +8,13 @@ Hikikomori는 백엔드/프론트엔드가 분리된 모노레포 구조의 커�
 
 하위 디렉토리별 상세 가이드:
 - **Backend:** [`backend/CLAUDE.md`](backend/CLAUDE.md)
+- **Stress Test:** [`infra/stress-tool/CLAUDE.md`](infra/stress-tool/CLAUDE.md)
 
 ## Tech Stack
 
 - **Backend:** Spring Boot 4.1.0-SNAPSHOT, Java 25, Gradle 9.3.0, PostgreSQL, Spring Data JPA, Lombok
 - **Frontend:** Next.js 16.1.6, React 19, TypeScript (strict mode), Tailwind CSS v4, PostCSS
+- **Stress Test:** Locust (Python), Docker, uv
 
 ## Development Commands
 
@@ -46,6 +48,16 @@ npm start --prefix frontend
 npm run lint --prefix frontend
 npm run format --prefix frontend
 npm run format:check --prefix frontend
+```
+
+### Stress Test (`/infra/stress-tool`)
+
+```bash
+# 스트레스 테스트 실행 (사전에 루트 docker compose up 필요, Web UI: http://localhost:8089)
+docker compose -f infra/stress-tool/docker-compose.yml up --build
+
+# Worker 수 조절
+docker compose -f infra/stress-tool/docker-compose.yml up --build --scale worker=4
 ```
 
 ## Architecture
