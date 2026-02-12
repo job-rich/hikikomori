@@ -1,15 +1,25 @@
 package org.hikikomori.community.controller.data;
 
+import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
 import org.hikikomori.community.domain.Post;
 
-public record PostResponse(Long id, String title, String content, String createdAt) {
+@Getter
+@Builder
+public class PostResponse {
+
+    private final UUID id;
+    private final String title;
+    private final String content;
+    private final String createdAt;
 
     public static PostResponse from(Post post) {
-        return new PostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getCreatedAt().toString()
-        );
+        return PostResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt().toString())
+                .build();
     }
 }

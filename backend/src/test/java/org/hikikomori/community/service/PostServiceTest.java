@@ -1,9 +1,14 @@
 package org.hikikomori.community.service;
 
-import java.util.List;
-import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.repository.CommentRepository;
@@ -11,11 +16,8 @@ import org.hikikomori.community.repository.PostRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +35,10 @@ class PostServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    private static final UUID POST_ID = UUID.randomUUID();
+    private static final UUID COMMENT_ID = UUID.randomUUID();
+    private static final UUID REPLY_ID = UUID.randomUUID();
 
     @Test
     @DisplayName("게시글 생성")
@@ -68,20 +74,21 @@ class PostServiceTest {
     @DisplayName("게시글 단건 조회")
     void findById() {
         Post post = Post.builder().title("제목").content("내용").build();
-        given(postRepository.findById(1L)).willReturn(Optional.of(post));
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
 
-        Post result = postService.findById(1L);
+        Post result = postService.findById(POST_ID);
 
         assertThat(result.getTitle()).isEqualTo("제목");
-        verify(postRepository).findById(1L);
+        verify(postRepository).findById(POST_ID);
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회 시 예외")
     void findByIdNotFound() {
-        given(postRepository.findById(999L)).willReturn(Optional.empty());
+        UUID notFoundId = UUID.randomUUID();
+        given(postRepository.findById(notFoundId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.findById(999L))
+        assertThatThrownBy(() -> postService.findById(notFoundId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시글을 찾을 수 없습니다");
     }
@@ -91,10 +98,10 @@ class PostServiceTest {
     void createComment() {
         Post post = Post.builder().title("제목").content("내용").build();
         Comment comment = Comment.builder().content("댓글").post(post).build();
-        given(postRepository.findById(1L)).willReturn(Optional.of(post));
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
         given(commentRepository.save(any(Comment.class))).willReturn(comment);
 
-        Comment result = postService.createComment(1L, null, "댓글");
+        Comment result = postService.createComment(POST_ID, null, "댓글");
 
         assertThat(result.getContent()).isEqualTo("댓글");
         verify(commentRepository).save(any(Comment.class));
@@ -106,11 +113,11 @@ class PostServiceTest {
         Post post = Post.builder().title("제목").content("내용").build();
         Comment parent = Comment.builder().content("댓글").post(post).build();
         Comment reply = Comment.builder().content("대댓글").post(post).parent(parent).build();
-        given(postRepository.findById(1L)).willReturn(Optional.of(post));
-        given(commentRepository.findById(1L)).willReturn(Optional.of(parent));
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+        given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(parent));
         given(commentRepository.save(any(Comment.class))).willReturn(reply);
 
-        Comment result = postService.createComment(1L, 1L, "대댓글");
+        Comment result = postService.createComment(POST_ID, COMMENT_ID, "대댓글");
 
         assertThat(result.getContent()).isEqualTo("대댓글");
         assertThat(result.getParent()).isEqualTo(parent);
@@ -123,12 +130,12 @@ class PostServiceTest {
                 Comment.builder().content("댓글1").build(),
                 Comment.builder().content("댓글2").build()
         );
-        given(commentRepository.findByPostIdAndParentIsNull(1L)).willReturn(comments);
+        given(commentRepository.findByPostIdAndParentIsNull(POST_ID)).willReturn(comments);
 
-        List<Comment> result = postService.findCommentsByPostId(1L);
+        List<Comment> result = postService.findCommentsByPostId(POST_ID);
 
         assertThat(result).hasSize(2);
-        verify(commentRepository).findByPostIdAndParentIsNull(1L);
+        verify(commentRepository).findByPostIdAndParentIsNull(POST_ID);
     }
 
     @Test
@@ -137,10 +144,10 @@ class PostServiceTest {
         Post post = Post.builder().title("제목").content("내용").build();
         Comment parent = Comment.builder().content("댓글").post(post).build();
         Comment reply = Comment.builder().content("대댓글").post(post).parent(parent).build();
-        given(postRepository.findById(1L)).willReturn(Optional.of(post));
-        given(commentRepository.findById(2L)).willReturn(Optional.of(reply));
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+        given(commentRepository.findById(REPLY_ID)).willReturn(Optional.of(reply));
 
-        assertThatThrownBy(() -> postService.createComment(1L, 2L, "대대댓글"))
+        assertThatThrownBy(() -> postService.createComment(POST_ID, REPLY_ID, "대대댓글"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("대댓글에는 답글을 달 수 없습니다");
     }

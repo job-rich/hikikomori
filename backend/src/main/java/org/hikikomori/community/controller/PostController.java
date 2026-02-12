@@ -1,6 +1,8 @@
 package org.hikikomori.community.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.controller.data.CommentCreateRequest;
 import org.hikikomori.community.controller.data.CommentResponse;
@@ -31,21 +33,21 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> findById(@PathVariable UUID id) {
         Post post = postService.findById(id);
 
         return ResponseEntity.ok(PostResponse.from(post));
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest request) {
-        Post post = postService.create(request.title(), request.content());
+    public ResponseEntity<PostResponse> create(@Valid @RequestBody PostCreateRequest request) {
+        Post post = postService.create(request.getTitle(), request.getContent());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(PostResponse.from(post));
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<CommentResponse>> findComments(@PathVariable Long id) {
+    public ResponseEntity<List<CommentResponse>> findComments(@PathVariable UUID id) {
         List<CommentResponse> comments = postService.findCommentsByPostId(id).stream()
                 .map(CommentResponse::from)
                 .toList();
@@ -55,10 +57,10 @@ public class PostController {
 
     @PostMapping("/{id}/comments")
     public ResponseEntity<CommentResponse> createComment(
-            @PathVariable Long id,
-            @RequestBody CommentCreateRequest request
+            @PathVariable UUID id,
+            @Valid @RequestBody CommentCreateRequest request
     ) {
-        Comment comment = postService.createComment(id, request.parentId(), request.content());
+        Comment comment = postService.createComment(id, request.getParentId(), request.getContent());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CommentResponse.from(comment));
     }
