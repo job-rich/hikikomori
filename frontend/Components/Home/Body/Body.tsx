@@ -1,24 +1,26 @@
 'use client';
-import Button from '@/Components/Common/Button/Button';
-import Create from '@/Components/Common/Modals/Create';
-import { useState } from 'react';
+
+import PostForm from '@/Components/Common/Post/Post-Form/Post-Form';
+import PostCard from '@/Components/Common/Post/Post-Card/Post-Card';
 export default function Body() {
-  const [createOpen, setCreateOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const handleSubmit = (content: string, tag: string) => {
+    console.log(content, tag);
+  };
+
   return (
-    <>
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex min-h-screen border border-red-500 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-          <div>
-            <Button
-              type={'create'}
-              setCreateOpen={setCreateOpen}
-              setDeleteOpen={setDeleteOpen}
-            />
-          </div>
-        </main>
+    <main className="min-w-0 flex-1 font-sans">
+      <div className="mx-auto flex max-w-3xl flex-col items-start">
+        <PostForm onSubmit={handleSubmit} />
+        <PostCard
+          id={1}
+          content="test"
+          timestamp="test"
+          replies={0}
+          views={0}
+          username="test"
+          votes={0}
+        />
       </div>
-      {createOpen && <Create setCreateOpen={setCreateOpen} />}
-    </>
+    </main>
   );
 }
