@@ -16,6 +16,10 @@ public class Post {
     @Id
     private UUID id;
 
+    private Long userId;
+
+    private String nickName;
+
     private String title;
 
     private String content;
@@ -23,8 +27,10 @@ public class Post {
     private LocalDateTime createdAt;
 
     @Builder
-    public Post(String title, String content) {
+    public Post(Long userId, String nickName, String title, String content) {
         this.id = UUIDGenerator.generate();
+        this.userId = userId;
+        this.nickName = nickName;
         this.title = title;
         this.content = content;
         this.createdAt = LocalDateTime.now();

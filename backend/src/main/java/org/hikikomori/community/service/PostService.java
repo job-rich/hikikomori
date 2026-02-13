@@ -3,6 +3,8 @@ package org.hikikomori.community.service;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.hikikomori.community.controller.data.CommentCreateRequest;
+import org.hikikomori.community.controller.data.PostCreateRequest;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.repository.CommentRepository;
@@ -29,10 +31,12 @@ public class PostService {
     }
 
     @Transactional
-    public Post create(String title, String content) {
+    public Post create(PostCreateRequest request) {
         Post post = Post.builder()
-                .title(title)
-                .content(content)
+                .userId(request.getUserId())
+                .nickName(request.getNickName())
+                .title(request.getTitle())
+                .content(request.getContent())
                 .build();
 
         return postRepository.save(post);
@@ -42,11 +46,13 @@ public class PostService {
         return commentRepository.findByPostIdAndParentIsNull(postId);
     }
 
-    public Comment createComment(UUID postId, UUID parentId, String content) {
+    public Comment createComment(UUID postId, CommentCreateRequest request) {
         Post post = findById(postId);
-        Comment parent = findParentComment(parentId);
+        Comment parent = findParentComment(request.getParentId());
         Comment comment = Comment.builder()
-                .content(content)
+                .content(request.getContent())
+                .userId(request.getUserId())
+                .nickName(request.getNickName())
                 .post(post)
                 .parent(parent)
                 .build();

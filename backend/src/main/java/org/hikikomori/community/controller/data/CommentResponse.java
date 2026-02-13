@@ -11,6 +11,8 @@ import org.hikikomori.community.domain.Comment;
 public class CommentResponse {
 
     private final UUID id;
+    private final Long userId;
+    private final String nickName;
     private final String content;
     private final String createdAt;
     private final List<CommentResponse> children;
@@ -22,6 +24,8 @@ public class CommentResponse {
 
         return CommentResponse.builder()
                 .id(comment.getId())
+                .userId(comment.getUserId())
+                .nickName(comment.getNickName())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt().toString())
                 .children(childResponses)

@@ -23,6 +23,10 @@ public class Comment {
     @Id
     private UUID id;
 
+    private Long userId;
+
+    private String nickName;
+
     private String content;
 
     private LocalDateTime createdAt;
@@ -39,9 +43,11 @@ public class Comment {
     private final List<Comment> children = new ArrayList<>();
 
     @Builder
-    public Comment(String content, Post post, Comment parent) {
+    public Comment(String content, Long userId, String nickName, Post post, Comment parent) {
         this.id = UUIDGenerator.generate();
         this.content = content;
+        this.userId = userId;
+        this.nickName = nickName;
         this.post = post;
         this.parent = parent;
         this.createdAt = LocalDateTime.now();
