@@ -16,7 +16,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -41,7 +46,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostResponse> create(@Valid @RequestBody PostCreateRequest request) {
-        Post post = postService.create(request.getTitle(), request.getContent());
+        Post post = postService.create(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(PostResponse.from(post));
     }
@@ -60,7 +65,7 @@ public class PostController {
             @PathVariable UUID id,
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        Comment comment = postService.createComment(id, request.getParentId(), request.getContent());
+        Comment comment = postService.createComment(id, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CommentResponse.from(comment));
     }

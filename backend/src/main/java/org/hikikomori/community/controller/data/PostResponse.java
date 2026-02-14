@@ -10,6 +10,8 @@ import org.hikikomori.community.domain.Post;
 public class PostResponse {
 
     private final UUID id;
+    private final Long userId;
+    private final String nickName;
     private final String title;
     private final String content;
     private final String createdAt;
@@ -17,6 +19,8 @@ public class PostResponse {
     public static PostResponse from(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
+                .userId(post.getUserId())
+                .nickName(post.getNickName())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt().toString())
