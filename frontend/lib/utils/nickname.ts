@@ -1,10 +1,7 @@
-import { uniqueNamesGenerator } from 'unique-names-generator';
 import { modifiers, famousPeople } from '@/lib/data/nicknameDictionaries';
 
 export function generateNickname(): string {
-  return uniqueNamesGenerator({
-    dictionaries: [modifiers, famousPeople],
-    separator: ' ',
-    length: 2,
-  });
+  const modifier = modifiers[Math.floor(Math.random() * modifiers.length)];
+  const person = famousPeople[Math.floor(Math.random() * famousPeople.length)];
+  return `${modifier} ${person}`;
 }

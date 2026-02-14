@@ -67,11 +67,20 @@ Components/
 - `Components/Common/` — Shared components (`Button/`, `Modals/`)
 - Server Components by default; only add `'use client'` when React hooks or browser APIs are needed (e.g., `Body.tsx` uses `useState` for modal state)
 
+### State Management
+
+- **Zustand** + `persist` 미들웨어 — 전역 상태 관리 + localStorage 영속화
+- `lib/stores/userStore.ts` — 사용자 상태 (nickname, snowflakeId)
+- `lib/types/user.ts` — UserState 인터페이스
+- persist key: `hikikomori-user` (localStorage)
+- 재방문 시 localStorage에 데이터가 있으면 닉네임 생성 화면 건너뛰고 `/home`으로 리다이렉트
+
 ### Utilities & Data
 
 - `lib/utils/` — 유틸리티 함수 (`nickname.ts`, `snowflake.ts`)
 - `lib/data/` — 정적 데이터 (`nicknameDictionaries.ts`)
-- `lib/types/` — 공유 타입 정의 (`button.ts`)
+- `lib/types/` — 공유 타입 정의 (`button.ts`, `user.ts`)
+- `lib/stores/` — Zustand 전역 상태 (`userStore.ts`)
 - Import with `@/lib/...`
 
 ### Testing
@@ -82,6 +91,7 @@ Components/
   - `lib/utils/__tests__/snowflake.test.ts`
   - `lib/utils/__tests__/nickname.test.ts`
   - `Components/NicknameGenerator/__tests__/NicknameGenerator.test.tsx`
+  - `lib/stores/__tests__/userStore.test.ts`
 - TDD 방식: 테스트 먼저 작성 → Red(실패) → 구현 → Green(통과)
 
 ### Import Conventions
