@@ -1,19 +1,19 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this directory.
+이 파일은 Claude Code (claude.ai/code)가 이 디렉토리의 코드를 다룰 때 참고하는 가이드이다.
 
-## Overview
+## 개요
 
 Locust 기반 Hikikomori Community API 부하/스트레스 테스트 도구. Docker Compose로 master + worker 분산 테스트를 실행한다.
 
-## Tech Stack
+## 기술 스택
 
-- **Runtime:** Python 3.14
-- **Load Testing:** Locust >= 2.32.0
-- **Package Manager:** uv
-- **Container:** Docker, Docker Compose
+- **런타임:** Python 3.14
+- **부하 테스트:** Locust >= 2.32.0
+- **패키지 관리:** uv
+- **컨테이너:** Docker, Docker Compose
 
-## Commands
+## 명령어
 
 ```bash
 # 의존성 설치 (로컬)
@@ -35,7 +35,7 @@ uv run locust --tags read       # 읽기만
 uv run locust --tags write      # 쓰기만
 ```
 
-## Architecture
+## 아키텍처
 
 ### 상속 구조
 
@@ -54,8 +54,8 @@ CommunityUser(PostUser, CommentUser)  ← 다중 상속으로 양쪽 task 통합
 
 ### 가상 사용자 비율 (weight)
 
-| Class | Weight | 100명 기준 |
-|-------|--------|-----------|
+| 클래스 | 비중 | 100명 기준 |
+|-------|------|-----------|
 | CommunityUser | 6 (60%) | 60명 — 게시글 + 댓글 통합 |
 | PostOnlyUser | 2 (20%) | 20명 — 게시글 전용 |
 | CommentOnlyUser | 2 (20%) | 20명 — 댓글 전용 |
@@ -81,8 +81,8 @@ create_comment()       → created_comment_ids에 ID 축적 → create_reply()�
 
 ## 대상 API
 
-| Method | Path | Description |
-|--------|------|-------------|
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
 | GET | /api/posts | 게시글 목록 (페이징) |
 | GET | /api/posts/{id} | 게시글 단건 조회 |
 | POST | /api/posts | 게시글 생성 |
@@ -95,7 +95,7 @@ create_comment()       → created_comment_ids에 ID 축적 → create_reply()�
 2. `scenarios/__init__.py`에 export 추가
 3. 필요 시 `locustfile.py`에 새 User 클래스 정의
 
-## Configuration
+## 설정
 
 - 대상 호스트: `http://backend:8080` (docker-compose.yml에 상수로 정의)
 - Worker 수: 기본 2 (docker-compose.yml의 `replicas`), `--scale worker=N`으로 조절
