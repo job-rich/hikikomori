@@ -18,9 +18,26 @@ export interface PostResponse {
   createdAt: string;
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export function createPost(request: PostCreateRequest): Promise<PostResponse> {
   return apiClient<PostResponse>('/api/posts', {
     method: 'POST',
     body: JSON.stringify(request),
   });
+}
+
+export function getPosts(
+  page = 0,
+  size = 20
+): Promise<PageResponse<PostResponse>> {
+  return apiClient<PageResponse<PostResponse>>(
+    `/api/posts?page=${page}&size=${size}`
+  );
 }
