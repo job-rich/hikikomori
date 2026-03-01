@@ -1,10 +1,33 @@
 'use client';
 
+import { useState } from 'react';
 import PostForm from '@/Components/Common/Post/Post-Form/Post-Form';
 import PostCard from '@/Components/Common/Post/Post-Card/Post-Card';
+import { createPost } from '@/lib/api/posts';
+import { useUserStore } from '@/lib/stores/userStore';
+import { isEmpty } from '@/lib/utils/isEmpty';
+
 export default function Body() {
-  const handleSubmit = (content: string, tag: string) => {
-    console.log(content, tag);
+  const { snowflakeId, nickname } = useUserStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (title: string, content: string, tag: string) => {
+    if (isEmpty(snowflakeId) || isEmpty(nickname) || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await createPost({
+        title,
+        content,
+        tag,
+        userId: Number(snowflakeId!),
+        nickName: nickname!,
+      });
+    } catch (error) {
+      console.error('게시글 생성 실패:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
