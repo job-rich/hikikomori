@@ -1,13 +1,12 @@
 package org.hikikomori.community.controller.data;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class PostCreateRequest {
 
     @NotBlank
@@ -19,4 +18,12 @@ public class PostCreateRequest {
     private Long userId;
 
     private String nickName;
+
+    @Builder
+    private PostCreateRequest(String title, String content, Long userId, String nickName) {
+        this.title = title;
+        this.content = content;
+        this.userId = userId;
+        this.nickName = nickName;
+    }
 }
