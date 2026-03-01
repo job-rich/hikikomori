@@ -108,6 +108,46 @@ describe('NicknameGenerator', () => {
     expect(snowflakeId).toBe('111111111');
   });
 
+  it('ESC 키를 누르면 모달이 닫혀야 한다', () => {
+    useUserStore.setState({ nicknameModalOpen: true });
+    render(<NicknameGenerator />);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    expect(useUserStore.getState().nicknameModalOpen).toBe(false);
+  });
+
+  it('모달 배경 클릭 시 모달이 닫혀야 한다', () => {
+    useUserStore.setState({ nicknameModalOpen: true });
+    render(<NicknameGenerator />);
+    const backdrop = screen.getByRole('dialog');
+
+    fireEvent.click(backdrop);
+
+    expect(useUserStore.getState().nicknameModalOpen).toBe(false);
+  });
+
+  it('모달 카드 내부 클릭 시 모달이 닫히지 않아야 한다', () => {
+    useUserStore.setState({ nicknameModalOpen: true });
+    render(<NicknameGenerator />);
+
+    fireEvent.click(screen.getByText('위대한 아인슈타인'));
+
+    expect(useUserStore.getState().nicknameModalOpen).toBe(true);
+  });
+
+  it('openNicknameModal은 모달을 열어야 한다', () => {
+    useUserStore.getState().openNicknameModal();
+    expect(useUserStore.getState().nicknameModalOpen).toBe(true);
+  });
+
+  it('closeNicknameModal은 모달을 닫아야 한다', () => {
+    useUserStore.setState({ nicknameModalOpen: true });
+    useUserStore.getState().closeNicknameModal();
+    expect(useUserStore.getState().nicknameModalOpen).toBe(false);
+  });
+
   it('requireNickname은 비로그인 시 모달을 열고 true를 반환한다', () => {
     const result = useUserStore.getState().requireNickname();
     expect(result).toBe(true);
