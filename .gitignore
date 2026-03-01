@@ -1,8 +1,9 @@
 # Ignore Mac system files
 .DS_Store
 
-# Ignore AI 
-.claude 
+# Ignore AI
+.claude
+.worktrees/
 findings.md
 progress.md
 task_plan.md
