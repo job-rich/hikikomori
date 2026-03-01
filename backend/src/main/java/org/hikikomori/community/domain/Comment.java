@@ -1,6 +1,7 @@
 package org.hikikomori.community.domain;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -27,6 +28,7 @@ public class Comment {
 
     private String nickName;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime createdAt;
@@ -40,7 +42,7 @@ public class Comment {
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private final List<Comment> children = new ArrayList<>();
+    private List<Comment> children = new ArrayList<>();
 
     @Builder
     public Comment(String content, Long userId, String nickName, Post post, Comment parent) {
