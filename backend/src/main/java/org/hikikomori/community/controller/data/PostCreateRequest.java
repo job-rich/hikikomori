@@ -15,8 +15,13 @@ public class PostCreateRequest {
     @NotBlank
     private String content;
 
-    private Long userId;
+    @NotBlank
+    private String tag;
 
+    @NotNull
+    private Long userId;
+    
+    @NotBlank
     private String nickName;
 
     @Builder

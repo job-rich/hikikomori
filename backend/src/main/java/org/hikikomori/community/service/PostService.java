@@ -35,6 +35,7 @@ public class PostService {
                 .nickName(request.getNickName())
                 .title(request.getTitle())
                 .content(request.getContent())
+                .tag(request.getTag())
                 .build();
 
         return postRepository.save(post);
