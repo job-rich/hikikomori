@@ -14,6 +14,7 @@ public class PostResponse {
     private final String nickName;
     private final String title;
     private final String content;
+    private final String tag;
     private final String createdAt;
 
     public static PostResponse from(Post post) {
@@ -23,6 +24,7 @@ public class PostResponse {
                 .nickName(post.getNickName())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .tag(post.getTag())
                 .createdAt(post.getCreatedAt().toString())
                 .build();
     }

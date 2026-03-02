@@ -45,10 +45,10 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 생성")
     void create() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         given(postRepository.save(any(Post.class))).willReturn(post);
 
-        PostCreateRequest request = new PostCreateRequest("제목", "내용", 1L, "테스터");
+        PostCreateRequest request = new PostCreateRequest("제목", "내용", "VOID", 1L, "테스터");
         Post result = postService.create(request);
 
         assertThat(result.getUserId()).isEqualTo(1L);
@@ -101,7 +101,7 @@ class PostServiceTest {
     @Test
     @DisplayName("댓글 생성")
     void createComment() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
         given(commentRepository.save(any(Comment.class))).willReturn(comment);
@@ -118,7 +118,7 @@ class PostServiceTest {
     @Test
     @DisplayName("대댓글 생성")
     void createReply() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
@@ -150,7 +150,7 @@ class PostServiceTest {
     @Test
     @DisplayName("대댓글에 답글 달기 시 예외")
     void createReplyToReplyThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
