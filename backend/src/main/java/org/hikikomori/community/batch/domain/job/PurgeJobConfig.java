@@ -10,14 +10,12 @@ import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
 public class PurgeJobConfig {
 
     private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
     private final CommentPurgeTasklet commentPurgeTasklet;
     private final PostPurgeTasklet postPurgeTasklet;
 
@@ -32,14 +30,14 @@ public class PurgeJobConfig {
     @Bean
     public Step commentPurgeStep() {
         return new StepBuilder("commentPurgeStep", jobRepository)
-                .tasklet(commentPurgeTasklet, transactionManager)
+                .tasklet(commentPurgeTasklet)
                 .build();
     }
 
     @Bean
     public Step postPurgeStep() {
         return new StepBuilder("postPurgeStep", jobRepository)
-                .tasklet(postPurgeTasklet, transactionManager)
+                .tasklet(postPurgeTasklet)
                 .build();
     }
 }
