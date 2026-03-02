@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useUserStore } from '@/lib/stores/userStore';
 
 // 타이틀 잔상 처리 유니코드 문자열 정리한거 (위 아래 좌 우 에 대한 문자열 코드)
 const ZALGO_CHARS = [
@@ -56,6 +57,7 @@ function addZalgo(text: string, intensity: number = 3): string {
 }
 
 export default function Navbar() {
+  const { nickname, openNicknameModal } = useUserStore();
   const [isTitle, setIsTitle] = useState(false);
   const [zalgoTitle, setZalgoTitle] = useState('방구석 철학자 ');
 
@@ -96,6 +98,16 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+        <button
+          onClick={openNicknameModal}
+          className={`cursor-pointer border px-3 py-1.5 font-mono text-xs tracking-wider transition-all ${
+            nickname
+              ? 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              : 'animate-pulse border-red-800/60 text-red-400 hover:border-red-600 hover:text-red-300'
+          }`}
+        >
+          {nickname ?? '닉네임을 생성하세요'}
+        </button>
       </div>
     </header>
   );
