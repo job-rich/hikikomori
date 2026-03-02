@@ -1,7 +1,6 @@
 package org.hikikomori.community.batch.domain.tasklet;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hikikomori.community.repository.CommentRepository;
@@ -21,12 +20,13 @@ public class CommentPurgeTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         var jobParams = chunkContext.getStepContext().getStepExecution().getJobParameters();
-        LocalDateTime startAt = LocalDate.parse(jobParams.getString("startAt")).atStartOfDay();
-        LocalDateTime endAt = LocalDate.parse(jobParams.getString("endAt")).atStartOfDay();
+        LocalDate startDate = LocalDate.parse(jobParams.getString("startDate"));
+        LocalDate endDate = LocalDate.parse(jobParams.getString("endDate"));
 
-        int deletedCount = commentRepository.deleteByCreatedAtBetween(startAt, endAt);
+        long deletedCount = commentRepository.deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
 
-        log.info("댓글 퍼지 완료: {}건 (기간: {} ~ {})", deletedCount, startAt, endAt);
+        contribution.incrementWriteCount(deletedCount);
+        log.info("댓글 퍼지 완료: {}건 (기간: {} ~ {})", deletedCount, startDate, endDate);
 
         return RepeatStatus.FINISHED;
     }

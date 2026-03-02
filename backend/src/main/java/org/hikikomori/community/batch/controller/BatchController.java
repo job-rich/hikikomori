@@ -2,6 +2,7 @@ package org.hikikomori.community.batch.controller;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.hikikomori.community.batch.controller.data.PurgeResponse;
 import org.hikikomori.community.batch.launcher.BatchJobLauncher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,11 +18,12 @@ public class BatchController {
     private final BatchJobLauncher batchJobLauncher;
 
     @PostMapping("/purge")
-    public ResponseEntity<String> runPurgeJob(
-            @RequestParam LocalDate startAt,
-            @RequestParam LocalDate endAt) {
-        Long executionId = batchJobLauncher.runManual(startAt, endAt.plusDays(1));
+    public ResponseEntity<PurgeResponse> runPurgeJob(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        PurgeResponse response = batchJobLauncher.runManual(startDate, endDate.plusDays(1));
 
-        return ResponseEntity.ok("퍼지 배치 작업이 실행되었습니다. (executionId: " + executionId + ")");
+        return ResponseEntity.ok(response);
     }
 }

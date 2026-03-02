@@ -11,5 +11,5 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Modifying
     @Query("DELETE FROM Post p WHERE p.createdAt >= :startAt AND p.createdAt < :endAt")
-    int deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt);
+    long deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt);
 }
