@@ -57,11 +57,17 @@ export default function PostCard({
         <div className="flex-1 min-w-0 pl-4">
           <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             <span>{username}</span>
-            {tag ? <span className="px-1.5 py-0.5 rounded bg-muted">{tag}</span> : null}
+            {tag ? (
+              <span className="px-1.5 py-0.5 rounded bg-muted">{tag}</span>
+            ) : null}
             <span>{formatDate(timestamp)}</span>
           </div>
 
-          {title ? <h3 className="mt-1 text-sm font-semibold text-foreground">{title}</h3> : null}
+          {title ? (
+            <h3 className="mt-1 text-sm font-semibold text-foreground">
+              {title}
+            </h3>
+          ) : null}
 
           <p className="mt-1 text-sm text-foreground leading-relaxed">
             {content}
