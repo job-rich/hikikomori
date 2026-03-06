@@ -45,10 +45,10 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 생성")
     void create() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         given(postRepository.save(any(Post.class))).willReturn(post);
 
-        PostCreateRequest request = new PostCreateRequest("제목", "내용", 1L, "테스터");
+        PostCreateRequest request = PostCreateRequest.builder().title("제목").content("내용").userId(1L).nickName("테스터").build();
         Post result = postService.create(request);
 
         assertThat(result.getUserId()).isEqualTo(1L);
@@ -101,12 +101,12 @@ class PostServiceTest {
     @Test
     @DisplayName("댓글 생성")
     void createComment() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
         given(commentRepository.save(any(Comment.class))).willReturn(comment);
 
-        CommentCreateRequest request = new CommentCreateRequest("댓글", null, 2L, "댓글러");
+        CommentCreateRequest request = CommentCreateRequest.builder().content("댓글").userId(2L).nickName("댓글러").build();
         Comment result = postService.createComment(POST_ID, request);
 
         assertThat(result.getUserId()).isEqualTo(2L);
@@ -118,14 +118,14 @@ class PostServiceTest {
     @Test
     @DisplayName("대댓글 생성")
     void createReply() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
         given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(parent));
         given(commentRepository.save(any(Comment.class))).willReturn(reply);
 
-        CommentCreateRequest request = new CommentCreateRequest("대댓글", COMMENT_ID, 3L, "대댓글러");
+        CommentCreateRequest request = CommentCreateRequest.builder().content("대댓글").parentId(COMMENT_ID).userId(3L).nickName("대댓글러").build();
         Comment result = postService.createComment(POST_ID, request);
 
         assertThat(result.getContent()).isEqualTo("대댓글");
@@ -150,13 +150,13 @@ class PostServiceTest {
     @Test
     @DisplayName("대댓글에 답글 달기 시 예외")
     void createReplyToReplyThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
         Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
         given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
         given(commentRepository.findById(REPLY_ID)).willReturn(Optional.of(reply));
 
-        CommentCreateRequest request = new CommentCreateRequest("대대댓글", REPLY_ID, 4L, "대대댓글러");
+        CommentCreateRequest request = CommentCreateRequest.builder().content("대대댓글").parentId(REPLY_ID).userId(4L).nickName("대대댓글러").build();
         assertThatThrownBy(() -> postService.createComment(POST_ID, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("대댓글에는 답글을 달 수 없습니다");

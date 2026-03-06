@@ -1,5 +1,6 @@
 package org.hikikomori.community.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
@@ -22,17 +23,21 @@ public class Post {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
+
+    private String tag;
 
     private LocalDateTime createdAt;
 
     @Builder
-    public Post(Long userId, String nickName, String title, String content) {
+    public Post(Long userId, String nickName, String title, String content, String tag) {
         this.id = UUIDGenerator.generate();
         this.userId = userId;
         this.nickName = nickName;
         this.title = title;
         this.content = content;
+        this.tag = tag;
         this.createdAt = LocalDateTime.now();
     }
 }

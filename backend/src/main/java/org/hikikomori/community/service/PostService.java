@@ -12,7 +12,6 @@ import org.hikikomori.community.repository.PostRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +29,13 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
     }
 
-    @Transactional
     public Post create(PostCreateRequest request) {
         Post post = Post.builder()
                 .userId(request.getUserId())
                 .nickName(request.getNickName())
                 .title(request.getTitle())
                 .content(request.getContent())
+                .tag(request.getTag())
                 .build();
 
         return postRepository.save(post);

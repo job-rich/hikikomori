@@ -7,27 +7,32 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react';
+import { formatDate } from '@/lib/utils/formatDate';
 
 interface PostCardProps {
-  id: number;
+  id: string | number;
+  title?: string;
   content: string;
+  tag?: string;
   timestamp: string;
-  replies: number;
-  views: number;
   username: string;
-  votes: number;
+  replies?: number;
+  views?: number;
+  votes?: number;
 }
 
 export default function PostCard({
+  title,
   content,
+  tag,
   timestamp,
-  replies,
-  views,
   username,
-  votes,
+  replies = 0,
+  views = 0,
+  votes = 0,
 }: PostCardProps) {
   return (
-    <article className="border border-border w-full mt-10 rounded-md bg-card">
+    <article className="border border-border w-full mt-4 rounded-md bg-card">
       <div className="flex p-4">
         <div className="flex flex-col items-center gap-1 pr-4 border-r border-border">
           <button
@@ -52,10 +57,19 @@ export default function PostCard({
         <div className="flex-1 min-w-0 pl-4">
           <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             <span>{username}</span>
-            <span>{timestamp}</span>
+            {tag ? (
+              <span className="px-1.5 py-0.5 rounded bg-muted">{tag}</span>
+            ) : null}
+            <span>{formatDate(timestamp)}</span>
           </div>
 
-          <p className="mt-2 text-sm text-foreground leading-relaxed">
+          {title ? (
+            <h3 className="mt-1 text-sm font-semibold text-foreground">
+              {title}
+            </h3>
+          ) : null}
+
+          <p className="mt-1 text-sm text-foreground leading-relaxed">
             {content}
           </p>
 
