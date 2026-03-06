@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Modifying
-    @Query("DELETE FROM Post p WHERE p.createdAt < :dateTime")
-    int deleteByCreatedAtBefore(LocalDateTime dateTime);
+    @Query("DELETE FROM Post p WHERE p.createdAt >= :startAt AND p.createdAt < :endAt")
+    long deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt);
 }

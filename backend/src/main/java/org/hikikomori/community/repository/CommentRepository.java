@@ -13,6 +13,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     List<Comment> findByPostIdAndParentIsNull(UUID postId);
 
     @Modifying
-    @Query("DELETE FROM Comment c WHERE c.createdAt < :dateTime")
-    int deleteByCreatedAtBefore(LocalDateTime dateTime);
+    @Query("DELETE FROM Comment c WHERE c.createdAt >= :startAt AND c.createdAt < :endAt")
+    long deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt);
 }
