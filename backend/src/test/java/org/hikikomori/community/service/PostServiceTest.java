@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.hikikomori.community.controller.data.CommentCreateRequest;
+import org.hikikomori.community.controller.data.CommentUpdateRequest;
 import org.hikikomori.community.controller.data.PostCreateRequest;
+import org.hikikomori.community.controller.data.PostUpdateRequest;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.repository.CommentRepository;
@@ -145,6 +147,112 @@ class PostServiceTest {
 
         assertThat(result).hasSize(2);
         verify(commentRepository).findByPostIdAndParentIsNull(POST_ID);
+    }
+
+    @Test
+    @DisplayName("게시글 수정")
+    void updatePost() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("OLD").build();
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+
+        PostUpdateRequest request = PostUpdateRequest.builder().userId(1L).title("새제목").content("새내용").tag("NEW").build();
+        postService.update(POST_ID, request);
+
+        assertThat(post.getTitle()).isEqualTo("새제목");
+        assertThat(post.getContent()).isEqualTo("새내용");
+        assertThat(post.getUpdatedAt()).isNotNull();
+        verify(postRepository).save(post);
+    }
+
+    @Test
+    @DisplayName("게시글 수정 - 타인 게시글 수정 시 예외")
+    void updatePostByOtherUserThrowsException() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("OLD").build();
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+
+        PostUpdateRequest request = PostUpdateRequest.builder().userId(2L).title("새제목").content("새내용").tag("NEW").build();
+
+        assertThatThrownBy(() -> postService.update(POST_ID, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인의 게시글만 수정할 수 있습니다");
+    }
+
+    @Test
+    @DisplayName("게시글 삭제")
+    void deletePost() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+
+        postService.delete(POST_ID, 1L);
+
+        verify(commentRepository).deleteAllByPostId(POST_ID);
+        verify(postRepository).deleteById(POST_ID);
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 - 타인 게시글 삭제 시 예외")
+    void deletePostByOtherUserThrowsException() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        given(postRepository.findById(POST_ID)).willReturn(Optional.of(post));
+
+        assertThatThrownBy(() -> postService.delete(POST_ID, 2L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인의 게시글만 삭제할 수 있습니다");
+    }
+
+    @Test
+    @DisplayName("댓글 수정")
+    void updateComment() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(comment));
+
+        CommentUpdateRequest request = CommentUpdateRequest.builder().userId(2L).content("수정된 댓글").build();
+        postService.updateComment(COMMENT_ID, request);
+
+        assertThat(comment.getContent()).isEqualTo("수정된 댓글");
+        assertThat(comment.getUpdatedAt()).isNotNull();
+        verify(commentRepository).save(comment);
+    }
+
+    @Test
+    @DisplayName("댓글 수정 - 타인 댓글 수정 시 예외")
+    void updateCommentByOtherUserThrowsException() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(comment));
+
+        CommentUpdateRequest request = CommentUpdateRequest.builder().userId(3L).content("수정된 댓글").build();
+
+        assertThatThrownBy(() -> postService.updateComment(COMMENT_ID, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인의 댓글만 수정할 수 있습니다");
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 소프트 삭제로 deletedAt 설정 및 내용 대체")
+    void deleteComment() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(comment));
+
+        postService.deleteComment(COMMENT_ID, 2L);
+
+        assertThat(comment.getDeletedAt()).isNotNull();
+        assertThat(comment.getContent()).isNotBlank();
+        verify(commentRepository).save(comment);
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 타인 댓글 삭제 시 예외")
+    void deleteCommentByOtherUserThrowsException() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        given(commentRepository.findById(COMMENT_ID)).willReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> postService.deleteComment(COMMENT_ID, 3L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인의 댓글만 삭제할 수 있습니다");
     }
 
     @Test

@@ -9,11 +9,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @DataJpaTest
 class PostRepositoryTest {
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Autowired
     private PostRepository postRepository;
@@ -85,6 +89,37 @@ class PostRepositoryTest {
         Comment saved = commentRepository.save(reply);
 
         assertThat(saved.getParent().getId()).isEqualTo(parent.getId());
+    }
+
+    @Test
+    @DisplayName("게시글 수정 후 updatedAt 설정")
+    void updatePostSetsUpdatedAt() {
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+
+        post.update("새제목", "새내용", "NEW");
+        postRepository.save(post);
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        Post found = postRepository.findById(post.getId()).orElseThrow();
+        assertThat(found.getTitle()).isEqualTo("새제목");
+        assertThat(found.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("댓글 수정 후 updatedAt 설정")
+    void updateCommentSetsUpdatedAt() {
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Comment comment = commentRepository.save(Comment.builder().content("댓글").post(post).build());
+
+        comment.updateContent("수정된 댓글");
+        commentRepository.save(comment);
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        Comment found = commentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(found.getContent()).isEqualTo("수정된 댓글");
+        assertThat(found.getUpdatedAt()).isNotNull();
     }
 
     @Test
