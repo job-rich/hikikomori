@@ -88,6 +88,40 @@ class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("userId로 게시글 조회 - 해당 사용자의 게시글만 반환")
+    void findByUserId() {
+        Long targetUserId = 12345L;
+        Long otherUserId = 99999L;
+
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 1").content("내용1").tag("VOID").build());
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 2").content("내용2").tag("VOID").build());
+        postRepository.save(Post.builder().userId(otherUserId).nickName("유저2").title("남의 글").content("내용3").tag("VOID").build());
+
+        Page<Post> result = postRepository.findByUserId(targetUserId, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(post -> post.getUserId().equals(targetUserId));
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("userId로 게시글 조회 - 페이징 동작 확인")
+    void findByUserIdWithPaging() {
+        Long userId = 12345L;
+        for (int i = 1; i <= 15; i++) {
+            postRepository.save(Post.builder().userId(userId).nickName("유저").title("제목" + i).content("내용" + i).tag("VOID").build());
+        }
+
+        Page<Post> firstPage = postRepository.findByUserId(userId, PageRequest.of(0, 10));
+        Page<Post> secondPage = postRepository.findByUserId(userId, PageRequest.of(1, 10));
+
+        assertThat(firstPage.getContent()).hasSize(10);
+        assertThat(secondPage.getContent()).hasSize(5);
+        assertThat(firstPage.getTotalElements()).isEqualTo(15);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("게시글의 루트 댓글만 조회")
     void findByPostIdAndParentIsNull() {
         Post post = postRepository.save(Post.builder().title("제목").content("내용").build());

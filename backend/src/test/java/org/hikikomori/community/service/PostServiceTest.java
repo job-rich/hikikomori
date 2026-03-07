@@ -99,6 +99,25 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("userId로 게시글 조회")
+    void findByUserId() {
+        Long userId = 12345L;
+        List<Post> posts = List.of(
+                Post.builder().userId(userId).nickName("유저").title("제목1").content("내용1").tag("VOID").build(),
+                Post.builder().userId(userId).nickName("유저").title("제목2").content("내용2").tag("VOID").build()
+        );
+        Page<Post> page = new PageImpl<>(posts);
+        Pageable pageable = PageRequest.of(0, 20);
+        given(postRepository.findByUserId(userId, pageable)).willReturn(page);
+
+        Page<Post> result = postService.findByUserId(userId, pageable);
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(post -> post.getUserId().equals(userId));
+        verify(postRepository).findByUserId(userId, pageable);
+    }
+
+    @Test
     @DisplayName("댓글 생성")
     void createComment() {
         Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();

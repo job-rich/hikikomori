@@ -24,6 +24,10 @@ public class PostService {
         return postRepository.findAll(pageable);
     }
 
+    public Page<Post> findByUserId(Long userId, Pageable pageable) {
+        return postRepository.findByUserId(userId, pageable);
+    }
+
     public Post findById(UUID id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
