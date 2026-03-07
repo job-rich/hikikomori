@@ -31,8 +31,18 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> findAll(@PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostResponse>> findAll(@PageableDefault(size = 6) Pageable pageable) {
         Page<PostResponse> posts = postService.findAll(pageable).map(PostResponse::from);
+
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/my/{userId}")
+    public ResponseEntity<Page<PostResponse>> findMyPosts(
+            @PathVariable Long userId,
+            @PageableDefault(size = 6) Pageable pageable
+    ) {
+        Page<PostResponse> posts = postService.findByUserId(userId, pageable).map(PostResponse::from);
 
         return ResponseEntity.ok(posts);
     }
