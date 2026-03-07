@@ -1,5 +1,6 @@
 package org.hikikomori.community.controller.data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
@@ -14,7 +15,9 @@ public class CommentResponse {
     private final Long userId;
     private final String nickName;
     private final String content;
-    private final String createdAt;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+    private final LocalDateTime deletedAt;
     private final List<CommentResponse> children;
 
     public static CommentResponse from(Comment comment) {
@@ -27,7 +30,9 @@ public class CommentResponse {
                 .userId(comment.getUserId())
                 .nickName(comment.getNickName())
                 .content(comment.getContent())
-                .createdAt(comment.getCreatedAt().toString())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .deletedAt(comment.getDeletedAt())
                 .children(childResponses)
                 .build();
     }
