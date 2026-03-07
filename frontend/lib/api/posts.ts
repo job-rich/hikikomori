@@ -35,9 +35,19 @@ export function createPost(request: PostCreateRequest): Promise<PostResponse> {
 
 export function getPosts(
   page = 0,
-  size = 20
+  size = 6
 ): Promise<PageResponse<PostResponse>> {
   return apiClient<PageResponse<PostResponse>>(
     `/api/posts?page=${page}&size=${size}`
+  );
+}
+
+export function getMyPosts(
+  userId: number,
+  page = 0,
+  size = 6
+): Promise<PageResponse<PostResponse>> {
+  return apiClient<PageResponse<PostResponse>>(
+    `/api/posts/my/${userId}?page=${page}&size=${size}`
   );
 }
