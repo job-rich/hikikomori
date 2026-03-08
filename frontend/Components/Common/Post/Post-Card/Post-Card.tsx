@@ -37,6 +37,7 @@ export default function PostCard({
         <div className="flex flex-col items-center gap-1 pr-4 border-r border-border">
           <button
             type="button"
+            onClick={(e) => e.stopPropagation()}
             className="p-1 text-muted-foreground hover:text-foreground"
             aria-label="추천"
           >
@@ -47,6 +48,7 @@ export default function PostCard({
           </span>
           <button
             type="button"
+            onClick={(e) => e.stopPropagation()}
             className="p-1 text-muted-foreground hover:text-foreground"
             aria-label="비추천"
           >
@@ -76,6 +78,7 @@ export default function PostCard({
           <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
             <button
               type="button"
+              onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1.5 hover:text-foreground"
             >
               <MessageSquare className="h-3.5 w-3.5" />
@@ -87,6 +90,7 @@ export default function PostCard({
             </div>
             <button
               type="button"
+              onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1.5 hover:text-destructive ml-auto"
               aria-label="신고"
             >
