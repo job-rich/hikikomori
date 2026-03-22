@@ -33,6 +33,10 @@ public class Comment {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
+    private LocalDateTime deletedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
@@ -43,6 +47,24 @@ public class Comment {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Comment> children = new ArrayList<>();
+
+    public void updateContent(String content) {
+        if (isDeleted()) {
+            throw new IllegalArgumentException("삭제된 댓글은 수정할 수 없습니다");
+        }
+        this.content = content;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    private boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void softDelete() {
+        this.content = DeleteTaunt.pick();
+        this.updatedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now();
+    }
 
     @Builder
     public Comment(String content, Long userId, String nickName, Post post, Comment parent) {
