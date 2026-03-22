@@ -30,6 +30,15 @@ public class Post {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
+    public void update(String title, String content, String tag) {
+        this.title = title;
+        this.content = content;
+        this.tag = tag;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     @Builder
     public Post(Long userId, String nickName, String title, String content, String tag) {
         this.id = UUIDGenerator.generate();

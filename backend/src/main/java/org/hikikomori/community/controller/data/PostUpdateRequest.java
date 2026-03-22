@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PostCreateRequest {
+public class PostUpdateRequest {
+
+    @NotNull
+    private Long userId;
 
     @NotBlank
     private String title;
@@ -19,17 +22,11 @@ public class PostCreateRequest {
     @NotBlank
     private String tag;
 
-    @NotNull
-    private Long userId;
-    
-    @NotBlank
-    private String nickName;
-
     @Builder
-    private PostCreateRequest(String title, String content, Long userId, String nickName) {
+    private PostUpdateRequest(Long userId, String title, String content, String tag) {
+        this.userId = userId;
         this.title = title;
         this.content = content;
-        this.userId = userId;
-        this.nickName = nickName;
+        this.tag = tag;
     }
 }
