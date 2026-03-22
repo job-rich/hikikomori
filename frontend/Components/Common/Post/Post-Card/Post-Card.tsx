@@ -8,6 +8,7 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/formatDate';
+import { useRouter } from 'next/navigation';
 
 interface PostCardProps {
   id: string | number;
@@ -22,6 +23,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({
+  id,
   title,
   content,
   tag,
@@ -31,8 +33,14 @@ export default function PostCard({
   views = 0,
   votes = 0,
 }: PostCardProps) {
+  const router = useRouter();
   return (
-    <article className="border border-border w-full mt-4 rounded-md bg-card">
+    <article
+      className="border border-border w-full mt-4 rounded-md bg-card"
+      onClick={() => {
+        router.push(`/posts/${id}`);
+      }}
+    >
       <div className="flex p-4">
         <div className="flex flex-col items-center gap-1 pr-4 border-r border-border">
           <button
