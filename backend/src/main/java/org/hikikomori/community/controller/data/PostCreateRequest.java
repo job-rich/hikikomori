@@ -21,7 +21,7 @@ public class PostCreateRequest {
 
     @NotNull
     private Long userId;
-    
+
     @NotBlank
     private String nickName;
 

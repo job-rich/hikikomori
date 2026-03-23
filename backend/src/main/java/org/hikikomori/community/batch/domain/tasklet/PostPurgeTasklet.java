@@ -1,4 +1,4 @@
-package org.hikikomori.community.batch.tasklet;
+package org.hikikomori.community.batch.domain.tasklet;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +13,20 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PostCleanupTasklet implements Tasklet {
+public class PostPurgeTasklet implements Tasklet {
 
     private final PostRepository postRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
-        LocalDate today = LocalDate.now();
-        int deletedCount = postRepository.deleteByCreatedAtBefore(today.atStartOfDay());
+        var jobParams = chunkContext.getStepContext().getStepExecution().getJobParameters();
+        LocalDate startDate = LocalDate.parse(jobParams.getString("startDate"));
+        LocalDate endDate = LocalDate.parse(jobParams.getString("endDate"));
 
-        log.info("게시글 삭제 완료: {}건 (기준일: {} 미만)", deletedCount, today);
+        long deletedCount = postRepository.deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
+
+        contribution.incrementWriteCount(deletedCount);
+        log.info("게시글 퍼지 완료: {}건 (기간: {} ~ {})", deletedCount, startDate, endDate);
 
         return RepeatStatus.FINISHED;
     }

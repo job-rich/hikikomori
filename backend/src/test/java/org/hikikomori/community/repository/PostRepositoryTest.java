@@ -1,5 +1,7 @@
 package org.hikikomori.community.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.hikikomori.community.domain.Comment;
@@ -12,6 +14,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @DataJpaTest
 class PostRepositoryTest {
@@ -133,5 +136,51 @@ class PostRepositoryTest {
 
         assertThat(comments).hasSize(1);
         assertThat(comments.get(0).getContent()).isEqualTo("댓글");
+    }
+
+    @Test
+    @DisplayName("기간 내 게시글만 삭제됨")
+    void deletePostByCreatedAtBetween() {
+        LocalDateTime yesterday = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+
+        Post oldPost = Post.builder().title("오래된 게시글").content("내용").build();
+        ReflectionTestUtils.setField(oldPost, "createdAt", yesterday);
+        postRepository.save(oldPost);
+        postRepository.save(Post.builder().title("오늘 게시글").content("내용").build());
+
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        long deleted = postRepository.deleteByCreatedAtBetween(yesterday, today);
+
+        entityManager.getEntityManager().clear();
+
+        assertThat(deleted).isEqualTo(1);
+        assertThat(postRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("기간 내 댓글만 삭제됨")
+    void deleteCommentByCreatedAtBetween() {
+        LocalDateTime yesterday = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+
+        Post post = postRepository.save(Post.builder().title("게시글").content("내용").build());
+
+        Comment oldComment = Comment.builder().content("오래된 댓글").post(post).build();
+        ReflectionTestUtils.setField(oldComment, "createdAt", yesterday);
+        commentRepository.save(oldComment);
+        commentRepository.save(Comment.builder().content("오늘 댓글").post(post).build());
+
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        long deleted = commentRepository.deleteByCreatedAtBetween(yesterday, today);
+
+        entityManager.getEntityManager().clear();
+
+        assertThat(deleted).isEqualTo(1);
+        assertThat(commentRepository.count()).isEqualTo(1);
     }
 }
