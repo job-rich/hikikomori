@@ -1,5 +1,6 @@
 package org.hikikomori.community.controller.data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,8 @@ public class PostResponse {
     private final String title;
     private final String content;
     private final String tag;
-    private final String createdAt;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     public static PostResponse from(Post post) {
         return PostResponse.builder()
@@ -25,7 +27,8 @@ public class PostResponse {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tag(post.getTag())
-                .createdAt(post.getCreatedAt().toString())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
 }

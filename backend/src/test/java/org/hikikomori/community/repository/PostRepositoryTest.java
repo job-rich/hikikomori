@@ -20,7 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class PostRepositoryTest {
 
     @Autowired
-    private TestEntityManager testEntityManager;
+    private TestEntityManager entityManager;
 
     @Autowired
     private PostRepository postRepository;
@@ -95,6 +95,37 @@ class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("게시글 수정 후 updatedAt 설정")
+    void updatePostSetsUpdatedAt() {
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+
+        post.update("새제목", "새내용", "NEW");
+        postRepository.save(post);
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        Post found = postRepository.findById(post.getId()).orElseThrow();
+        assertThat(found.getTitle()).isEqualTo("새제목");
+        assertThat(found.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("댓글 수정 후 updatedAt 설정")
+    void updateCommentSetsUpdatedAt() {
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Comment comment = commentRepository.save(Comment.builder().content("댓글").post(post).build());
+
+        comment.updateContent("수정된 댓글");
+        commentRepository.save(comment);
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
+
+        Comment found = commentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(found.getContent()).isEqualTo("수정된 댓글");
+        assertThat(found.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
     @DisplayName("게시글의 루트 댓글만 조회")
     void findByPostIdAndParentIsNull() {
         Post post = postRepository.save(Post.builder().title("제목").content("내용").build());
@@ -118,12 +149,12 @@ class PostRepositoryTest {
         postRepository.save(oldPost);
         postRepository.save(Post.builder().title("오늘 게시글").content("내용").build());
 
-        testEntityManager.flush();
-        testEntityManager.getEntityManager().clear();
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
 
         long deleted = postRepository.deleteByCreatedAtBetween(yesterday, today);
 
-        testEntityManager.getEntityManager().clear();
+        entityManager.getEntityManager().clear();
 
         assertThat(deleted).isEqualTo(1);
         assertThat(postRepository.count()).isEqualTo(1);
@@ -142,12 +173,12 @@ class PostRepositoryTest {
         commentRepository.save(oldComment);
         commentRepository.save(Comment.builder().content("오늘 댓글").post(post).build());
 
-        testEntityManager.flush();
-        testEntityManager.getEntityManager().clear();
+        entityManager.flush();
+        entityManager.getEntityManager().clear();
 
         long deleted = commentRepository.deleteByCreatedAtBetween(yesterday, today);
 
-        testEntityManager.getEntityManager().clear();
+        entityManager.getEntityManager().clear();
 
         assertThat(deleted).isEqualTo(1);
         assertThat(commentRepository.count()).isEqualTo(1);
