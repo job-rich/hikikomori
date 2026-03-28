@@ -1,0 +1,31 @@
+/* ===== Body Tab Toggle ===== */
+
+.body-tab-group {
+  display: flex;
+  gap: 0.25rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.body-tab {
+  padding: 0.5rem 1rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.body-tab:hover {
+  color: hsl(var(--foreground));
+}
+
+.body-tab--active {
+  color: hsl(var(--foreground));
+  border-bottom-color: hsl(var(--foreground));
+}

@@ -51,7 +51,7 @@ export interface CommentCreateRequest {
 
 export function getPosts(
   page = 0,
-  size = 20
+  size = 6
 ): Promise<PageResponse<PostResponse>> {
   return apiClient<PageResponse<PostResponse>>(
     `/api/posts?page=${page}&size=${size}`
