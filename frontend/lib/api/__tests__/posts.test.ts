@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createPost, getPosts } from '@/lib/api/posts';
+import { createPost, getPosts, getMyPosts } from '@/lib/api/posts';
 
 const mockPostResponse = {
   id: '019ca88c-7e32-73bd-b211-aef07da86168',
@@ -16,7 +16,7 @@ const mockPageResponse = {
   totalElements: 1,
   totalPages: 1,
   number: 0,
-  size: 20,
+  size: 6,
 };
 
 beforeEach(() => {
@@ -75,7 +75,7 @@ describe('getPosts', () => {
     expect(result.content).toHaveLength(1);
     expect(result.content[0].title).toBe('테스트');
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/posts?page=0&size=20'),
+      expect.stringContaining('/api/posts?page=0&size=6'),
       expect.any(Object)
     );
   });
@@ -90,6 +90,38 @@ describe('getPosts', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/posts?page=2&size=10'),
+      expect.any(Object)
+    );
+  });
+});
+
+describe('getMyPosts', () => {
+  it('userId를 포함한 GET 요청으로 내 게시글을 조회해야 한다', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockPageResponse),
+    } as Response);
+
+    const result = await getMyPosts(12345);
+
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].userId).toBe(12345);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/posts/my/12345?page=0&size=6'),
+      expect.any(Object)
+    );
+  });
+
+  it('페이지와 사이즈를 지정하여 조회할 수 있어야 한다', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockPageResponse),
+    } as Response);
+
+    await getMyPosts(12345, 1, 10);
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/posts/my/12345?page=1&size=10'),
       expect.any(Object)
     );
   });

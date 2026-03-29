@@ -8,6 +8,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostService {
 
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+
+    public Page<Post> findAll(Pageable pageable) {
+        return postRepository.findAll(pageable);
+    }
+
+    public Page<Post> findByUserId(Long userId, Pageable pageable) {
+        return postRepository.findByUserId(userId, pageable);
+    }
+
+    public Post findById(UUID id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
+    }
+
+    public Post create(PostCreateRequest request) {
+        Post post = Post.builder()
+                .userId(request.getUserId())
+                .nickName(request.getNickName())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .tag(request.getTag())
     public Post buildPost(PostCreate postCreate) {
         return Post.builder()
                 .userId(postCreate.userId())
