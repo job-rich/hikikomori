@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import org.hikikomori.community.domain.Post;
-import org.hikikomori.community.service.PostService;
+import org.hikikomori.community.dto.response.PostResponse;
+import org.hikikomori.community.facade.PostFacade;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +26,17 @@ class PostControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private PostService postService;
+    private PostFacade postFacade;
 
     @Test
     @DisplayName("GET /api/posts/my/{userId} - userId로 내 게시글 조회")
     void findMyPosts() throws Exception {
         Long userId = 12345L;
-        List<Post> posts = List.of(
-                Post.builder().userId(userId).nickName("유저").title("제목1").content("내용1").tag("VOID").build(),
-                Post.builder().userId(userId).nickName("유저").title("제목2").content("내용2").tag("VOID").build()
+        List<PostResponse> posts = List.of(
+                new PostResponse(null, userId, "유저", "제목1", "내용1", "VOID", null, null),
+                new PostResponse(null, userId, "유저", "제목2", "내용2", "VOID", null, null)
         );
-        given(postService.findByUserId(eq(userId), any(Pageable.class)))
+        given(postFacade.findMyPosts(eq(userId), any(Pageable.class)))
                 .willReturn(new PageImpl<>(posts));
 
         mockMvc.perform(get("/api/posts/my/{userId}", userId))

@@ -126,6 +126,9 @@ class PostRepositoryTest {
         assertThat(secondPage.getContent()).hasSize(5);
         assertThat(firstPage.getTotalElements()).isEqualTo(15);
         assertThat(firstPage.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("게시글 수정 후 updatedAt 설정")
     void updatePostSetsUpdatedAt() {
         Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
