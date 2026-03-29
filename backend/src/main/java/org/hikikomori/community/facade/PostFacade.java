@@ -37,6 +37,10 @@ public class PostFacade {
         return postRepository.findAll(pageable).map(PostResponse::from);
     }
 
+    public Page<PostResponse> findMyPosts(Long userId, Pageable pageable) {
+        return postRepository.findByUserId(userId, pageable).map(PostResponse::from);
+    }
+
     public PostResponse findPostById(UUID id) {
         Post post = findPostOrThrow(id);
 
