@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostFacade {
 
@@ -47,7 +46,6 @@ public class PostFacade {
         return PostResponse.from(post);
     }
 
-    @Transactional
     public PostResponse createPost(PostCreateRequest request) {
         PostCreate postCreate = new PostCreate(
                 request.title(), request.content(), request.tag(),
@@ -60,7 +58,6 @@ public class PostFacade {
         return PostResponse.from(saved);
     }
 
-    @Transactional
     public void updatePost(UUID postId, PostUpdateRequest request) {
         Post post = findPostOrThrow(postId);
         PostUpdate postUpdate = new PostUpdate(request.title(), request.content(), request.tag());
@@ -85,7 +82,6 @@ public class PostFacade {
                 .toList();
     }
 
-    @Transactional
     public CommentResponse createComment(UUID postId, CommentCreateRequest request) {
         Post post = findPostOrThrow(postId);
         Comment parent = findParentComment(request.parentId());
@@ -98,7 +94,6 @@ public class PostFacade {
         return CommentResponse.from(saved);
     }
 
-    @Transactional
     public void updateComment(UUID commentId, CommentUpdateRequest request) {
         Comment comment = findCommentOrThrow(commentId);
 
@@ -107,7 +102,6 @@ public class PostFacade {
         commentRepository.save(comment);
     }
 
-    @Transactional
     public void deleteComment(UUID commentId, Long userId) {
         Comment comment = findCommentOrThrow(commentId);
 
