@@ -1,4 +1,4 @@
-package org.hikikomori.community.domain;
+package org.hikikomori.community.util;
 
 import java.util.List;
 import java.util.Random;

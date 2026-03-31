@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
+import org.hikikomori.community.util.UUIDGenerator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
