@@ -83,6 +83,7 @@ org.hikikomori.community
 │   ├── *JpaRepository    # Spring Data JPA interface (쿼리만)
 │   └── *RepositoryImpl   # DB 접근 + 예외 처리
 ├── domain/               # JPA 엔티티
+├── util/                 # 유틸리티 (UUIDGenerator, DeleteTaunt)
 └── batch/                # 배치 (Scheduler, Job, Tasklet)
 ```
 
