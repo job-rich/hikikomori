@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import org.hikikomori.community.dto.response.PostResponse;
+import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.facade.PostFacade;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,9 +32,9 @@ class PostControllerTest {
     @DisplayName("GET /api/posts/my/{userId} - userId로 내 게시글 조회")
     void findMyPosts() throws Exception {
         Long userId = 12345L;
-        List<PostResponse> posts = List.of(
-                new PostResponse(null, userId, "유저", "제목1", "내용1", "VOID", null, null),
-                new PostResponse(null, userId, "유저", "제목2", "내용2", "VOID", null, null)
+        List<PostDto.Response> posts = List.of(
+                new PostDto.Response(null, userId, "유저", "제목1", "내용1", "VOID", null, null),
+                new PostDto.Response(null, userId, "유저", "제목2", "내용2", "VOID", null, null)
         );
         given(postFacade.findMyPosts(eq(userId), any(Pageable.class)))
                 .willReturn(new PageImpl<>(posts));

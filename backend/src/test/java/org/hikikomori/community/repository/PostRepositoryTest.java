@@ -23,10 +23,10 @@ class PostRepositoryTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private PostRepository postRepository;
+    private PostJpaRepository postRepository;
 
     @Autowired
-    private CommentRepository commentRepository;
+    private CommentJpaRepository commentRepository;
 
     @BeforeEach
     void setUp() {
