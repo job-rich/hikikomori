@@ -3,7 +3,7 @@ package org.hikikomori.community.batch.domain.tasklet;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hikikomori.community.repository.CommentRepository;
+import org.hikikomori.community.repository.CommentJpaRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CommentPurgeTasklet implements Tasklet {
 
-    private final CommentRepository commentRepository;
+    private final CommentJpaRepository commentJpaRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
@@ -23,7 +23,7 @@ public class CommentPurgeTasklet implements Tasklet {
         LocalDate startDate = LocalDate.parse(jobParams.getString("startDate"));
         LocalDate endDate = LocalDate.parse(jobParams.getString("endDate"));
 
-        long deletedCount = commentRepository.deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
+        long deletedCount = commentJpaRepository.deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
 
         contribution.incrementWriteCount(deletedCount);
         log.info("댓글 퍼지 완료: {}건 (기간: {} ~ {})", deletedCount, startDate, endDate);

@@ -4,12 +4,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.hikikomori.community.dto.request.CommentCreateRequest;
-import org.hikikomori.community.dto.request.CommentUpdateRequest;
-import org.hikikomori.community.dto.request.PostCreateRequest;
-import org.hikikomori.community.dto.request.PostUpdateRequest;
-import org.hikikomori.community.dto.response.CommentResponse;
-import org.hikikomori.community.dto.response.PostResponse;
+import org.hikikomori.community.dto.CommentDto;
+import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.facade.PostFacade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,12 +30,12 @@ public class PostController {
     private final PostFacade postFacade;
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> findAll(@PageableDefault(size = 6) Pageable pageable) {
+    public ResponseEntity<Page<PostDto.Response>> findAll(@PageableDefault(size = 6) Pageable pageable) {
         return ResponseEntity.ok(postFacade.findAllPosts(pageable));
     }
 
     @GetMapping("/my/{userId}")
-    public ResponseEntity<Page<PostResponse>> findMyPosts(
+    public ResponseEntity<Page<PostDto.Response>> findMyPosts(
             @PathVariable Long userId,
             @PageableDefault(size = 6) Pageable pageable
     ) {
@@ -47,19 +43,19 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> findById(@PathVariable UUID id) {
+    public ResponseEntity<PostDto.Response> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(postFacade.findPostById(id));
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> create(@Valid @RequestBody PostCreateRequest request) {
+    public ResponseEntity<PostDto.Response> create(@Valid @RequestBody PostDto.CreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(postFacade.createPost(request));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(
             @PathVariable UUID id,
-            @Valid @RequestBody PostUpdateRequest request) {
+            @Valid @RequestBody PostDto.UpdateRequest request) {
         postFacade.updatePost(id, request);
         return ResponseEntity.noContent().build();
     }
@@ -71,14 +67,14 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<CommentResponse>> findComments(@PathVariable UUID id) {
+    public ResponseEntity<List<CommentDto.Response>> findComments(@PathVariable UUID id) {
         return ResponseEntity.ok(postFacade.findCommentsByPostId(id));
     }
 
     @PostMapping("/{id}/comments")
-    public ResponseEntity<CommentResponse> createComment(
+    public ResponseEntity<CommentDto.Response> createComment(
             @PathVariable UUID id,
-            @Valid @RequestBody CommentCreateRequest request
+            @Valid @RequestBody CommentDto.CreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(postFacade.createComment(id, request));
     }
@@ -87,7 +83,7 @@ public class PostController {
     public ResponseEntity<Void> updateComment(
             @PathVariable UUID id,
             @PathVariable UUID commentId,
-            @Valid @RequestBody CommentUpdateRequest request
+            @Valid @RequestBody CommentDto.UpdateRequest request
     ) {
         postFacade.updateComment(commentId, request);
         return ResponseEntity.noContent().build();
