@@ -48,7 +48,7 @@ public class PostFacade {
         Post post = postRepository.getById(postId);
         postService.checkOwnership(post, request.userId(), "수정");
         postService.applyUpdate(post, request);
-        postRepository.save(post);
+        postRepository.save(post); // update도 변경된거 다 보내주는게 맞긴함.
     }
 
     @Transactional
