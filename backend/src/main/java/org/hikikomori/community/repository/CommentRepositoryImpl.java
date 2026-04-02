@@ -1,5 +1,6 @@
 package org.hikikomori.community.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,9 @@ public class CommentRepositoryImpl {
 
     public void deleteAllByPostId(UUID postId) {
         jpaRepository.deleteAllByPostId(postId);
+    }
+
+    public long deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt) {
+        return jpaRepository.deleteByCreatedAtBetween(startAt, endAt);
     }
 }

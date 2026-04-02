@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -130,5 +132,21 @@ class CommentRepositoryImplTest {
 
         // then
         verify(jpaRepository).deleteAllByPostId(postId);
+    }
+
+    @Test
+    @DisplayName("기간별 댓글 삭제 위임")
+    void deleteByCreatedAtBetweenDelegatesToJpaRepository() {
+        // given
+        LocalDateTime startAt = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime endAt = LocalDate.now().atStartOfDay();
+        given(jpaRepository.deleteByCreatedAtBetween(startAt, endAt)).willReturn(5L);
+
+        // when
+        long result = commentRepository.deleteByCreatedAtBetween(startAt, endAt);
+
+        // then
+        assertThat(result).isEqualTo(5L);
+        verify(jpaRepository).deleteByCreatedAtBetween(startAt, endAt);
     }
 }
