@@ -69,7 +69,7 @@ class PostFacadeTest {
 
     @Test
     @DisplayName("게시글 목록 조회 - 페이징")
-    void findAllPosts() {
+    void getPosts() {
         List<Post> posts = List.of(
                 Post.builder().title("제목1").content("내용1").build(),
                 Post.builder().title("제목2").content("내용2").build()
@@ -78,7 +78,7 @@ class PostFacadeTest {
         Pageable pageable = PageRequest.of(0, 10);
         given(postRepository.findAll(pageable)).willReturn(page);
 
-        Page<PostDto.Response> result = postFacade.findAllPosts(pageable);
+        Page<PostDto.Response> result = postFacade.getPosts(pageable);
 
         assertThat(result.getContent()).hasSize(2);
         verify(postRepository).findAll(pageable);
@@ -86,11 +86,11 @@ class PostFacadeTest {
 
     @Test
     @DisplayName("게시글 단건 조회")
-    void findPostById() {
+    void getPost() {
         Post post = Post.builder().title("제목").content("내용").build();
         given(postRepository.getById(POST_ID)).willReturn(post);
 
-        PostDto.Response result = postFacade.findPostById(POST_ID);
+        PostDto.Response result = postFacade.getPost(POST_ID);
 
         assertThat(result.title()).isEqualTo("제목");
         verify(postRepository).getById(POST_ID);
@@ -98,11 +98,11 @@ class PostFacadeTest {
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회 시 예외")
-    void findPostByIdNotFound() {
+    void getPostNotFound() {
         UUID notFoundId = UUID.randomUUID();
         given(postRepository.getById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
 
-        assertThatThrownBy(() -> postFacade.findPostById(notFoundId))
+        assertThatThrownBy(() -> postFacade.getPost(notFoundId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시글을 찾을 수 없습니다");
     }
@@ -162,14 +162,14 @@ class PostFacadeTest {
 
     @Test
     @DisplayName("댓글 목록 조회")
-    void findCommentsByPostId() {
+    void getComments() {
         List<Comment> comments = List.of(
                 Comment.builder().content("댓글1").build(),
                 Comment.builder().content("댓글2").build()
         );
         given(commentRepository.findByPostIdAndParentIsNull(POST_ID)).willReturn(comments);
 
-        List<CommentDto.Response> result = postFacade.findCommentsByPostId(POST_ID);
+        List<CommentDto.Response> result = postFacade.getComments(POST_ID);
 
         assertThat(result).hasSize(2);
         verify(commentRepository).findByPostIdAndParentIsNull(POST_ID);
