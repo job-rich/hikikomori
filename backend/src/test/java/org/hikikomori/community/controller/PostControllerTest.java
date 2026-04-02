@@ -37,14 +37,14 @@ class PostControllerTest {
 
     @Test
     @DisplayName("GET /api/posts/my/{userId} - userId로 내 게시글 조회")
-    void findMyPosts() throws Exception {
+    void getMyPosts() throws Exception {
         // given
         Long userId = 12345L;
         List<PostDto.Response> posts = List.of(
                 new PostDto.Response(null, userId, "유저", "제목1", "내용1", "VOID", null, null),
                 new PostDto.Response(null, userId, "유저", "제목2", "내용2", "VOID", null, null)
         );
-        given(postFacade.findMyPosts(eq(userId), any(Pageable.class)))
+        given(postFacade.getMyPosts(eq(userId), any(Pageable.class)))
                 .willReturn(new PageImpl<>(posts));
 
         // when & then
@@ -90,7 +90,7 @@ class PostControllerTest {
         // given
         UUID postId = UUID.randomUUID();
         PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", "VOID", null, null);
-        given(postFacade.findPostById(postId)).willReturn(response);
+        given(postFacade.getPost(postId)).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/posts/{id}", postId))
@@ -108,7 +108,7 @@ class PostControllerTest {
                 new PostDto.Response(null, 1L, "유저1", "제목1", "내용1", "VOID", null, null),
                 new PostDto.Response(null, 2L, "유저2", "제목2", "내용2", "VOID", null, null)
         );
-        given(postFacade.findAllPosts(any(Pageable.class))).willReturn(new PageImpl<>(posts));
+        given(postFacade.getPosts(any(Pageable.class))).willReturn(new PageImpl<>(posts));
 
         // when & then
         mockMvc.perform(get("/api/posts"))
@@ -165,7 +165,7 @@ class PostControllerTest {
                 new CommentDto.Response(null, 1L, "댓글러1", "댓글1", null, null, null, List.of()),
                 new CommentDto.Response(null, 2L, "댓글러2", "댓글2", null, null, null, List.of())
         );
-        given(postFacade.findCommentsByPostId(postId)).willReturn(comments);
+        given(postFacade.getComments(postId)).willReturn(comments);
 
         // when & then
         mockMvc.perform(get("/api/posts/{id}/comments", postId))

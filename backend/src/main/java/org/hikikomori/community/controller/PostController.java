@@ -30,21 +30,21 @@ public class PostController {
     private final PostFacade postFacade;
 
     @GetMapping
-    public ResponseEntity<Page<PostDto.Response>> findAll(@PageableDefault(size = 6) Pageable pageable) {
-        return ResponseEntity.ok(postFacade.findAllPosts(pageable));
+    public ResponseEntity<Page<PostDto.Response>> getPosts(@PageableDefault(size = 6) Pageable pageable) {
+        return ResponseEntity.ok(postFacade.getPosts(pageable));
     }
 
     @GetMapping("/my/{userId}")
-    public ResponseEntity<Page<PostDto.Response>> findMyPosts(
+    public ResponseEntity<Page<PostDto.Response>> getMyPosts(
             @PathVariable Long userId,
             @PageableDefault(size = 6) Pageable pageable
     ) {
-        return ResponseEntity.ok(postFacade.findMyPosts(userId, pageable));
+        return ResponseEntity.ok(postFacade.getMyPosts(userId, pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto.Response> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(postFacade.findPostById(id));
+    public ResponseEntity<PostDto.Response> getPost(@PathVariable UUID id) {
+        return ResponseEntity.ok(postFacade.getPost(id));
     }
 
     @PostMapping
@@ -67,8 +67,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<CommentDto.Response>> findComments(@PathVariable UUID id) {
-        return ResponseEntity.ok(postFacade.findCommentsByPostId(id));
+    public ResponseEntity<List<CommentDto.Response>> getComments(@PathVariable UUID id) {
+        return ResponseEntity.ok(postFacade.getComments(id));
     }
 
     @PostMapping("/{id}/comments")

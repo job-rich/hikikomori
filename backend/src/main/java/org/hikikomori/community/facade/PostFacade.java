@@ -25,15 +25,15 @@ public class PostFacade {
     private final PostRepositoryImpl postRepository;
     private final CommentRepositoryImpl commentRepository;
 
-    public Page<PostDto.Response> findAllPosts(Pageable pageable) {
+    public Page<PostDto.Response> getPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(PostDto.Response::from);
     }
 
-    public Page<PostDto.Response> findMyPosts(Long userId, Pageable pageable) {
+    public Page<PostDto.Response> getMyPosts(Long userId, Pageable pageable) {
         return postRepository.findByUserId(userId, pageable).map(PostDto.Response::from);
     }
 
-    public PostDto.Response findPostById(UUID id) {
+    public PostDto.Response getPost(UUID id) {
         Post post = postRepository.getById(id);
         return PostDto.Response.from(post);
     }
@@ -59,7 +59,7 @@ public class PostFacade {
         postRepository.deleteById(postId);
     }
 
-    public List<CommentDto.Response> findCommentsByPostId(UUID postId) {
+    public List<CommentDto.Response> getComments(UUID postId) {
         return commentRepository.findByPostIdAndParentIsNull(postId).stream()
                 .map(CommentDto.Response::from)
                 .toList();
