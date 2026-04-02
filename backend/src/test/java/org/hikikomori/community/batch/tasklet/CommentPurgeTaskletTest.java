@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import org.hikikomori.community.batch.domain.tasklet.CommentPurgeTasklet;
-import org.hikikomori.community.repository.CommentJpaRepository;
+import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class CommentPurgeTaskletTest {
     private CommentPurgeTasklet commentPurgeTasklet;
 
     @Mock
-    private CommentJpaRepository commentJpaRepository;
+    private CommentRepositoryImpl commentRepository;
 
     @Mock
     private StepContribution contribution;
@@ -44,20 +44,20 @@ class CommentPurgeTaskletTest {
     @Test
     @DisplayName("댓글 퍼지 - 삭제 건수를 writeCount에 기록하고 FINISHED 반환")
     void execute() {
-        given(commentJpaRepository.deleteByCreatedAtBetween(
+        given(commentRepository.deleteByCreatedAtBetween(
                 startDate.atStartOfDay(), endDate.atStartOfDay())).willReturn(5L);
 
         RepeatStatus status = commentPurgeTasklet.execute(contribution, chunkContext);
 
         assertThat(status).isEqualTo(RepeatStatus.FINISHED);
-        verify(commentJpaRepository).deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
+        verify(commentRepository).deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
         verify(contribution).incrementWriteCount(5L);
     }
 
     @Test
     @DisplayName("댓글 퍼지 - 삭제 대상 없을 때 writeCount 0 기록")
     void executeWithNoData() {
-        given(commentJpaRepository.deleteByCreatedAtBetween(
+        given(commentRepository.deleteByCreatedAtBetween(
                 startDate.atStartOfDay(), endDate.atStartOfDay())).willReturn(0L);
 
         commentPurgeTasklet.execute(contribution, chunkContext);

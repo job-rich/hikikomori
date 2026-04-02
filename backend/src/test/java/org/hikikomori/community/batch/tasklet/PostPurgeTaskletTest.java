@@ -3,7 +3,7 @@ package org.hikikomori.community.batch.tasklet;
 import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.hikikomori.community.batch.domain.tasklet.PostPurgeTasklet;
-import org.hikikomori.community.repository.PostJpaRepository;
+import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +29,7 @@ class PostPurgeTaskletTest {
     private PostPurgeTasklet postPurgeTasklet;
 
     @Mock
-    private PostJpaRepository postJpaRepository;
+    private PostRepositoryImpl postRepository;
 
     @Mock
     private StepContribution contribution;
@@ -43,20 +43,20 @@ class PostPurgeTaskletTest {
     @Test
     @DisplayName("게시글 퍼지 - 삭제 건수를 writeCount에 기록하고 FINISHED 반환")
     void execute() {
-        given(postJpaRepository.deleteByCreatedAtBetween(
+        given(postRepository.deleteByCreatedAtBetween(
                 startDate.atStartOfDay(), endDate.atStartOfDay())).willReturn(3L);
 
         RepeatStatus status = postPurgeTasklet.execute(contribution, chunkContext);
 
         assertThat(status).isEqualTo(RepeatStatus.FINISHED);
-        verify(postJpaRepository).deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
+        verify(postRepository).deleteByCreatedAtBetween(startDate.atStartOfDay(), endDate.atStartOfDay());
         verify(contribution).incrementWriteCount(3L);
     }
 
     @Test
     @DisplayName("게시글 퍼지 - 삭제 대상 없을 때 writeCount 0 기록")
     void executeWithNoData() {
-        given(postJpaRepository.deleteByCreatedAtBetween(
+        given(postRepository.deleteByCreatedAtBetween(
                 startDate.atStartOfDay(), endDate.atStartOfDay())).willReturn(0L);
 
         postPurgeTasklet.execute(contribution, chunkContext);
