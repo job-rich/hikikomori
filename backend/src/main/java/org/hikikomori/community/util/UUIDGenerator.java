@@ -1,4 +1,4 @@
-package org.hikikomori.community.domain;
+package org.hikikomori.community.util;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
