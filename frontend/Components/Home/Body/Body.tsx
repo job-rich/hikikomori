@@ -149,6 +149,10 @@ export default function Body() {
                 tag={post.tag}
                 timestamp={post.createdAt}
                 username={post.nickName}
+                isOwner={
+                  !!snowflakeId && post.userId === Number(snowflakeId)
+                }
+                onDeleted={fetchPosts}
               />
             ))
           )}

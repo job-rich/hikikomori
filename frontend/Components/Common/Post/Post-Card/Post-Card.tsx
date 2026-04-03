@@ -7,11 +7,14 @@ import {
   ChevronUp,
   ChevronDown,
   Bookmark,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/formatDate';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { TAG_STYLES } from '@/lib/utils/tagColors';
+import { deletePost } from '@/lib/api/posts';
 
 interface PostCardProps {
   id: string | number;
@@ -24,6 +27,10 @@ interface PostCardProps {
   views?: number;
   votes?: number;
   voteRatio?: number;
+  /** 현재 로그인 사용자가 작성한 글이면 상세와 동일하게 수정·삭제 진입 */
+  isOwner?: boolean;
+  /** 카드에서 삭제 성공 시 목록 새로고침 */
+  onDeleted?: () => void;
 }
 
 export default function PostCard({
@@ -37,11 +44,31 @@ export default function PostCard({
   views = 0,
   votes = 0,
   voteRatio = 0,
+  isOwner = false,
+  onDeleted,
 }: PostCardProps) {
   const router = useRouter();
+  const snowflakeId = useUserStore((s) => s.snowflakeId);
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
+
+  const goToEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/posts/${id}`);
+  };
+
+  const handleDeleteCard = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isOwner || !onDeleted || snowflakeId == null) return;
+    if (!window.confirm('이 게시글을 삭제할까요?')) return;
+    try {
+      await deletePost(String(id), Number(snowflakeId));
+      onDeleted();
+    } catch (err) {
+      console.error('게시글 삭제 실패:', err);
+    }
+  };
 
   return (
     <article
@@ -122,15 +149,39 @@ export default function PostCard({
                   <Bookmark className="h-3.5 w-3.5" />
                   북마크
                 </button>
-                <button
-                  type="button"
-                  className="ml-auto flex items-center gap-1.5 hover:text-destructive"
-                  aria-label="신고"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <TriangleAlert className="h-3.5 w-3.5" />
-                  신고
-                </button>
+                {isOwner && (
+                  <>
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 hover:text-foreground"
+                      onClick={goToEdit}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      수정
+                    </button>
+                    {onDeleted ? (
+                      <button
+                        type="button"
+                        className="flex items-center gap-1.5 hover:text-destructive"
+                        onClick={handleDeleteCard}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        삭제
+                      </button>
+                    ) : null}
+                  </>
+                )}
+                {!isOwner && (
+                  <button
+                    type="button"
+                    className="ml-auto flex items-center gap-1.5 hover:text-destructive"
+                    aria-label="신고"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <TriangleAlert className="h-3.5 w-3.5" />
+                    신고
+                  </button>
+                )}
               </>
             )}
           </div>
