@@ -6,6 +6,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
+import org.hikikomori.community.domain.PostTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -100,9 +101,9 @@ class PostRepositoryTest {
         Long targetUserId = 12345L;
         Long otherUserId = 99999L;
 
-        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 1").content("내용1").tag("VOID").build());
-        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 2").content("내용2").tag("VOID").build());
-        postRepository.save(Post.builder().userId(otherUserId).nickName("유저2").title("남의 글").content("내용3").tag("VOID").build());
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 1").content("내용1").tag(PostTag.ETC).build());
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 2").content("내용2").tag(PostTag.ETC).build());
+        postRepository.save(Post.builder().userId(otherUserId).nickName("유저2").title("남의 글").content("내용3").tag(PostTag.ETC).build());
 
         Page<Post> result = postRepository.findByUserId(targetUserId, PageRequest.of(0, 10));
 
@@ -116,7 +117,7 @@ class PostRepositoryTest {
     void findByUserIdWithPaging() {
         Long userId = 12345L;
         for (int i = 1; i <= 15; i++) {
-            postRepository.save(Post.builder().userId(userId).nickName("유저").title("제목" + i).content("내용" + i).tag("VOID").build());
+            postRepository.save(Post.builder().userId(userId).nickName("유저").title("제목" + i).content("내용" + i).tag(PostTag.ETC).build());
         }
 
         Page<Post> firstPage = postRepository.findByUserId(userId, PageRequest.of(0, 10));
@@ -131,9 +132,9 @@ class PostRepositoryTest {
     @Test
     @DisplayName("게시글 수정 후 updatedAt 설정")
     void updatePostSetsUpdatedAt() {
-        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag(PostTag.ETC).build());
 
-        post.update("새제목", "새내용", "NEW");
+        post.update("새제목", "새내용", PostTag.CULTURE);
         postRepository.save(post);
         entityManager.flush();
         entityManager.getEntityManager().clear();
@@ -146,7 +147,7 @@ class PostRepositoryTest {
     @Test
     @DisplayName("댓글 수정 후 updatedAt 설정")
     void updateCommentSetsUpdatedAt() {
-        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag(PostTag.ETC).build());
         Comment comment = commentRepository.save(Comment.builder().content("댓글").post(post).build());
 
         comment.updateContent("수정된 댓글");

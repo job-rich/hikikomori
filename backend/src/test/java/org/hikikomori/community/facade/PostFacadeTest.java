@@ -12,6 +12,7 @@ import org.hikikomori.community.dto.CommentDto;
 import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
+import org.hikikomori.community.domain.PostTag;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.service.CommentService;
@@ -55,10 +56,10 @@ class PostFacadeTest {
     @Test
     @DisplayName("게시글 생성")
     void createPost() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         given(postRepository.save(any(Post.class))).willReturn(post);
 
-        PostDto.CreateRequest request = new PostDto.CreateRequest("제목", "내용", "VOID", 1L, "테스터");
+        PostDto.CreateRequest request = new PostDto.CreateRequest("제목", "내용", PostTag.ETC, 1L, "테스터");
         PostDto.Response result = postFacade.createPost(request);
 
         assertThat(result.userId()).isEqualTo(1L);
@@ -110,10 +111,10 @@ class PostFacadeTest {
     @Test
     @DisplayName("게시글 수정")
     void updatePost() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("OLD").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.DAILY).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
 
-        PostDto.UpdateRequest request = new PostDto.UpdateRequest(1L, "새제목", "새내용", "NEW");
+        PostDto.UpdateRequest request = new PostDto.UpdateRequest(1L, "새제목", "새내용", PostTag.CULTURE);
         postFacade.updatePost(POST_ID, request);
 
         assertThat(post.getTitle()).isEqualTo("새제목");
@@ -125,10 +126,10 @@ class PostFacadeTest {
     @Test
     @DisplayName("게시글 수정 - 타인 게시글 수정 시 예외")
     void updatePostByOtherUserThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("OLD").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.DAILY).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
 
-        PostDto.UpdateRequest request = new PostDto.UpdateRequest(2L, "새제목", "새내용", "NEW");
+        PostDto.UpdateRequest request = new PostDto.UpdateRequest(2L, "새제목", "새내용", PostTag.CULTURE);
 
         assertThatThrownBy(() -> postFacade.updatePost(POST_ID, request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -138,7 +139,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("게시글 삭제")
     void deletePost() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
 
         postFacade.deletePost(POST_ID, 1L);
@@ -150,7 +151,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("게시글 삭제 - 타인 게시글 삭제 시 예외")
     void deletePostByOtherUserThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
 
         assertThatThrownBy(() -> postFacade.deletePost(POST_ID, 2L))
@@ -178,7 +179,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("댓글 생성")
     void createComment() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
         given(commentRepository.save(any(Comment.class))).willReturn(comment);
@@ -195,7 +196,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("대댓글 생성")
     void createReply() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
@@ -209,19 +210,37 @@ class PostFacadeTest {
     }
 
     @Test
-    @DisplayName("대댓글에 답글 달기 시 예외")
-    void createReplyToReplyThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
-        Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
-        Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
+    @DisplayName("대댓글에 답글 허용 (3depth)")
+    void createReplyToReply() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
+        Comment depth1 = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        Comment depth2 = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(depth1).build();
+        Comment depth3 = Comment.builder().userId(4L).nickName("대대댓글러").content("대대댓글").post(post).parent(depth2).build();
         given(postRepository.getById(POST_ID)).willReturn(post);
-        given(commentRepository.getParentById(REPLY_ID)).willReturn(reply);
+        given(commentRepository.getParentById(REPLY_ID)).willReturn(depth2);
+        given(commentRepository.save(any(Comment.class))).willReturn(depth3);
 
         CommentDto.CreateRequest request = new CommentDto.CreateRequest("대대댓글", REPLY_ID, 4L, "대대댓글러");
+        CommentDto.Response result = postFacade.createComment(POST_ID, request);
+
+        assertThat(result.content()).isEqualTo("대대댓글");
+    }
+
+    @Test
+    @DisplayName("3depth 초과 시 예외")
+    void createReplyExceedsMaxDepth() {
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
+        Comment depth1 = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        Comment depth2 = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(depth1).build();
+        Comment depth3 = Comment.builder().userId(4L).nickName("대대댓글러").content("대대댓글").post(post).parent(depth2).build();
+        given(postRepository.getById(POST_ID)).willReturn(post);
+        given(commentRepository.getParentById(REPLY_ID)).willReturn(depth3);
+
+        CommentDto.CreateRequest request = new CommentDto.CreateRequest("4depth", REPLY_ID, 5L, "초과댓글러");
 
         assertThatThrownBy(() -> postFacade.createComment(POST_ID, request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("대댓글에는 답글을 달 수 없습니다");
+                .hasMessageContaining("3단계 이상의 댓글은 작성할 수 없습니다");
     }
 
     @Test
@@ -240,7 +259,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("댓글 수정")
     void updateComment() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(commentRepository.getById(COMMENT_ID)).willReturn(comment);
 
@@ -255,7 +274,7 @@ class PostFacadeTest {
     @Test
     @DisplayName("댓글 수정 - 타인 댓글 수정 시 예외")
     void updateCommentByOtherUserThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(commentRepository.getById(COMMENT_ID)).willReturn(comment);
 
@@ -267,23 +286,23 @@ class PostFacadeTest {
     }
 
     @Test
-    @DisplayName("댓글 삭제 - 소프트 삭제로 deletedAt 설정 및 내용 대체")
+    @DisplayName("댓글 삭제 - 소프트 삭제로 deletedAt 설정, 원본 유지")
     void deleteComment() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(commentRepository.getById(COMMENT_ID)).willReturn(comment);
 
         postFacade.deleteComment(COMMENT_ID, 2L);
 
         assertThat(comment.getDeletedAt()).isNotNull();
-        assertThat(comment.getContent()).isNotBlank();
+        assertThat(comment.getContent()).isEqualTo("댓글");
         verify(commentRepository).save(comment);
     }
 
     @Test
     @DisplayName("댓글 삭제 - 타인 댓글 삭제 시 예외")
     void deleteCommentByOtherUserThrowsException() {
-        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag("VOID").build();
+        Post post = Post.builder().userId(1L).nickName("테스터").title("제목").content("내용").tag(PostTag.ETC).build();
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
         given(commentRepository.getById(COMMENT_ID)).willReturn(comment);
 

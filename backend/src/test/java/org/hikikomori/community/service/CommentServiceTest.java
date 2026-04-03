@@ -88,15 +88,27 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("대댓글에 답글 시 예외")
+    @DisplayName("대댓글에 답글 허용 (3depth)")
     void checkNestingDepthReplyToReply() {
         Post post = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").build();
-        Comment parent = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
-        Comment reply = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(parent).build();
+        Comment depth1 = Comment.builder().userId(2L).nickName("댓글러").content("댓글").post(post).build();
+        Comment depth2 = Comment.builder().userId(3L).nickName("대댓글러").content("대댓글").post(post).parent(depth1).build();
 
-        assertThatThrownBy(() -> commentService.checkNestingDepth(reply))
+        assertThatCode(() -> commentService.checkNestingDepth(depth2))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("3depth 초과 시 예외")
+    void checkNestingDepthExceedsMax() {
+        Post post = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").build();
+        Comment depth1 = Comment.builder().userId(2L).nickName("댓글러").content("1depth").post(post).build();
+        Comment depth2 = Comment.builder().userId(3L).nickName("대댓글러").content("2depth").post(post).parent(depth1).build();
+        Comment depth3 = Comment.builder().userId(4L).nickName("대대댓글러").content("3depth").post(post).parent(depth2).build();
+
+        assertThatThrownBy(() -> commentService.checkNestingDepth(depth3))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("대댓글에는 답글을 달 수 없습니다");
+                .hasMessageContaining("3단계 이상의 댓글은 작성할 수 없습니다");
     }
 
     @Test
@@ -111,13 +123,13 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 소프트 삭제")
+    @DisplayName("댓글 소프트 삭제 - 원본 유지")
     void applySoftDelete() {
         Comment comment = Comment.builder().userId(2L).nickName("댓글러").content("댓글").build();
 
         commentService.applySoftDelete(comment);
 
         assertThat(comment.getDeletedAt()).isNotNull();
-        assertThat(comment.getContent()).isNotEqualTo("댓글");
+        assertThat(comment.getContent()).isEqualTo("댓글");
     }
 }
