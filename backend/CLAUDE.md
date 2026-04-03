@@ -83,7 +83,7 @@ org.hikikomori.community
 │   ├── *JpaRepository    # Spring Data JPA interface (쿼리만)
 │   └── *RepositoryImpl   # DB 접근 + 예외 처리
 ├── domain/               # JPA 엔티티
-├── util/                 # 유틸리티 (UUIDGenerator, DeleteTaunt)
+├── util/                 # 유틸리티 (UUIDGenerator)
 └── batch/                # 배치 (Scheduler, Job, Tasklet)
 ```
 
@@ -101,7 +101,7 @@ org.hikikomori.community
 | POST | `/api/posts/{id}/comments` | 댓글/대댓글 생성 | 201 |
 | PATCH | `/api/posts/{id}/comments/{commentId}` | 댓글 수정 | 204 |
 | DELETE | `/api/posts/{id}/comments/{commentId}` | 댓글 삭제 (소프트) | 204 |
-| POST | `/api/global/cleanup` | 배치 정리 작업 수동 실행 | 200 |
+| POST | `/api/batch/purge?startDate=&endDate=` | 배치 정리 작업 수동 실행 | 200 |
 
 ## 컨벤션
 
@@ -131,15 +131,17 @@ org.hikikomori.community
 
 ## 도메인 모델
 
-- **Post:** id(UUID), userId(Long), nickName(String), title(String), content(String), createdAt(LocalDateTime)
-- **Comment:** id(UUID), userId(Long), nickName(String), content(String), createdAt(LocalDateTime), post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 2단계 중첩(댓글 + 대댓글)
+- **Post:** id(UUID), userId(Long), nickName(String), title(String), content(TEXT), tag(PostTag enum), createdAt, updatedAt
+- **PostTag:** PHILOSOPHY(철학), SOCIETY(사회), POLITICS(정치), ECONOMY(경제), CULTURE(문화), DAILY(일상), ETC(기타) — `@Enumerated(EnumType.STRING)`
+- **Comment:** id(UUID), userId(Long), nickName(String), content(TEXT), createdAt, updatedAt, deletedAt, post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 3단계 중첩(댓글 → 대댓글 → 대대댓글)
+  - **소프트 삭제:** `deletedAt`만 설정, content 원본 유지. Response에서 삭제된 댓글의 content는 null로 치환 (DB 원본 보장, 패킷 노출 방지)
 
 ## 배치 처리
 
 - **스케줄:** 매일 자정 (`cron="0 0 0 * * *"`)
 - **Job:** cleanupJob — 2개 Step (Comment 먼저 삭제 → Post 삭제, 외래키 제약 고려)
 - **기준:** `today.atStartOfDay()` 이전 데이터 삭제
-- **수동 실행:** `POST /api/global/cleanup`
+- **수동 실행:** `POST /api/batch/purge?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`
 - **설정:** `spring.batch.job.enabled=false` (자동 실행 비활성화, 스케줄러 통해서만 실행)
 
 ## 알려진 이슈
