@@ -58,6 +58,16 @@ export function getPosts(
   );
 }
 
+export function getMyPosts(
+  userId: number,
+  page = 0,
+  size = 6
+): Promise<PageResponse<PostResponse>> {
+  return apiClient<PageResponse<PostResponse>>(
+    `/api/posts/my/${userId}?page=${page}&size=${size}`
+  );
+}
+
 // 포스트 상세 화면
 
 // 포스트 조회
