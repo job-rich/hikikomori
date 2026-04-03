@@ -2,6 +2,8 @@ package org.hikikomori.community.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
@@ -30,13 +32,14 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String tag;
+    @Enumerated(EnumType.STRING)
+    private PostTag tag;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    public void update(String title, String content, String tag) {
+    public void update(String title, String content, PostTag tag) {
         this.title = title;
         this.content = content;
         this.tag = tag;
@@ -44,7 +47,7 @@ public class Post {
     }
 
     @Builder
-    public Post(Long userId, String nickName, String title, String content, String tag) {
+    public Post(Long userId, String nickName, String title, String content, PostTag tag) {
         this.id = UUIDGenerator.generate();
         this.userId = userId;
         this.nickName = nickName;
