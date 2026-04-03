@@ -40,7 +40,7 @@ public class CommentDto {
                     comment.getId(),
                     comment.getUserId(),
                     comment.getNickName(),
-                    comment.getContent(),
+                    comment.getDeletedAt() != null ? null : comment.getContent(),
                     comment.getCreatedAt(),
                     comment.getUpdatedAt(),
                     comment.getDeletedAt(),
