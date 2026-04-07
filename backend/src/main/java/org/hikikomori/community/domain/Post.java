@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Formula;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
@@ -34,6 +35,9 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     private PostTag tag;
+
+    @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")
+    private long commentCount;
 
     private LocalDateTime createdAt;
 
