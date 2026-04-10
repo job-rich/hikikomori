@@ -25,8 +25,8 @@ public class CommentService {
     }
 
     public void checkNestingDepth(Comment parent) {
-        if (parent != null && parent.getParent() != null) {
-            throw new IllegalArgumentException("대댓글에는 답글을 달 수 없습니다");
+        if (parent != null && parent.getParent() != null && parent.getParent().getParent() != null) {
+            throw new IllegalArgumentException("3단계 이상의 댓글은 작성할 수 없습니다");
         }
     }
 
