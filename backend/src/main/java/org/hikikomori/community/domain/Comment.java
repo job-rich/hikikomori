@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
+import org.hikikomori.community.util.UUIDGenerator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -61,7 +62,6 @@ public class Comment {
     }
 
     public void softDelete() {
-        this.content = DeleteTaunt.pick();
         this.updatedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
     }

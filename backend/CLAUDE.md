@@ -40,70 +40,109 @@ docker compose up --build backend
 - Spring Data JPA (ddl-auto: update), Spring Batch, Lombok
 - springdoc-openapi 3.0.1 (Swagger UI: `/swagger-ui.html`)
 - com.fasterxml.uuid:java-uuid-generator:5.2.0 (TimeBasedEpoch UUID)
-- 테스트: H2 인메모리 DB (create-drop)
+- 테스트: H2 인메모리 DB (create-drop), ArchUnit 1.4.1
 
 ## 아키텍처
 
-계층형 아키텍처: **Controller → Service → Repository → Entity** + Batch
+Facade 기반 계층형 아키텍처: **Controller → Facade → Service + RepositoryImpl → JpaRepository → Entity** + Batch
+
+```
+Controller
+  └→ Facade (구체 클래스, 오케스트레이션 + 트랜잭션 경계)
+      ├→ Service (구체 클래스, 가공/변환/검증, Repository 모름)
+      └→ RepositoryImpl (구체 클래스, DB 접근 + 모든 DB 예외 처리)
+           └→ JpaRepository (Spring Data JPA interface)
+```
+
+**핵심 규칙:**
+- **Service는 Repository를 모른다** — Facade가 Repository에서 데이터를 가져와 Service에 넘기면, Service는 가공만 수행
+- **Facade 인터페이스는 사용하지 않는다** — 구체 클래스로 직접 구현
+- **RepositoryImpl이 JpaRepository를 감싼다** — DB 예외를 도메인 예외로 변환하는 책임
+- **트랜잭션은 Facade에서 관리** — `@Transactional`은 Facade 구현체에만 선언
+
+### 계층별 책임
+
+| 계층 | 책임 | 의존 |
+|------|------|------|
+| Controller | HTTP 요청/응답, 형식 검증(`@Valid`) | Facade |
+| Facade | 오케스트레이션, 비즈니스 검증, 트랜잭션 | Service + RepositoryImpl |
+| Service | 비즈니스 로직 (가공/변환/검증, 외부 의존 없음) | DTO만 수신 |
+| RepositoryImpl | DB 접근, DB 예외 → 도메인 예외 변환 | JpaRepository |
+
+### 패키지 구조
 
 ```
 org.hikikomori.community
-├── CommunityApplication.java  # @SpringBootApplication, @EnableScheduling
-├── controller/
-│   ├── PostController.java    # REST API (@RestController, /api/posts)
-│   ├── GlobalController.java  # 배치 관리 API (/api/global/cleanup)
-│   └── data/                  # DTO (Java 클래스, from() 팩토리 메서드 패턴)
-├── domain/
-│   ├── Post.java              # JPA 엔티티
-│   ├── Comment.java           # JPA 엔티티 (자기참조 관계)
-│   └── UUIDGenerator.java     # TimeBasedEpoch UUID 생성 유틸리티
-├── repository/                # Spring Data JPA Repository
-├── service/
-│   ├── PostService.java       # 게시글/댓글 비즈니스 로직
-│   └── BatchService.java      # 배치 작업 실행
-└── batch/
-    ├── BatchScheduler.java    # @Scheduled (매일 자정 cron)
-    ├── job/
-    │   └── CleanupJobConfig.java  # 배치 Job (2 Step: Comment → Post 순서 삭제)
-    └── tasklet/
-        ├── PostCleanupTasklet.java     # 전일 이전 게시글 삭제
-        └── CommentCleanupTasklet.java  # 전일 이전 댓글 삭제
+├── controller/           # REST API (@RestController)
+├── dto/
+│   ├── PostDto.java      # Post DTO 통합 (CreateRequest, UpdateRequest, Response)
+│   └── CommentDto.java   # Comment DTO 통합 (CreateRequest, UpdateRequest, Response)
+├── facade/               # Facade (구체 클래스, 오케스트레이션)
+├── service/              # Service (가공/변환/검증, DTO 직접 수신)
+├── repository/
+│   ├── *JpaRepository    # Spring Data JPA interface (쿼리만)
+│   └── *RepositoryImpl   # DB 접근 + 예외 처리
+├── domain/               # JPA 엔티티
+├── util/                 # 유틸리티 (UUIDGenerator)
+└── batch/                # 배치 (Scheduler, Job, Tasklet)
 ```
 
 ## API 엔드포인트
 
 | 메서드 | 경로 | 설명 | 상태 코드 |
 |--------|------|------|----------|
-| GET | `/api/posts` | 게시글 목록 (페이징, 기본 20개) | 200 |
+| GET | `/api/posts` | 게시글 목록 (페이징, 기본 6개) | 200 |
 | GET | `/api/posts/{id}` | 게시글 단건 조회 | 200 |
+| GET | `/api/posts/my/{userId}` | 내 게시글 목록 (페이징) | 200 |
 | POST | `/api/posts` | 게시글 생성 | 201 |
+| PATCH | `/api/posts/{id}` | 게시글 수정 | 204 |
+| DELETE | `/api/posts/{id}` | 게시글 삭제 | 204 |
 | GET | `/api/posts/{id}/comments` | 댓글 목록 (루트 댓글만) | 200 |
 | POST | `/api/posts/{id}/comments` | 댓글/대댓글 생성 | 201 |
-| POST | `/api/global/cleanup` | 배치 정리 작업 수동 실행 | 200 |
+| PATCH | `/api/posts/{id}/comments/{commentId}` | 댓글 수정 | 204 |
+| DELETE | `/api/posts/{id}/comments/{commentId}` | 댓글 삭제 (소프트) | 204 |
+| POST | `/api/batch/purge?startDate=&endDate=` | 배치 정리 작업 수동 실행 | 200 |
 
 ## 컨벤션
 
-- **DTO:** Request/Response는 Java 클래스 사용 (@Getter, @Builder), Response에 `static from(Entity)` 팩토리 메서드
+- **DTO:** 도메인 단위 통합 (`PostDto`, `CommentDto`), inner record로 CreateRequest/UpdateRequest/Response 포함. Response에 `static from(Entity)` 팩토리 메서드
+- **계층 간 전달:** DTO record를 Service에 직접 전달 (별도 VO 없음)
 - **DI:** 생성자 주입 (Lombok `@RequiredArgsConstructor`)
-- **트랜잭션:** Service의 쓰기 메서드에 `@Transactional`, 읽기 메서드는 트랜잭션 없음
+- **트랜잭션:** Facade에 `@Transactional` (Service와 Repository는 트랜잭션 무관)
 - **엔티티:** Lombok `@Getter`, `@NoArgsConstructor`, `@Builder` 사용. ID는 UUID (TimeBasedEpoch 자동 생성)
-- **예외:** `IllegalArgumentException` + 한국어 메시지 (예: `"게시글을 찾을 수 없습니다"`, `"대댓글에는 답글을 달 수 없습니다"`)
-- **검증:** Jakarta Validation (`@NotBlank`) + 컨트롤러에서 `@Valid`
+- **예외 처리 전략:**
+  - Service: 단일 관심사 검증 (소유권, 중첩 깊이 등) — `check` 네이밍
+  - RepositoryImpl: DB 예외 → 도메인 예외 변환 (`getById` → `IllegalArgumentException`)
+  - Facade: 복합 검증 (여러 Service/DB 결과 조합)
+  - Controller: `@ControllerAdvice`로 HTTP 응답 변환
+- **검증:**
+  - 형식 검증(`@NotBlank`, `@Size`): Controller/DTO (`@Valid`)
+  - 비즈니스 검증(중복 체크 등): Facade (Repository를 직접 알고 있으므로)
 - **로깅:** Lombok `@Slf4j`, 한국어 로그 메시지
-- **테스트:** 단위 테스트는 Mockito + BDD 스타일(`given/when/then`), 통합 테스트는 `@DataJpaTest` (H2), 테스트명/DisplayName 한국어
+- **테스트:**
+  - Service: 순수 단위 테스트 (mock 불필요, 입력→출력 검증)
+  - RepositoryImpl: 단위 테스트 (JpaRepository mock)
+  - Facade: 조합 테스트 (RepositoryImpl mock)
+  - Controller: API 테스트 (Facade mock, `@WebMvcTest`)
+  - ArchUnit: 아키텍처 규칙 검증 (계층 의존성)
+  - 테스트명/DisplayName 한국어, BDD 스타일(`given/when/then`)
 - **API 경로:** `/api/{resource}` 패턴
+- **복잡도 관리:** Facade에 Service/Repository 주입이 10개 이상이면 도메인 분리 신호
 
 ## 도메인 모델
 
-- **Post:** id(UUID), userId(Long), nickName(String), title(String), content(String), createdAt(LocalDateTime)
-- **Comment:** id(UUID), userId(Long), nickName(String), content(String), createdAt(LocalDateTime), post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 2단계 중첩(댓글 + 대댓글)
+- **Post:** id(UUID), userId(Long), nickName(String), title(String), content(TEXT), tag(PostTag enum), commentCount(@Formula, 읽기 전용), createdAt, updatedAt
+  - **commentCount:** `@Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")` — DB 서브쿼리로 자동 계산, 스냅샷 아님. 정렬: `?sort=commentCount,desc`
+- **PostTag:** PHILOSOPHY(철학), SOCIETY(사회), POLITICS(정치), ECONOMY(경제), CULTURE(문화), DAILY(일상), ETC(기타) — `@Enumerated(EnumType.STRING)`
+- **Comment:** id(UUID), userId(Long), nickName(String), content(TEXT), createdAt, updatedAt, deletedAt, post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 3단계 중첩(댓글 → 대댓글 → 대대댓글)
+  - **소프트 삭제:** `deletedAt`만 설정, content 원본 유지. Response에서 삭제된 댓글의 content는 null로 치환 (DB 원본 보장, 패킷 노출 방지)
 
 ## 배치 처리
 
 - **스케줄:** 매일 자정 (`cron="0 0 0 * * *"`)
 - **Job:** cleanupJob — 2개 Step (Comment 먼저 삭제 → Post 삭제, 외래키 제약 고려)
 - **기준:** `today.atStartOfDay()` 이전 데이터 삭제
-- **수동 실행:** `POST /api/global/cleanup`
+- **수동 실행:** `POST /api/batch/purge?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`
 - **설정:** `spring.batch.job.enabled=false` (자동 실행 비활성화, 스케줄러 통해서만 실행)
 
 ## 알려진 이슈

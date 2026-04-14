@@ -3,7 +3,7 @@ package org.hikikomori.community.batch.tasklet;
 import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.hikikomori.community.batch.domain.tasklet.PostPurgeTasklet;
-import org.hikikomori.community.repository.PostRepository;
+import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +29,7 @@ class PostPurgeTaskletTest {
     private PostPurgeTasklet postPurgeTasklet;
 
     @Mock
-    private PostRepository postRepository;
+    private PostRepositoryImpl postRepository;
 
     @Mock
     private StepContribution contribution;

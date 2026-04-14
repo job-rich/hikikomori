@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import org.hikikomori.community.batch.domain.tasklet.CommentPurgeTasklet;
-import org.hikikomori.community.repository.CommentRepository;
+import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class CommentPurgeTaskletTest {
     private CommentPurgeTasklet commentPurgeTasklet;
 
     @Mock
-    private CommentRepository commentRepository;
+    private CommentRepositoryImpl commentRepository;
 
     @Mock
     private StepContribution contribution;

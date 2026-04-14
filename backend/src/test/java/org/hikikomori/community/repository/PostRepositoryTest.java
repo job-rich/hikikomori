@@ -6,6 +6,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
+import org.hikikomori.community.domain.PostTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,10 @@ class PostRepositoryTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private PostRepository postRepository;
+    private PostJpaRepository postRepository;
 
     @Autowired
-    private CommentRepository commentRepository;
+    private CommentJpaRepository commentRepository;
 
     @BeforeEach
     void setUp() {
@@ -95,11 +96,45 @@ class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("userId로 게시글 조회 - 해당 사용자의 게시글만 반환")
+    void findByUserId() {
+        Long targetUserId = 12345L;
+        Long otherUserId = 99999L;
+
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 1").content("내용1").tag(PostTag.ETC).build());
+        postRepository.save(Post.builder().userId(targetUserId).nickName("유저1").title("내 글 2").content("내용2").tag(PostTag.ETC).build());
+        postRepository.save(Post.builder().userId(otherUserId).nickName("유저2").title("남의 글").content("내용3").tag(PostTag.ETC).build());
+
+        Page<Post> result = postRepository.findByUserId(targetUserId, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(post -> post.getUserId().equals(targetUserId));
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("userId로 게시글 조회 - 페이징 동작 확인")
+    void findByUserIdWithPaging() {
+        Long userId = 12345L;
+        for (int i = 1; i <= 15; i++) {
+            postRepository.save(Post.builder().userId(userId).nickName("유저").title("제목" + i).content("내용" + i).tag(PostTag.ETC).build());
+        }
+
+        Page<Post> firstPage = postRepository.findByUserId(userId, PageRequest.of(0, 10));
+        Page<Post> secondPage = postRepository.findByUserId(userId, PageRequest.of(1, 10));
+
+        assertThat(firstPage.getContent()).hasSize(10);
+        assertThat(secondPage.getContent()).hasSize(5);
+        assertThat(firstPage.getTotalElements()).isEqualTo(15);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("게시글 수정 후 updatedAt 설정")
     void updatePostSetsUpdatedAt() {
-        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag(PostTag.ETC).build());
 
-        post.update("새제목", "새내용", "NEW");
+        post.update("새제목", "새내용", PostTag.CULTURE);
         postRepository.save(post);
         entityManager.flush();
         entityManager.getEntityManager().clear();
@@ -112,7 +147,7 @@ class PostRepositoryTest {
     @Test
     @DisplayName("댓글 수정 후 updatedAt 설정")
     void updateCommentSetsUpdatedAt() {
-        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag("TAG").build());
+        Post post = postRepository.save(Post.builder().title("제목").content("내용").tag(PostTag.ETC).build());
         Comment comment = commentRepository.save(Comment.builder().content("댓글").post(post).build());
 
         comment.updateContent("수정된 댓글");
