@@ -4,6 +4,16 @@ import Body from '@/Components/Home/Body/Body';
 import { useUserStore } from '@/lib/stores/userStore';
 import * as postsApi from '@/lib/api/posts';
 
+const routerMock = vi.hoisted(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => routerMock,
+}));
+
 vi.mock('@/lib/api/posts');
 
 const mockPosts = [
@@ -112,13 +122,13 @@ describe('Body - 내가 쓴 게시글 기능', () => {
     await screen.findByText('전체 게시글');
 
     expect(
-      screen.getByPlaceholderText('제목을 입력하세요...')
+      screen.getByPlaceholderText('제목을 입력하세요')
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '내가 쓴 글' }));
 
     expect(
-      screen.queryByPlaceholderText('제목을 입력하세요...')
+      screen.queryByPlaceholderText('제목을 입력하세요')
     ).not.toBeInTheDocument();
   });
 
@@ -131,7 +141,7 @@ describe('Body - 내가 쓴 게시글 기능', () => {
     fireEvent.click(screen.getByRole('button', { name: '전체 게시글' }));
 
     expect(
-      screen.getByPlaceholderText('제목을 입력하세요...')
+      screen.getByPlaceholderText('제목을 입력하세요')
     ).toBeInTheDocument();
   });
 

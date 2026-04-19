@@ -39,6 +39,7 @@ export interface CommentResponse {
   nickName: string;
   content: string;
   createdAt: string;
+  deletedAt?: string | null;
   children: CommentResponse[];
 }
 
@@ -75,6 +76,31 @@ export function getPost(id: string): Promise<PostResponse> {
   return apiClient<PostResponse>(`/api/posts/${id}`);
 }
 
+export interface PostUpdateRequest {
+  userId: number;
+  title: string;
+  content: string;
+  tag: string;
+}
+
+/** PATCH 성공 시 본문 없음(204). 이후 `getPost`로 다시 조회한다. */
+export function updatePost(
+  id: string,
+  request: PostUpdateRequest
+): Promise<void> {
+  return apiClient<void>(`/api/posts/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+}
+
+export function deletePost(id: string, userId: number): Promise<void> {
+  const q = new URLSearchParams({ userId: String(userId) });
+  return apiClient<void>(`/api/posts/${id}?${q}`, {
+    method: 'DELETE',
+  });
+}
+
 // 댓글 목록 조회
 export function getComments(postId: string): Promise<CommentResponse[]> {
   return apiClient<CommentResponse[]>(`/api/posts/${postId}/comments`);
@@ -88,5 +114,33 @@ export function createComment(
   return apiClient<CommentResponse>(`/api/posts/${postId}/comments`, {
     method: 'POST',
     body: JSON.stringify(request),
+  });
+}
+
+export interface CommentUpdateRequest {
+  userId: number;
+  content: string;
+}
+
+/** PATCH 성공 시 본문 없음(204). 이후 `getComments`로 다시 조회한다. */
+export function updateComment(
+  postId: string,
+  commentId: string,
+  request: CommentUpdateRequest
+): Promise<void> {
+  return apiClient<void>(`/api/posts/${postId}/comments/${commentId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+}
+
+export function deleteComment(
+  postId: string,
+  commentId: string,
+  userId: number
+): Promise<void> {
+  const q = new URLSearchParams({ userId: String(userId) });
+  return apiClient<void>(`/api/posts/${postId}/comments/${commentId}?${q}`, {
+    method: 'DELETE',
   });
 }

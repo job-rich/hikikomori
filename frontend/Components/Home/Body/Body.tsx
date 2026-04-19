@@ -15,10 +15,16 @@ import './body.css';
 
 type ViewMode = 'all' | 'my';
 
+type SortTab = 'latest' | 'votes' | 'comments';
+
 export default function Body() {
-  const { snowflakeId, nickname } = useUserStore();
+  const { snowflakeId, nickname, openNicknameModal } = useUserStore();
+  const isLoggedIn = useUserStore(
+    (s) => s.nickname !== null && s.snowflakeId !== null
+  );
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sortTab, setSortTab] = useState<SortTab>('latest');
   const [viewMode, setViewMode] = useState<ViewMode>('all');
   const [isLoading, setIsLoading] = useState(false);
   const pageRef = useRef(0);
@@ -133,43 +139,110 @@ export default function Body() {
   return (
     <main className="min-w-0 flex-1 font-sans">
       <div className="mx-auto flex max-w-3xl flex-col items-start">
-        <div className="body-tab-group">
+        {/* 메인 탭 */}
+        <div className="flex w-full border-b border-border">
           <button
             type="button"
-            className={`body-tab ${viewMode === 'all' ? 'body-tab--active' : ''}`}
             onClick={() => setViewMode('all')}
+            className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+              viewMode === 'all'
+                ? 'border-b-2 border-foreground text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
             전체 게시글
           </button>
-          <button
-            type="button"
-            className={`body-tab ${viewMode === 'my' ? 'body-tab--active' : ''}`}
-            onClick={() => setViewMode('my')}
-          >
-            내가 쓴 글
-          </button>
+          {isLoggedIn && (
+            <button
+              type="button"
+              onClick={() => setViewMode('my')}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+                viewMode === 'my'
+                  ? 'border-b-2 border-foreground text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              내가 쓴 글
+            </button>
+          )}
         </div>
 
-        {viewMode === 'all' && <PostForm onSubmit={handleSubmit} />}
+        {/* 글 작성 영역 또는 닉네임 생성 배너 */}
+        <div className="mt-4 w-full">
+          {isLoggedIn && viewMode === 'all' ? (
+            <PostForm onSubmit={handleSubmit} />
+          ) : !isLoggedIn ? (
+            <div className="flex flex-col items-center gap-4 rounded-lg border border-border border-t-rose-400 bg-card p-8">
+              <p className="text-sm text-muted-foreground">
+                글을 작성하려면 닉네임을 생성하세요
+              </p>
+              <button
+                type="button"
+                onClick={openNicknameModal}
+                className="rounded-full bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+              >
+                닉네임 생성
+              </button>
+            </div>
+          ) : null}
+        </div>
 
-        {posts.length === 0 && !isLoading ? (
-          <p className="w-full mt-4 text-center text-sm text-muted-foreground py-10">
-            {viewMode === 'my'
-              ? '작성한 게시글이 없습니다.'
-              : '게시글이 없습니다.'}
+        {/* 정렬 탭 */}
+        <div className="mt-6 flex w-full items-center gap-1 text-sm">
+          {(
+            [
+              { key: 'latest', label: '최신순' },
+              { key: 'votes', label: '추천순' },
+              { key: 'comments', label: '댓글순' },
+            ] as const
+          ).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSortTab(key)}
+              className={`px-3 py-1.5 transition-colors ${
+                sortTab === key
+                  ? 'border-b-2 border-foreground font-semibold text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* 게시글 목록 */}
+        <div className="mt-4 flex w-full flex-col gap-3">
+          {posts.length === 0 && !isLoading ? (
+            <p className="w-full py-10 text-center text-sm text-muted-foreground">
+              {viewMode === 'my'
+                ? '작성한 게시글이 없습니다.'
+                : '게시글이 없습니다.'}
+            </p>
+          ) : posts.length > 0 ? (
+            posts.map((post) => (
+              <PostCard
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                content={post.content}
+                tag={post.tag}
+                timestamp={post.createdAt}
+                username={post.nickName}
+                isOwner={
+                  !!snowflakeId && post.userId === Number(snowflakeId)
+                }
+                onDeleted={() => resetAndFetch(viewMode)}
+              />
+            ))
+          ) : null}
+        </div>
+
+        {/* 더 불러오기 인디케이터 */}
+        {posts.length > 0 && (
+          <p className="w-full py-6 text-center text-xs text-muted-foreground">
+            스크롤하여 더 불러오기...
           </p>
-        ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              content={post.content}
-              tag={post.tag}
-              timestamp={post.createdAt}
-              username={post.nickName}
-            />
-          ))
         )}
 
         <div ref={sentinelRef} data-testid="scroll-sentinel" />

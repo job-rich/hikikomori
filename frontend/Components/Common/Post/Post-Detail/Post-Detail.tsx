@@ -11,17 +11,24 @@ import {
   TriangleAlert,
   Send,
   Reply,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/formatDate';
 import {
   getPost,
   getComments,
   createComment,
+  updatePost,
+  deletePost,
+  updateComment,
+  deleteComment,
   type PostResponse,
   type CommentResponse,
 } from '@/lib/api/posts';
 import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
+import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
 
 interface PostDetailProps {
   postId: string;
@@ -42,6 +49,15 @@ function CommentItem({
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isCommentOwner =
+    !isEmpty(snowflakeId) && comment.userId === Number(snowflakeId);
+
+  const isCommentDeleted = comment.deletedAt != null;
 
   const handleReply = async () => {
     if (!replyContent.trim() || isSubmitting) return;
@@ -66,19 +82,116 @@ function CommentItem({
     }
   };
 
+  const beginEditComment = () => {
+    setEditDraft(comment.content);
+    setIsEditing(true);
+    setReplyOpen(false);
+  };
+
+  const cancelEditComment = () => {
+    setIsEditing(false);
+  };
+
+  const saveEditComment = async () => {
+    if (!editDraft.trim() || isSavingEdit) return;
+    if (isEmpty(snowflakeId)) return;
+
+    setIsSavingEdit(true);
+    try {
+      await updateComment(postId, comment.id, {
+        userId: Number(snowflakeId!),
+        content: editDraft.trim(),
+      });
+      setIsEditing(false);
+      onCommentAdded();
+    } catch (error) {
+      console.error('댓글 수정 실패:', error);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDeleteComment = async () => {
+    if (isEmpty(snowflakeId)) return;
+    if (!window.confirm('이 댓글을 삭제할까요?')) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteComment(postId, comment.id, Number(snowflakeId!));
+      onCommentAdded();
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className={depth > 0 ? 'ml-6 border-l border-border pl-4' : ''}>
       <div className="py-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {comment.nickName}
-          </span>
-          <span>{formatDate(comment.createdAt)}</span>
+        <div className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-foreground">
+              {comment.nickName}
+            </span>
+            <span>{formatDate(comment.createdAt)}</span>
+          </div>
+          {isCommentOwner && !isEditing && !isCommentDeleted && (
+            <span className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={beginEditComment}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-0.5 rounded border border-border px-1.5 py-0.5 text-[11px] text-foreground hover:bg-muted disabled:opacity-50"
+              >
+                <Pencil className="h-3 w-3" />
+                수정
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteComment}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-0.5 rounded border border-border px-1.5 py-0.5 text-[11px] text-destructive hover:bg-destructive/10 disabled:opacity-50"
+              >
+                <Trash2 className="h-3 w-3" />
+                삭제
+              </button>
+            </span>
+          )}
         </div>
-        <p className="mt-1.5 text-sm text-foreground leading-relaxed">
-          {comment.content}
-        </p>
-        {depth === 0 && (
+        {isEditing && !isCommentDeleted ? (
+          <div className="mt-2 space-y-2">
+            <textarea
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+              rows={3}
+              className="w-full resize-y rounded border border-border bg-transparent px-3 py-2 text-sm text-foreground"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelEditComment}
+                disabled={isSavingEdit}
+                className="rounded border border-border px-2 py-1 text-xs hover:bg-muted disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={saveEditComment}
+                disabled={isSavingEdit || !editDraft.trim()}
+                className="rounded bg-accent px-2 py-1 text-xs font-medium text-accent-foreground disabled:opacity-50"
+              >
+                {isSavingEdit ? '저장 중…' : '저장'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-1.5 text-sm text-foreground leading-relaxed">
+            {comment.content}
+          </p>
+        )}
+        {depth === 0 && !isEditing && !isCommentDeleted && (
           <button
             type="button"
             onClick={() => setReplyOpen(!replyOpen)}
@@ -124,6 +237,10 @@ function CommentItem({
   );
 }
 
+function tagIsValid(tag: string): tag is (typeof TAGS)[number] {
+  return (TAGS as readonly string[]).includes(tag);
+}
+
 export default function PostDetail({ postId }: PostDetailProps) {
   const router = useRouter();
   const { snowflakeId, nickname, requireNickname } = useUserStore();
@@ -133,6 +250,12 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editTag, setEditTag] = useState<string>(TAGS[0]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -143,11 +266,15 @@ export default function PostDetail({ postId }: PostDetailProps) {
     }
   }, [postId]);
 
+  const reloadPost = useCallback(async () => {
+    const data = await getPost(postId);
+    setPost(data);
+  }, [postId]);
+
   useEffect(() => {
     async function fetchPost() {
       try {
-        const data = await getPost(postId);
-        setPost(data);
+        await reloadPost();
       } catch {
         setError('게시글을 찾을 수 없습니다.');
       } finally {
@@ -156,7 +283,62 @@ export default function PostDetail({ postId }: PostDetailProps) {
     }
     fetchPost();
     fetchComments();
-  }, [postId, fetchComments]);
+  }, [postId, fetchComments, reloadPost]);
+
+  const isOwner =
+    !isEmpty(snowflakeId) &&
+    post !== null &&
+    post.userId === Number(snowflakeId);
+
+  const beginEdit = () => {
+    if (!post) return;
+    setEditTitle(post.title);
+    setEditContent(post.content);
+    setEditTag(tagIsValid(post.tag) ? post.tag : '기타');
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!post || isEmpty(snowflakeId)) return;
+    if (!editTitle.trim() || !editContent.trim()) return;
+
+    setIsSaving(true);
+    try {
+      await updatePost(postId, {
+        userId: Number(snowflakeId!),
+        title: editTitle.trim(),
+        content: editContent.trim(),
+        tag: editTag,
+      });
+      await reloadPost();
+      setIsEditing(false);
+    } catch (err) {
+      console.error('게시글 수정 실패:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!post || isEmpty(snowflakeId)) return;
+    if (!window.confirm('이 게시글을 삭제할까요? 삭제 후에는 복구할 수 없습니다.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deletePost(postId, Number(snowflakeId!));
+      router.push('/home');
+    } catch (err) {
+      console.error('게시글 삭제 실패:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleCommentSubmit = async () => {
     if (!commentContent.trim() || isSubmitting) return;
@@ -237,23 +419,108 @@ export default function PostDetail({ postId }: PostDetailProps) {
           </div>
 
           <div className="flex-1 min-w-0 pl-5">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-              <span className="font-medium">{post.nickName}</span>
-              {post.tag ? (
-                <span className="px-1.5 py-0.5 rounded bg-muted">
-                  {post.tag}
+            <div className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <span className="font-medium">{post.nickName}</span>
+                {!isEditing && post.tag ? (
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-xs font-medium ${TAG_STYLES[post.tag] ?? 'bg-muted text-foreground'}`}
+                  >
+                    {post.tag}
+                  </span>
+                ) : null}
+                <span>{formatDate(post.createdAt)}</span>
+              </div>
+              {isOwner && !isEditing && (
+                <span className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={beginEdit}
+                    disabled={isDeleting}
+                    className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted disabled:opacity-50"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeletePost}
+                    disabled={isDeleting}
+                    className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    삭제
+                  </button>
                 </span>
-              ) : null}
-              <span>{formatDate(post.createdAt)}</span>
+              )}
             </div>
 
-            <h1 className="mt-2 text-lg font-bold text-foreground">
-              {post.title}
-            </h1>
+            {isEditing ? (
+              <div className="mt-3 space-y-3">
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full rounded border border-border bg-transparent px-3 py-2 text-sm text-foreground"
+                  placeholder="제목"
+                />
+                <div className="flex flex-wrap gap-2">
+                  {TAGS.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setEditTag(tag)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                        editTag === tag
+                          ? `${TAG_STYLES[tag]} ring-2 ring-offset-1 ring-offset-background`
+                          : `${TAG_STYLES[tag]} opacity-50 hover:opacity-75`
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  rows={8}
+                  className="w-full resize-y rounded border border-border bg-transparent px-3 py-2 text-sm text-foreground"
+                  placeholder="본문"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    disabled={isSaving}
+                    className="rounded border border-border px-3 py-1.5 text-xs hover:bg-muted disabled:opacity-50"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveEdit}
+                    disabled={
+                      isSaving ||
+                      !editTitle.trim() ||
+                      !editContent.trim()
+                    }
+                    className="rounded bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
+                  >
+                    {isSaving ? '저장 중…' : '저장'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="mt-2 text-lg font-bold text-foreground">
+                  {post.title}
+                </h1>
 
-            <div className="mt-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {post.content}
-            </div>
+                <div className="mt-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {post.content}
+                </div>
+              </>
+            )}
 
             <div className="mt-5 flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
               <div className="flex items-center gap-1.5">
@@ -264,13 +531,15 @@ export default function PostDetail({ postId }: PostDetailProps) {
                 <Eye className="h-3.5 w-3.5" />
                 <span>0</span>
               </div>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 hover:text-destructive ml-auto"
-                aria-label="신고"
-              >
-                <TriangleAlert className="h-3.5 w-3.5" />
-              </button>
+              {!isOwner && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 hover:text-destructive ml-auto"
+                  aria-label="신고"
+                >
+                  <TriangleAlert className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

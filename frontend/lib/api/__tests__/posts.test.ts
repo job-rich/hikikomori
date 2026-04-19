@@ -23,12 +23,18 @@ beforeEach(() => {
   vi.restoreAllMocks();
 });
 
+function mockFetchJson(data: unknown): Response {
+  const json = JSON.stringify(data);
+  return {
+    ok: true,
+    status: 200,
+    text: () => Promise.resolve(json),
+  } as Response;
+}
+
 describe('createPost', () => {
   it('POST 요청을 보내고 생성된 게시글을 반환해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockPostResponse),
-    } as Response);
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPostResponse));
 
     const result = await createPost({
       title: '테스트',
@@ -65,10 +71,7 @@ describe('createPost', () => {
 
 describe('getPosts', () => {
   it('게시글 목록을 페이징하여 조회해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockPageResponse),
-    } as Response);
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     const result = await getPosts();
 
@@ -81,10 +84,7 @@ describe('getPosts', () => {
   });
 
   it('페이지와 사이즈를 지정하여 조회할 수 있어야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockPageResponse),
-    } as Response);
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     await getPosts(2, 10);
 
@@ -97,10 +97,7 @@ describe('getPosts', () => {
 
 describe('getMyPosts', () => {
   it('userId를 포함한 GET 요청으로 내 게시글을 조회해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockPageResponse),
-    } as Response);
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     const result = await getMyPosts(12345);
 
@@ -113,10 +110,7 @@ describe('getMyPosts', () => {
   });
 
   it('페이지와 사이즈를 지정하여 조회할 수 있어야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockPageResponse),
-    } as Response);
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     await getMyPosts(12345, 1, 10);
 
