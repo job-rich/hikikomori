@@ -13,7 +13,10 @@ public enum PostTag {
     ECONOMY("경제"),
     CULTURE("문화"),
     DAILY("일상"),
-    ETC("기타");
+    ETC("기타"),
+    /** 레거시 DB 문자열 호환. 새 글은 {@link #ETC} 사용. */
+    @Deprecated
+    VOID("기타");
 
     private final String description;
 }

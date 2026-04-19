@@ -18,6 +18,8 @@ export const TAG_STYLES: Record<string, string> = {
   문화: 'bg-amber-500 text-white',
   일상: 'bg-pink-400 text-white',
   기타: 'bg-gray-500 text-white',
+  /** API 레거시 enum 이름 */
+  VOID: 'bg-gray-500 text-white',
 };
 
 export const TAG_DOT_COLORS: Record<string, string> = {
