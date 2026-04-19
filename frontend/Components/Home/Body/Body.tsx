@@ -15,7 +15,6 @@ import './body.css';
 
 type ViewMode = 'all' | 'my';
 
-type MainTab = 'all' | 'mine';
 type SortTab = 'latest' | 'votes' | 'comments';
 
 export default function Body() {
@@ -25,7 +24,6 @@ export default function Body() {
   );
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mainTab, setMainTab] = useState<MainTab>('all');
   const [sortTab, setSortTab] = useState<SortTab>('latest');
   const [viewMode, setViewMode] = useState<ViewMode>('all');
   const [isLoading, setIsLoading] = useState(false);
@@ -138,11 +136,6 @@ export default function Body() {
     }
   };
 
-  const filteredPosts =
-    mainTab === 'mine' && snowflakeId
-      ? posts.filter((p) => p.userId === Number(snowflakeId))
-      : posts;
-
   return (
     <main className="min-w-0 flex-1 font-sans">
       <div className="mx-auto flex max-w-3xl flex-col items-start">
@@ -150,9 +143,9 @@ export default function Body() {
         <div className="flex w-full border-b border-border">
           <button
             type="button"
-            onClick={() => setMainTab('all')}
+            onClick={() => setViewMode('all')}
             className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-              mainTab === 'all'
+              viewMode === 'all'
                 ? 'border-b-2 border-foreground text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
@@ -162,9 +155,9 @@ export default function Body() {
           {isLoggedIn && (
             <button
               type="button"
-              onClick={() => setMainTab('mine')}
+              onClick={() => setViewMode('my')}
               className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-                mainTab === 'mine'
+                viewMode === 'my'
                   ? 'border-b-2 border-foreground text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
@@ -176,9 +169,9 @@ export default function Body() {
 
         {/* 글 작성 영역 또는 닉네임 생성 배너 */}
         <div className="mt-4 w-full">
-          {isLoggedIn ? (
+          {isLoggedIn && viewMode === 'all' ? (
             <PostForm onSubmit={handleSubmit} />
-          ) : (
+          ) : !isLoggedIn ? (
             <div className="flex flex-col items-center gap-4 rounded-lg border border-border border-t-rose-400 bg-card p-8">
               <p className="text-sm text-muted-foreground">
                 글을 작성하려면 닉네임을 생성하세요
@@ -191,7 +184,7 @@ export default function Body() {
                 닉네임 생성
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* 정렬 탭 */}
@@ -220,12 +213,14 @@ export default function Body() {
 
         {/* 게시글 목록 */}
         <div className="mt-4 flex w-full flex-col gap-3">
-          {filteredPosts.length === 0 ? (
+          {posts.length === 0 && !isLoading ? (
             <p className="w-full py-10 text-center text-sm text-muted-foreground">
-              게시글이 없습니다.
+              {viewMode === 'my'
+                ? '작성한 게시글이 없습니다.'
+                : '게시글이 없습니다.'}
             </p>
-          ) : (
-            filteredPosts.map((post) => (
+          ) : posts.length > 0 ? (
+            posts.map((post) => (
               <PostCard
                 key={post.id}
                 id={post.id}
@@ -237,40 +232,16 @@ export default function Body() {
                 isOwner={
                   !!snowflakeId && post.userId === Number(snowflakeId)
                 }
-                onDeleted={fetchPosts}
+                onDeleted={() => resetAndFetch(viewMode)}
               />
             ))
-          )}
+          ) : null}
         </div>
 
         {/* 더 불러오기 인디케이터 */}
-        {filteredPosts.length > 0 && (
+        {posts.length > 0 && (
           <p className="w-full py-6 text-center text-xs text-muted-foreground">
             스크롤하여 더 불러오기...
-        <div className="body-tab-group">
-          <button
-            type="button"
-            className={`body-tab ${viewMode === 'all' ? 'body-tab--active' : ''}`}
-            onClick={() => setViewMode('all')}
-          >
-            전체 게시글
-          </button>
-          <button
-            type="button"
-            className={`body-tab ${viewMode === 'my' ? 'body-tab--active' : ''}`}
-            onClick={() => setViewMode('my')}
-          >
-            내가 쓴 글
-          </button>
-        </div>
-
-        {viewMode === 'all' && <PostForm onSubmit={handleSubmit} />}
-
-        {posts.length === 0 && !isLoading ? (
-          <p className="w-full mt-4 text-center text-sm text-muted-foreground py-10">
-            {viewMode === 'my'
-              ? '작성한 게시글이 없습니다.'
-              : '게시글이 없습니다.'}
           </p>
         )}
 
