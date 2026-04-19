@@ -4,6 +4,16 @@ import Body from '@/Components/Home/Body/Body';
 import { useUserStore } from '@/lib/stores/userStore';
 import * as postsApi from '@/lib/api/posts';
 
+const routerMock = vi.hoisted(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => routerMock,
+}));
+
 vi.mock('@/lib/api/posts');
 
 const mockPosts = [
