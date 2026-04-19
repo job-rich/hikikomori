@@ -1,4 +1,9 @@
+import { displayTagFromApi, toApiTag } from '@/lib/utils/postTagApi';
 import { apiClient } from './client';
+
+function mapPost(p: PostResponse): PostResponse {
+  return { ...p, tag: displayTagFromApi(p.tag) };
+}
 
 export interface PostCreateRequest {
   title: string;
@@ -26,11 +31,14 @@ export interface PageResponse<T> {
   size: number;
 }
 
-export function createPost(request: PostCreateRequest): Promise<PostResponse> {
-  return apiClient<PostResponse>('/api/posts', {
+export async function createPost(
+  request: PostCreateRequest
+): Promise<PostResponse> {
+  const raw = await apiClient<PostResponse>('/api/posts', {
     method: 'POST',
-    body: JSON.stringify(request),
+    body: JSON.stringify({ ...request, tag: toApiTag(request.tag) }),
   });
+  return mapPost(raw);
 }
 
 export interface CommentResponse {
@@ -50,30 +58,33 @@ export interface CommentCreateRequest {
   nickName: string;
 }
 
-export function getPosts(
+export async function getPosts(
   page = 0,
   size = 6
 ): Promise<PageResponse<PostResponse>> {
-  return apiClient<PageResponse<PostResponse>>(
+  const data = await apiClient<PageResponse<PostResponse>>(
     `/api/posts?page=${page}&size=${size}`
   );
+  return { ...data, content: data.content.map(mapPost) };
 }
 
-export function getMyPosts(
+export async function getMyPosts(
   userId: number,
   page = 0,
   size = 6
 ): Promise<PageResponse<PostResponse>> {
-  return apiClient<PageResponse<PostResponse>>(
+  const data = await apiClient<PageResponse<PostResponse>>(
     `/api/posts/my/${userId}?page=${page}&size=${size}`
   );
+  return { ...data, content: data.content.map(mapPost) };
 }
 
 // 포스트 상세 화면
 
 // 포스트 조회
-export function getPost(id: string): Promise<PostResponse> {
-  return apiClient<PostResponse>(`/api/posts/${id}`);
+export async function getPost(id: string): Promise<PostResponse> {
+  const raw = await apiClient<PostResponse>(`/api/posts/${id}`);
+  return mapPost(raw);
 }
 
 export interface PostUpdateRequest {
@@ -90,7 +101,7 @@ export function updatePost(
 ): Promise<void> {
   return apiClient<void>(`/api/posts/${id}`, {
     method: 'PATCH',
-    body: JSON.stringify(request),
+    body: JSON.stringify({ ...request, tag: toApiTag(request.tag) }),
   });
 }
 
