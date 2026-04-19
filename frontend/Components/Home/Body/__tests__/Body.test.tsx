@@ -122,13 +122,13 @@ describe('Body - 내가 쓴 게시글 기능', () => {
     await screen.findByText('전체 게시글');
 
     expect(
-      screen.getByPlaceholderText('제목을 입력하세요...')
+      screen.getByPlaceholderText('제목을 입력하세요')
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '내가 쓴 글' }));
 
     expect(
-      screen.queryByPlaceholderText('제목을 입력하세요...')
+      screen.queryByPlaceholderText('제목을 입력하세요')
     ).not.toBeInTheDocument();
   });
 
@@ -141,7 +141,7 @@ describe('Body - 내가 쓴 게시글 기능', () => {
     fireEvent.click(screen.getByRole('button', { name: '전체 게시글' }));
 
     expect(
-      screen.getByPlaceholderText('제목을 입력하세요...')
+      screen.getByPlaceholderText('제목을 입력하세요')
     ).toBeInTheDocument();
   });
 
