@@ -139,15 +139,21 @@ export default function Body() {
   };
 
   const sortedPosts = useMemo(() => {
-    if (sortTab !== 'latest') {
-      return posts;
+    if (sortTab === 'latest') {
+      return [...posts].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
 
-    return [...posts].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    if (sortTab === 'comments') {
+      return [...posts].sort((a, b) => b.commentCount - a.commentCount);
+    }
+
+    return posts;
   }, [posts, sortTab]);
+
+
 
   return (
     <main className="min-w-0 flex-1 font-sans">
