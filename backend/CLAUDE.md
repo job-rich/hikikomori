@@ -133,6 +133,7 @@ org.hikikomori.community
 
 - **Post:** id(UUID), userId(Long), nickName(String), title(String), content(TEXT), tag(PostTag enum), commentCount(@Formula, 읽기 전용), createdAt, updatedAt
   - **commentCount:** `@Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")` — DB 서브쿼리로 자동 계산, 스냅샷 아님. 정렬: `?sort=commentCount,desc`
+  - **PostDto.Response 의 view/like/fightPoint/isBookmarked 필드:** Post 의 컬럼이 아니다. 모두 Post 밖의 별도 도메인 join 결과로 채워야 하는 값 (PostView / PostLike / Bookmark / User). 도메인 도입 전까지는 디폴트 0/false 로 응답해 화면 호환만 유지.
 - **PostTag:** PHILOSOPHY(철학), SOCIETY(사회), POLITICS(정치), ECONOMY(경제), CULTURE(문화), DAILY(일상), ETC(기타) — `@Enumerated(EnumType.STRING)`
 - **Comment:** id(UUID), userId(Long), nickName(String), content(TEXT), createdAt, updatedAt, deletedAt, post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 3단계 중첩(댓글 → 대댓글 → 대대댓글)
   - **소프트 삭제:** `deletedAt`만 설정, content 원본 유지. Response에서 삭제된 댓글의 content는 null로 치환 (DB 원본 보장, 패킷 노출 방지)

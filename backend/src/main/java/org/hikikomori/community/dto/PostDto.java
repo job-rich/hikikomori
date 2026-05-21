@@ -32,6 +32,10 @@ public class PostDto {
             String content,
             PostTag tag,
             long commentCount,
+            long view,
+            long like,
+            long fightPoint,
+            boolean isBookmarked,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -44,6 +48,10 @@ public class PostDto {
                     post.getContent(),
                     post.getTag(),
                     post.getCommentCount(),
+                    0L,
+                    0L,
+                    0L,
+                    false,
                     post.getCreatedAt(),
                     post.getUpdatedAt()
             );
