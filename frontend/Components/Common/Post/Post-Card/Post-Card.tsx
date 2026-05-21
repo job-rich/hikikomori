@@ -23,6 +23,7 @@ interface PostCardProps {
   tag?: string;
   timestamp: string;
   username: string;
+  commentCount?: number;
   replies?: number;
   views?: number;
   votes?: number;
@@ -40,6 +41,7 @@ export default function PostCard({
   tag,
   timestamp,
   username,
+  commentCount,
   replies = 0,
   views = 0,
   votes = 0,
@@ -110,9 +112,7 @@ export default function PostCard({
             )}
             <span className="font-medium">{username}</span>
             <span>✕ {views.toLocaleString()}</span>
-            <span className="text-rose-500">
-              ▲ {voteRatio}%
-            </span>
+            <span className="text-rose-500">▲ {voteRatio}%</span>
             <span>· {formatDate(timestamp)}</span>
           </div>
 
@@ -133,7 +133,7 @@ export default function PostCard({
           <div className="mt-3 flex items-center gap-4 border-t border-border pt-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <MessageSquare className="h-3.5 w-3.5" />
-              {replies}
+              {commentCount}
             </span>
             <span className="flex items-center gap-1.5">
               <Eye className="h-3.5 w-3.5" />

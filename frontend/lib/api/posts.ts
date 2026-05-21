@@ -20,6 +20,7 @@ export interface PostResponse {
   title: string;
   content: string;
   tag: string;
+  commentCount: number;
   createdAt: string;
 }
 
