@@ -131,12 +131,11 @@ org.hikikomori.community
 
 ## 도메인 모델
 
-- **Post:** id(UUID), userId(Long), nickName(String), title(String), content(TEXT), tag(PostTag enum), commentCount(@Formula, 읽기 전용), createdAt, updatedAt
-  - **commentCount:** `@Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")` — DB 서브쿼리로 자동 계산, 스냅샷 아님. 정렬: `?sort=commentCount,desc`
-  - **PostDto.Response 의 view/like/fightPoint/isBookmarked 필드:** Post 의 컬럼이 아니다. 모두 Post 밖의 별도 도메인 join 결과로 채워야 하는 값 (PostView / PostLike / Bookmark / User). 도메인 도입 전까지는 디폴트 0/false 로 응답해 화면 호환만 유지.
-- **PostTag:** PHILOSOPHY(철학), SOCIETY(사회), POLITICS(정치), ECONOMY(경제), CULTURE(문화), DAILY(일상), ETC(기타) — `@Enumerated(EnumType.STRING)`
-- **Comment:** id(UUID), userId(Long), nickName(String), content(TEXT), createdAt, updatedAt, deletedAt, post(ManyToOne LAZY), parent(self-referencing ManyToOne LAZY), children(OneToMany CASCADE ALL) — 최대 3단계 중첩(댓글 → 대댓글 → 대대댓글)
-  - **소프트 삭제:** `deletedAt`만 설정, content 원본 유지. Response에서 삭제된 댓글의 content는 null로 치환 (DB 원본 보장, 패킷 노출 방지)
+엔티티 필드 정의는 `domain/` 의 각 파일 참고. 코드에서 derive 불가능한 hidden behavior 만 여기 기록.
+
+- **Post.commentCount:** `@Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")` — DB 서브쿼리로 자동 계산, 스냅샷 아님. 정렬: `?sort=commentCount,desc`
+- **Comment:** 자기참조 `parent`/`children` 으로 최대 3단계 nesting (댓글 → 대댓글 → 대대댓글).
+- **Comment 소프트 삭제:** `deletedAt` 만 설정, content 원본 DB 에 유지. Response 변환 시 삭제된 댓글의 content 는 null 로 치환 (패킷 노출 방지).
 
 ## 배치 처리
 
@@ -145,7 +144,3 @@ org.hikikomori.community
 - **기준:** `today.atStartOfDay()` 이전 데이터 삭제
 - **수동 실행:** `POST /api/batch/purge?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`
 - **설정:** `spring.batch.job.enabled=false` (자동 실행 비활성화, 스케줄러 통해서만 실행)
-
-## 알려진 이슈
-
-- compose.yaml의 DB 자격증명(myuser/secret/mydatabase)과 application.yaml(postgres/postgres/community)이 불일치 — Spring Boot Docker Compose 통합이 자동 연결하므로 현재 동작에는 영향 없음

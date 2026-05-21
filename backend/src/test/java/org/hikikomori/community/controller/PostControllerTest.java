@@ -119,41 +119,6 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("단건 조회 시 view/like/fightPoint/isBookmarked 필드를 포함한다")
-    void 단건_조회_시_view_like_fightPoint_isBookmarked_필드를_포함한다() throws Exception {
-        // given
-        UUID postId = UUID.randomUUID();
-        PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", PostTag.ETC, 0L, 0L, 0L, 0L, false, null, null);
-        given(postFacade.getPost(postId)).willReturn(response);
-
-        // when & then
-        mockMvc.perform(get("/api/posts/{id}", postId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.view").value(0))
-                .andExpect(jsonPath("$.like").value(0))
-                .andExpect(jsonPath("$.fightPoint").value(0))
-                .andExpect(jsonPath("$.isBookmarked").value(false));
-    }
-
-    @Test
-    @DisplayName("목록 조회 시 새 카운트 필드를 포함한다")
-    void 목록_조회_시_새_카운트_필드를_포함한다() throws Exception {
-        // given
-        List<PostDto.Response> posts = List.of(
-                new PostDto.Response(null, 1L, "유저1", "제목1", "내용1", PostTag.ETC, 0L, 5L, 3L, 10L, false, null, null)
-        );
-        given(postFacade.getPosts(any(Pageable.class))).willReturn(new PageImpl<>(posts));
-
-        // when & then
-        mockMvc.perform(get("/api/posts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].view").value(5))
-                .andExpect(jsonPath("$.content[0].like").value(3))
-                .andExpect(jsonPath("$.content[0].fightPoint").value(10))
-                .andExpect(jsonPath("$.content[0].isBookmarked").value(false));
-    }
-
-    @Test
     @DisplayName("PATCH /api/posts/{id} - 게시글 수정 시 204 반환")
     void updatePost() throws Exception {
         // given

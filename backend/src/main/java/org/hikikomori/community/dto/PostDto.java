@@ -48,6 +48,7 @@ public class PostDto {
                     post.getContent(),
                     post.getTag(),
                     post.getCommentCount(),
+                    // TODO: view/like/fightPoint/isBookmarked 별도 도메인 도입 후 채움
                     0L,
                     0L,
                     0L,
