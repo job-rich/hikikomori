@@ -34,6 +34,9 @@ interface PostDetailProps {
   postId: string;
 }
 
+/** 댓글(0) → 대댓글(1) → 대대댓글(2). 백엔드 nesting 제한과 동일 */
+const MAX_COMMENT_DEPTH = 2;
+
 function CommentItem({
   comment,
   postId,
@@ -191,7 +194,7 @@ function CommentItem({
             {comment.content}
           </p>
         )}
-        {depth === 0 && !isEditing && !isCommentDeleted && (
+        {depth < MAX_COMMENT_DEPTH && !isEditing && !isCommentDeleted && (
           <button
             type="button"
             onClick={() => setReplyOpen(!replyOpen)}
@@ -256,6 +259,8 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [editTag, setEditTag] = useState<string>(TAGS[0]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  console.log(commentContent);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -325,7 +330,9 @@ export default function PostDetail({ postId }: PostDetailProps) {
 
   const handleDeletePost = async () => {
     if (!post || isEmpty(snowflakeId)) return;
-    if (!window.confirm('이 게시글을 삭제할까요? 삭제 후에는 복구할 수 없습니다.')) {
+    if (
+      !window.confirm('이 게시글을 삭제할까요? 삭제 후에는 복구할 수 없습니다.')
+    ) {
       return;
     }
 
@@ -500,9 +507,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
                     type="button"
                     onClick={handleSaveEdit}
                     disabled={
-                      isSaving ||
-                      !editTitle.trim() ||
-                      !editContent.trim()
+                      isSaving || !editTitle.trim() || !editContent.trim()
                     }
                     className="rounded bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
                   >
@@ -525,7 +530,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
             <div className="mt-5 flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
               <div className="flex items-center gap-1.5">
                 <MessageSquare className="h-3.5 w-3.5" />
-                <span>{comments.length}</span>
+                <span>{post.commentCount}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Eye className="h-3.5 w-3.5" />
@@ -547,7 +552,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
 
       <section className="mt-6">
         <h2 className="text-sm font-semibold text-foreground">
-          댓글 {comments.length}개
+          댓글 {post.commentCount}개
         </h2>
 
         <div className="mt-3 flex gap-2">
