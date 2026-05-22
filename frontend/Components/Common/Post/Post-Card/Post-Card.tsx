@@ -110,9 +110,7 @@ export default function PostCard({
             )}
             <span className="font-medium">{username}</span>
             <span>✕ {views.toLocaleString()}</span>
-            <span className="text-rose-500">
-              ▲ {voteRatio}%
-            </span>
+            <span className="text-rose-500">▲ {voteRatio}%</span>
             <span>· {formatDate(timestamp)}</span>
           </div>
 
