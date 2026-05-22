@@ -153,8 +153,6 @@ export default function Body() {
     return posts;
   }, [posts, sortTab]);
 
-
-
   return (
     <main className="min-w-0 flex-1 font-sans">
       <div className="mx-auto flex max-w-3xl flex-col items-start">
