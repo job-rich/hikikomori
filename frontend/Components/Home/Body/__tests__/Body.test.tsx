@@ -78,17 +78,16 @@ beforeEach(() => {
     nicknameModalOpen: false,
   });
 
-  const MockIntersectionObserver = vi.fn(function (
-    this: unknown,
-    callback: IntersectionObserverCallback
-  ) {
-    intersectionCallback = callback;
-    return {
-      observe: mockObserve,
-      disconnect: mockDisconnect,
-      unobserve: vi.fn(),
-    };
-  });
+  const MockIntersectionObserver = vi.fn(
+    function (this: unknown, callback: IntersectionObserverCallback) {
+      intersectionCallback = callback;
+      return {
+        observe: mockObserve,
+        disconnect: mockDisconnect,
+        unobserve: vi.fn(),
+      };
+    }
+  );
   vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 });
 

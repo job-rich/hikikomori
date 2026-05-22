@@ -11,8 +11,6 @@ const mockPostResponse = {
   createdAt: '2026-03-01T08:38:25.586252',
 };
 
-const expectedPostResponse = { ...mockPostResponse, tag: '기타' };
-
 const mockPageResponse = {
   content: [mockPostResponse],
   totalElements: 1,
@@ -36,9 +34,7 @@ function mockFetchJson(data: unknown): Response {
 
 describe('createPost', () => {
   it('POST 요청을 보내고 생성된 게시글을 반환해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      mockFetchJson(mockPostResponse)
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPostResponse));
 
     const result = await createPost({
       title: '테스트',
@@ -48,7 +44,7 @@ describe('createPost', () => {
       nickName: '묵직한 바흐',
     });
 
-    expect(result).toEqual(expectedPostResponse);
+    expect(result).toEqual(mockPostResponse);
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/posts'),
       expect.objectContaining({ method: 'POST' })
@@ -75,9 +71,7 @@ describe('createPost', () => {
 
 describe('getPosts', () => {
   it('게시글 목록을 페이징하여 조회해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      mockFetchJson(mockPageResponse)
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     const result = await getPosts();
 
@@ -90,9 +84,7 @@ describe('getPosts', () => {
   });
 
   it('페이지와 사이즈를 지정하여 조회할 수 있어야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      mockFetchJson(mockPageResponse)
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     await getPosts(2, 10);
 
@@ -105,9 +97,7 @@ describe('getPosts', () => {
 
 describe('getMyPosts', () => {
   it('userId를 포함한 GET 요청으로 내 게시글을 조회해야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      mockFetchJson(mockPageResponse)
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     const result = await getMyPosts(12345);
 
@@ -120,9 +110,7 @@ describe('getMyPosts', () => {
   });
 
   it('페이지와 사이즈를 지정하여 조회할 수 있어야 한다', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      mockFetchJson(mockPageResponse)
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValue(mockFetchJson(mockPageResponse));
 
     await getMyPosts(12345, 1, 10);
 
