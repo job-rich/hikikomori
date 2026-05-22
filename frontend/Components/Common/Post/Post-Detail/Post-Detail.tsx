@@ -325,7 +325,9 @@ export default function PostDetail({ postId }: PostDetailProps) {
 
   const handleDeletePost = async () => {
     if (!post || isEmpty(snowflakeId)) return;
-    if (!window.confirm('이 게시글을 삭제할까요? 삭제 후에는 복구할 수 없습니다.')) {
+    if (
+      !window.confirm('이 게시글을 삭제할까요? 삭제 후에는 복구할 수 없습니다.')
+    ) {
       return;
     }
 
@@ -500,9 +502,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
                     type="button"
                     onClick={handleSaveEdit}
                     disabled={
-                      isSaving ||
-                      !editTitle.trim() ||
-                      !editContent.trim()
+                      isSaving || !editTitle.trim() || !editContent.trim()
                     }
                     className="rounded bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
                   >
