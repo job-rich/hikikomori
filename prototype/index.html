@@ -1,0 +1,1841 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>방구석 철학자들 — 인터랙티브 프로토타입</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0b;
+        --bg-soft: #111114;
+        --card: #14141a;
+        --card-soft: #1a1a22;
+        --border: #27272f;
+        --border-soft: #1f1f27;
+        --text: #e5e5e7;
+        --muted: #8b8b95;
+        --muted-soft: #5a5a64;
+        --accent: #ec4899;
+        --accent-soft: #be185d;
+        --neon: #f43f5e;
+        --danger: #ef4444;
+        --gold: #facc15;
+        --blue: #3b82f6;
+      }
+      * {
+        font-family: 'Noto Sans KR', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .accent {
+        color: var(--accent);
+      }
+      .bg-accent {
+        background: var(--accent);
+      }
+      .border-default {
+        border-color: var(--border);
+      }
+      .text-muted {
+        color: var(--muted);
+      }
+      .bg-card {
+        background: var(--card);
+      }
+      .bg-card-soft {
+        background: var(--card-soft);
+      }
+      .pill {
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .tag-philosophy {
+        background: rgba(236, 72, 153, 0.15);
+        color: #f9a8d4;
+      }
+      .tag-society {
+        background: rgba(59, 130, 246, 0.15);
+        color: #93c5fd;
+      }
+      .tag-politics {
+        background: rgba(244, 63, 94, 0.15);
+        color: #fda4af;
+      }
+      .tag-economy {
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+      }
+      .tag-culture {
+        background: rgba(168, 85, 247, 0.15);
+        color: #d8b4fe;
+      }
+      .tag-life {
+        background: rgba(250, 204, 21, 0.15);
+        color: #fde047;
+      }
+      .tag-etc {
+        background: rgba(139, 139, 149, 0.18);
+        color: #c7c7d0;
+      }
+      .glitch-title {
+        color: var(--neon);
+        text-shadow:
+          0 0 12px rgba(244, 63, 94, 0.45),
+          0 0 2px rgba(244, 63, 94, 0.8);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+      }
+      .scanline::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.02) 0px,
+          rgba(255, 255, 255, 0.02) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        pointer-events: none;
+      }
+      .vhs-flicker {
+        animation: vhs 3.5s infinite;
+      }
+      @keyframes vhs {
+        0%,
+        96%,
+        100% {
+          opacity: 1;
+        }
+        97% {
+          opacity: 0.6;
+        }
+        98% {
+          opacity: 0.9;
+        }
+        99% {
+          opacity: 0.4;
+        }
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04) 0%,
+          rgba(255, 255, 255, 0.08) 50%,
+          rgba(255, 255, 255, 0.04) 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.8s infinite;
+        border-radius: 4px;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+      .arena-stamp {
+        border: 2px solid var(--neon);
+        color: var(--neon);
+        padding: 4px 10px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        transform: rotate(-2deg);
+      }
+      .arena-redacted {
+        background: #2a2a32;
+        height: 10px;
+        border-radius: 2px;
+      }
+      .nav-toggle {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 100;
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 14px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .nav-toggle:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .nav-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 280px;
+        background: var(--bg-soft);
+        border-left: 1px solid var(--border);
+        padding: 16px;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.2s;
+        z-index: 99;
+      }
+      .nav-panel.open {
+        transform: translateX(0);
+      }
+      .nav-panel h4 {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--muted);
+        margin: 18px 0 8px;
+      }
+      .nav-panel a {
+        display: block;
+        padding: 8px 10px;
+        font-size: 13px;
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 4px;
+        margin-bottom: 2px;
+      }
+      .nav-panel a:hover {
+        background: var(--card);
+        color: var(--accent);
+      }
+      .nav-panel a.active {
+        background: var(--card);
+        color: var(--accent);
+        border-left: 2px solid var(--accent);
+      }
+      .nav-panel .badge {
+        font-size: 9px;
+        padding: 1px 5px;
+        margin-left: 6px;
+        border-radius: 3px;
+      }
+      .badge-impl {
+        background: rgba(34, 197, 94, 0.18);
+        color: #86efac;
+      }
+      .badge-miss {
+        background: rgba(236, 72, 153, 0.18);
+        color: #f9a8d4;
+      }
+      .input-base {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 13px;
+        outline: none;
+      }
+      .input-base:focus {
+        border-color: var(--accent);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: var(--accent-soft);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .btn-ghost:hover {
+        border-color: var(--accent);
+      }
+      .vs-bar {
+        height: 8px;
+        background: linear-gradient(
+          to right,
+          #3b82f6 0%,
+          #3b82f6 38%,
+          #ec4899 38%,
+          #ec4899 100%
+        );
+        border-radius: 999px;
+      }
+      .digit {
+        display: inline-block;
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+        margin: 0 3px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--neon);
+        text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+        border-radius: 6px;
+      }
+      details > summary {
+        cursor: pointer;
+      }
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+      .rank-medal {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--card);
+        border: 1px solid var(--accent);
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 13px;
+        z-index: 200;
+        animation: fadein 0.2s;
+      }
+      @keyframes fadein {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 10px);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="nav-toggle" onclick="toggleNav()">📋 화면 목록</button>
+    <aside id="navPanel" class="nav-panel">
+      <div class="flex items-center justify-between mb-3">
+        <strong class="text-sm">방구석 철학자들</strong>
+        <button onclick="toggleNav()" class="text-muted text-lg leading-none">
+          ×
+        </button>
+      </div>
+      <p class="text-[11px] text-muted mb-3">
+        인터랙티브 프로토타입 · 동작 없음, 화면 이동만
+      </p>
+
+      <h4>메인 / 필수</h4>
+      <a href="#/home" data-route="/home">메인 화면 <span class="badge badge-impl">구현</span></a>
+      <a href="#/home/skeleton" data-route="/home/skeleton">스켈레톤 로딩 <span class="badge badge-miss">신규</span></a>
+      <a href="#/home/no-login" data-route="/home/no-login">비로그인 메인 <span class="badge badge-impl">구현</span></a>
+      <a href="#/nickname" data-route="/nickname">닉네임 생성 모달 <span class="badge badge-impl">구현</span></a>
+
+      <h4>게시글</h4>
+      <a href="#/post/1" data-route="/post/1">게시글 상세 <span class="badge badge-impl">구현</span></a>
+      <a href="#/post/1/edit" data-route="/post/1/edit">게시글 수정 <span class="badge badge-impl">구현</span></a>
+      <a href="#/my-posts" data-route="/my-posts">내가 쓴 글 <span class="badge badge-impl">구현</span></a>
+      <a href="#/search" data-route="/search">검색 <span class="badge badge-miss">신규</span></a>
+      <a href="#/report" data-route="/report">신고 모달 <span class="badge badge-miss">신규</span></a>
+
+      <h4>부가 기능</h4>
+      <a href="#/vs" data-route="/vs">VS 모드 / 오늘의 논쟁 <span class="badge badge-miss">신규</span></a>
+      <a href="#/vote-topic" data-route="/vote-topic">오늘의 주제 투표 <span class="badge badge-miss">신규</span></a>
+      <a href="#/archive" data-route="/archive">토론 아카이브 <span class="badge badge-miss">신규</span></a>
+      <a href="#/ranking" data-route="/ranking">랭킹 보드 <span class="badge badge-miss">신규</span></a>
+      <a href="#/hall-of-fame" data-route="/hall-of-fame">명예의 전당 + 후원 <span class="badge badge-miss">신규</span></a>
+      <a href="#/countdown" data-route="/countdown">퍼지 카운트다운 <span class="badge badge-miss">신규</span></a>
+      <a href="#/notifications" data-route="/notifications">알림 센터 <span class="badge badge-miss">신규</span></a>
+
+      <h4>개인화</h4>
+      <a href="#/profile" data-route="/profile">ID 내보내기 + 전투력 <span class="badge badge-miss">신규</span></a>
+      <a href="#/badges" data-route="/badges">업적/뱃지 <span class="badge badge-miss">신규</span></a>
+      <a href="#/settings" data-route="/settings">설정 <span class="badge badge-miss">신규</span></a>
+
+      <h4>온보딩</h4>
+      <a href="#/onboarding" data-route="/onboarding">온보딩 튜토리얼 <span class="badge badge-miss">신규</span></a>
+    </aside>
+
+    <main id="app"></main>
+
+    <script>
+      // ============ Mock data ============
+      const MOCK_USER = {
+        nickname: '냉소적인 니체',
+        snowflakeId: '1234567890123456789',
+        power: 2891,
+        rank: 12,
+      };
+
+      const TAGS = ['철학', '사회', '정치', '경제', '문화', '일상', '기타'];
+      const TAG_CLASS = {
+        철학: 'tag-philosophy',
+        사회: 'tag-society',
+        정치: 'tag-politics',
+        경제: 'tag-economy',
+        문화: 'tag-culture',
+        일상: 'tag-life',
+        기타: 'tag-etc',
+      };
+
+      const POSTS = [
+        {
+          id: 1,
+          tag: '철학',
+          author: '냉소적인 니체',
+          votes: 2891,
+          ratio: 3,
+          views: 1234,
+          time: '3분 전',
+          title: '존재의 의미에 대하여',
+          excerpt:
+            '삶이란 무엇인가. 우리는 왜 이 세상에 던져진 것인가. 하이데거의 현존재 분석을 통해 존재의 의미를 다시 묻는다.',
+          comments: 124,
+        },
+        {
+          id: 2,
+          tag: '사회',
+          author: '우울한 칸트',
+          votes: 1567,
+          ratio: 8,
+          views: 891,
+          time: '15분 전',
+          title: '개인주의 시대의 연대는 가능한가',
+          excerpt:
+            '각자가 자신만의 세계에 갇혀 사는 시대, 진정한 연대란 무엇이며, 그것은 어떻게 가능한 것인가.',
+          comments: 67,
+        },
+        {
+          id: 3,
+          tag: '정치',
+          author: '지혜로운 코페르니쿠스',
+          votes: 1234,
+          ratio: 12,
+          views: 1542,
+          time: '1시간 전',
+          title: '민주주의는 완성된 것인가',
+          excerpt:
+            '우리가 믿고 있는 민주주의는 정말 최선의 체제인가. 플라톤의 철인정치부터 현대 민주주의의 한계까지.',
+          comments: 256,
+        },
+        {
+          id: 4,
+          tag: '경제',
+          author: '회의적인 고흐',
+          votes: 891,
+          ratio: 15,
+          views: 720,
+          time: '2시간 전',
+          title: '노동의 가치는 어디로 갔는가',
+          excerpt:
+            '자동화의 시대, 인간 노동의 본질적 가치는 사라지고 있는가. 마르크스의 노동가치설을 재조명한다.',
+          comments: 89,
+        },
+        {
+          id: 5,
+          tag: '문화',
+          author: '고독한 소크라테스',
+          votes: 3456,
+          ratio: 1,
+          views: 2891,
+          time: '3시간 전',
+          title: '예술은 현실 도피인가, 저항인가',
+          excerpt:
+            '예술은 현실로부터의 도피인가, 현실에 대한 저항인가. 아도르노의 미학 이론을 바탕으로 현대 예술의 역할을 탐구한다.',
+          comments: 178,
+        },
+        {
+          id: 6,
+          tag: '일상',
+          author: '잠 안오는 데카르트',
+          votes: 236,
+          ratio: 42,
+          views: 412,
+          time: '5시간 전',
+          title: '새벽 4시의 라면은 왜 맛있을까',
+          excerpt:
+            '새벽 4시, 모든 것이 고요한 시간에 끓이는 라면은 왜 유독 맛있는 것인가. 감각과 환경의 상관관계를 일상에서 발견한다.',
+          comments: 312,
+        },
+      ];
+
+      const COMMENTS = [
+        {
+          id: 1,
+          author: '우울한 칸트',
+          power: 1567,
+          time: '25분 전',
+          content:
+            '하이데거의 현존재 분석은 결국 칸트의 순수이성비판에서 시작된 인식론적 한계를 존재론적으로 확장한 것이라고 볼 수 있습니다. 묻지 못할 것에 대한 집요한 물음일수록 존재 자체에 대한 물음으로 진화한 것이죠.',
+          tag: '추천됨',
+          replies: [
+            {
+              id: 11,
+              author: '냉소적인 니체',
+              power: 2891,
+              time: '20분 전',
+              content:
+                '칸트의 인식론적 한계를 존재론으로 확장했다는 해석에 동의합니다. 다만 니체적 관점에서 보면, 존재의 의미를 묻는 것 자체가 이미 허무주의에 시작될 수도 있죠.',
+              replies: [
+                {
+                  id: 111,
+                  author: '우울한 칸트',
+                  power: 1567,
+                  time: '20분 전',
+                  content:
+                    '허무주의의 시작이라기보다는, 허무주의를 극복하기 위한 시도 보아야 하지 않을까요?',
+                  replies: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          author: '도망간 유체발사기',
+          power: 0,
+          time: '22분 전',
+          content: '도망간 유저의 댓글입니다.',
+          deleted: true,
+          replies: [
+            {
+              id: 21,
+              author: '도망간 유체발사기',
+              power: 0,
+              time: '40분 전',
+              content: '도망간 유저의 댓글입니다.',
+              deleted: true,
+              replies: [],
+            },
+          ],
+        },
+        {
+          id: 3,
+          author: '회의적인 고흐',
+          power: 891,
+          time: '35분 전',
+          content:
+            '한낮철학자 도망간지만 아이디어는 남아있네요. 존재의 의미를 찾아 도망간 건 아닐지...',
+          replies: [],
+        },
+        {
+          id: 4,
+          author: '고독한 소크라테스',
+          power: 3456,
+          time: '1시간 전',
+          content:
+            '나는 내가 모른다는 것을 안다. 그리고 그것이 존재에 대한 가장 정직한 대답일지도 모르겠습니다.',
+          replies: [],
+        },
+      ];
+
+      const NOTIFICATIONS = [
+        {
+          id: 1,
+          type: 'reply',
+          icon: '💬',
+          title: '냉소적인 니체님이 회원님의 댓글에 답글을 남겼습니다',
+          excerpt: '"칸트의 인식론적 한계를 존재론으로 확장했다는..."',
+          time: '5분 전',
+          unread: true,
+        },
+        {
+          id: 2,
+          type: 'vote',
+          icon: '▲',
+          title: '회원님의 게시글이 추천 +50을 받았습니다',
+          excerpt: '"개인주의 시대의 연대는 가능한가"',
+          time: '20분 전',
+          unread: true,
+        },
+        {
+          id: 3,
+          type: 'mention',
+          icon: '@',
+          title: '우울한 칸트님이 회원님을 언급했습니다',
+          excerpt: '@냉소적인 니체 니체적 관점에서는 어떻게 보시나요?',
+          time: '1시간 전',
+          unread: true,
+        },
+        {
+          id: 4,
+          type: 'badge',
+          icon: '🏆',
+          title: '새 업적 획득: 첫 천 추천',
+          excerpt: '게시글이 1,000 추천을 돌파했습니다',
+          time: '3시간 전',
+          unread: false,
+        },
+        {
+          id: 5,
+          type: 'system',
+          icon: '⚠',
+          title: '24시간 후 모든 데이터가 초기화됩니다',
+          excerpt: '오늘 자정 자정 초기화 안내',
+          time: '6시간 전',
+          unread: false,
+        },
+      ];
+
+      const RANKINGS = [
+        { rank: 1, nickname: '냉소적인 니체', power: 28910, posts: 47, votes: 24891, badges: 12 },
+        { rank: 2, nickname: '고독한 소크라테스', power: 24560, posts: 38, votes: 21340, badges: 11 },
+        { rank: 3, nickname: '지혜로운 코페르니쿠스', power: 19840, posts: 31, votes: 17820, badges: 9 },
+        { rank: 4, nickname: '우울한 칸트', power: 15670, posts: 29, votes: 14210, badges: 8 },
+        { rank: 5, nickname: '회의적인 고흐', power: 12340, posts: 24, votes: 11200, badges: 7 },
+        { rank: 6, nickname: '잠 안오는 데카르트', power: 9870, posts: 21, votes: 8910, badges: 6 },
+        { rank: 7, nickname: '광기의 니체', power: 8910, posts: 18, votes: 7820, badges: 5 },
+        { rank: 8, nickname: '몰락의 슈펭글러', power: 7560, posts: 16, votes: 6890, badges: 5 },
+        { rank: 9, nickname: '실존의 사르트르', power: 6780, posts: 14, votes: 6120, badges: 4 },
+        { rank: 10, nickname: '광야의 키에르케고르', power: 5430, posts: 12, votes: 4980, badges: 4 },
+      ];
+
+      const BADGES = [
+        { icon: '🥇', name: '첫 글', desc: '첫 게시글 작성', earned: true, rare: false },
+        { icon: '💬', name: '대화의 시작', desc: '댓글 10개 작성', earned: true, rare: false },
+        { icon: '🔥', name: '뜨거운 토론', desc: '댓글 100개 작성', earned: true, rare: false },
+        { icon: '⭐', name: '첫 백 추천', desc: '게시글 100 추천', earned: true, rare: false },
+        { icon: '🏆', name: '첫 천 추천', desc: '게시글 1,000 추천', earned: true, rare: true },
+        { icon: '👑', name: '왕좌의 주인', desc: '랭킹 1위', earned: false, rare: true },
+        { icon: '🦉', name: '지혜의 부엉이', desc: '철학 카테고리 100글', earned: false, rare: true },
+        { icon: '⚔️', name: 'VS 챔피언', desc: 'VS 모드 우승 10회', earned: false, rare: false },
+        { icon: '🎯', name: '논쟁의 명수', desc: '댓글 1,000개', earned: false, rare: false },
+        { icon: '🌙', name: '새벽의 철학자', desc: '새벽 글 50개', earned: true, rare: false },
+        { icon: '🗿', name: '돌의 인내', desc: '30일 연속 출석', earned: false, rare: true },
+        { icon: '💀', name: '죽음의 사색가', desc: '실존주의 마스터', earned: false, rare: true },
+      ];
+
+      const ARCHIVE = [
+        {
+          date: '2026-05-21',
+          topic: 'AI는 인간의 창작을 대체할 수 있는가?',
+          winner: '경제 62%',
+          loser: '인문 38%',
+          posts: 1234,
+          comments: 5678,
+        },
+        {
+          date: '2026-05-20',
+          topic: '소셜 미디어는 민주주의를 위협하는가?',
+          winner: '경제 71%',
+          loser: '인문 29%',
+          posts: 891,
+          comments: 3421,
+        },
+        {
+          date: '2026-05-19',
+          topic: '보편적 기본소득은 노동의 본질을 훼손하는가?',
+          winner: '인문 55%',
+          loser: '경제 45%',
+          posts: 1567,
+          comments: 6789,
+        },
+        {
+          date: '2026-05-18',
+          topic: '환경 보호와 경제 성장, 양립 가능한가?',
+          winner: '인문 68%',
+          loser: '경제 32%',
+          posts: 720,
+          comments: 2891,
+        },
+        {
+          date: '2026-05-17',
+          topic: '메타버스는 새로운 실존인가, 도피인가?',
+          winner: '경제 52%',
+          loser: '인문 48%',
+          posts: 412,
+          comments: 1891,
+        },
+      ];
+
+      const TOPIC_CANDIDATES = [
+        {
+          id: 1,
+          title: '개인의 행복과 사회의 정의, 무엇이 우선인가?',
+          tag: '윤리',
+          votes: 3421,
+          ratio: 38,
+        },
+        {
+          id: 2,
+          title: 'AI의 의식은 가능한가?',
+          tag: '인지',
+          votes: 5621,
+          ratio: 62,
+        },
+        {
+          id: 3,
+          title: '예술의 가치는 객관적인가, 주관적인가?',
+          tag: '미학',
+          votes: 1290,
+          ratio: 14,
+        },
+        {
+          id: 4,
+          title: '죽음을 알기 때문에 우리는 살아가는가?',
+          tag: '실존',
+          votes: 2150,
+          ratio: 24,
+        },
+      ];
+
+      // ============ Router ============
+      const routes = {
+        '/home': renderHome,
+        '/home/skeleton': renderSkeleton,
+        '/home/no-login': renderNoLoginHome,
+        '/nickname': renderNicknameModal,
+        '/post/1': renderPostDetail,
+        '/post/1/edit': renderPostEdit,
+        '/my-posts': renderMyPosts,
+        '/search': renderSearch,
+        '/report': renderReport,
+        '/vs': renderVS,
+        '/vote-topic': renderVoteTopic,
+        '/archive': renderArchive,
+        '/ranking': renderRanking,
+        '/hall-of-fame': renderHallOfFame,
+        '/countdown': renderCountdown,
+        '/notifications': renderNotifications,
+        '/profile': renderProfile,
+        '/badges': renderBadges,
+        '/settings': renderSettings,
+        '/onboarding': renderOnboarding,
+      };
+
+      function go(path) {
+        location.hash = '#' + path;
+      }
+
+      function getRoute() {
+        const h = location.hash.replace(/^#/, '');
+        return h || '/home';
+      }
+
+      function renderApp() {
+        const r = getRoute();
+        const fn = routes[r] || renderHome;
+        document.getElementById('app').innerHTML = fn();
+        markActiveNav(r);
+        attachHandlers();
+        window.scrollTo(0, 0);
+      }
+
+      function markActiveNav(path) {
+        document.querySelectorAll('.nav-panel a').forEach((a) => {
+          a.classList.toggle('active', a.dataset.route === path);
+        });
+      }
+
+      function toggleNav() {
+        document.getElementById('navPanel').classList.toggle('open');
+      }
+
+      function attachHandlers() {
+        document.querySelectorAll('[data-go]').forEach((el) => {
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+            go(el.dataset.go);
+          });
+        });
+      }
+
+      function toast(msg) {
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1800);
+      }
+      window.toast = toast;
+
+      // ============ Shared chrome ============
+      function navbar(opts = {}) {
+        const { noLogin = false } = opts;
+        return `
+        <header class="sticky top-0 z-40 border-b border-default bg-[#0a0a0b]/90 backdrop-blur scanline relative">
+          <div class="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
+            <a href="#/home" data-go="/home" class="glitch-title text-base font-bold vhs-flicker shrink-0">방구석 철학자들</a>
+            <div class="flex-1 max-w-md">
+              <a href="#/search" data-go="/search" class="block">
+                <div class="flex items-center gap-2 rounded-md border border-default bg-[#0e0e12] px-3 py-1.5">
+                  <span class="text-muted text-sm">🔍</span>
+                  <span class="text-sm text-muted">검색...</span>
+                </div>
+              </a>
+            </div>
+            ${
+              noLogin
+                ? `<button data-go="/nickname" class="btn-primary text-xs">닉네임 생성</button>`
+                : `
+              <a href="#/notifications" data-go="/notifications" class="relative text-muted hover:text-pink-400">
+                🔔
+                <span class="absolute -top-1 -right-1 bg-pink-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center">3</span>
+              </a>
+              <a href="#/profile" data-go="/profile" class="flex items-center gap-2 text-xs">
+                <span class="mono">${MOCK_USER.nickname}</span>
+                <span class="mono accent">⚔ ${MOCK_USER.power.toLocaleString()}</span>
+                <span class="mono text-muted">▲ 12%</span>
+              </a>
+              <button class="btn-primary text-xs">닉네임 생성</button>
+              <button data-go="/profile" class="btn-ghost text-xs">ID 내보내기</button>
+              <a href="#/settings" data-go="/settings" class="text-muted hover:text-pink-400" title="설정">⚙</a>
+            `
+            }
+          </div>
+        </header>`;
+      }
+
+      function footer() {
+        return `
+        <footer class="border-t border-default bg-[#0d0d11] py-6 mt-12">
+          <div class="mx-auto max-w-6xl px-4 text-center text-xs text-muted space-y-1">
+            <p>방구석 철학자들 © 2026 명예의 전당 후원하기 매일 자정 초기화</p>
+            <p>비로그인 상태에서 조회 가능, 참여 시 닉네임 모달 유도</p>
+          </div>
+        </footer>`;
+      }
+
+      function sidePanel() {
+        return `
+        <aside class="hidden lg:block w-72 shrink-0 space-y-4">
+          <div class="rounded-lg border border-default bg-card p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold flex items-center gap-1"><span class="accent">⚡</span> 오늘의 논쟁</h3>
+              <a href="#/vs" data-go="/vs" class="text-[11px] text-muted hover:text-pink-400">더보기 →</a>
+            </div>
+            <div class="text-xs text-muted mb-2 mono">VS DEBATE</div>
+            <p class="text-sm font-medium mb-3">AI는 인간의 창작을 대체할 수 있는가?</p>
+            <div class="vs-bar mb-2"></div>
+            <div class="flex justify-between text-xs mono">
+              <span class="text-blue-400">인문 38%</span>
+              <span class="text-pink-400">경제 62%</span>
+            </div>
+            <button class="btn-primary w-full mt-3 text-xs" data-go="/vs">의견 참여</button>
+          </div>
+
+          <div class="rounded-lg border border-default bg-card p-4">
+            <h3 class="text-sm font-bold mb-3 flex items-center gap-1"><span>🏆</span> 인기 게시글</h3>
+            <ol class="space-y-2">
+              ${POSTS.slice(0, 5)
+                .map(
+                  (p, i) => `
+                <li class="flex gap-2 text-xs cursor-pointer hover:text-pink-400" data-go="/post/${p.id}">
+                  <span class="accent font-bold w-4">${i + 1}</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="truncate">${p.title}</p>
+                    <p class="text-muted text-[10px] mt-0.5">${p.author} · ▲${p.votes}</p>
+                  </div>
+                </li>`
+                )
+                .join('')}
+            </ol>
+          </div>
+
+          <div class="rounded-lg border border-default bg-card p-4">
+            <h3 class="text-sm font-bold mb-3">🏷 태그 필터</h3>
+            <ul class="space-y-1.5 text-xs">
+              ${TAGS.map(
+                (t, i) => `
+                <li class="flex justify-between items-center cursor-pointer hover:text-pink-400">
+                  <span class="flex items-center gap-2">
+                    <span class="pill ${TAG_CLASS[t]}">${t}</span>
+                  </span>
+                  <span class="text-muted">${[34, 18, 15, 12, 9, 21, 7][i] ?? 5}</span>
+                </li>`
+              ).join('')}
+            </ul>
+          </div>
+        </aside>`;
+      }
+
+      function postCard(p) {
+        return `
+        <article class="rounded-lg border border-default bg-card hover:bg-[#181820] cursor-pointer transition-colors" onclick="go('/post/${p.id}')">
+          <div class="flex p-4">
+            <div class="flex flex-col items-center gap-0.5 pr-3 min-w-[44px]">
+              <button class="p-1 text-muted hover:text-pink-400" onclick="event.stopPropagation();toast('추천')">▲</button>
+              <span class="text-base font-bold">${p.votes.toLocaleString()}</span>
+              <button class="p-1 text-muted hover:text-blue-400" onclick="event.stopPropagation();toast('비추천')">▼</button>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 text-[11px] text-muted flex-wrap">
+                <span class="pill ${TAG_CLASS[p.tag]}">${p.tag}</span>
+                <span class="font-medium text-zinc-300">${p.author}</span>
+                <span class="mono">⚔ ${p.votes}</span>
+                <span class="text-pink-400">▲ ${p.ratio}%</span>
+                <span>· ${p.time}</span>
+              </div>
+              <h3 class="mt-1.5 font-bold line-clamp-1">${p.title}</h3>
+              <p class="mt-1 text-xs text-muted line-clamp-1">▼ ${p.excerpt}</p>
+              <div class="mt-3 flex items-center gap-4 border-t border-default pt-2 text-[11px] text-muted">
+                <span>💬 ${p.comments}</span>
+                <span>👁 ${p.views}</span>
+                <span class="hover:text-pink-400 cursor-pointer" onclick="event.stopPropagation();toast('북마크')">🔖 북마크</span>
+                <span class="ml-auto hover:text-red-400 cursor-pointer" onclick="event.stopPropagation();go('/report')">⚠ 신고</span>
+              </div>
+            </div>
+          </div>
+        </article>`;
+      }
+
+      // ============ Pages ============
+      function renderHome() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <div class="border-b border-default flex">
+              <button class="px-4 py-2.5 text-sm font-medium border-b-2 border-pink-500 text-white">전체 게시글</button>
+              <button class="px-4 py-2.5 text-sm text-muted hover:text-white" onclick="go('/my-posts')">내가 쓴 글</button>
+            </div>
+
+            <div class="mt-4 rounded-lg border border-default bg-card p-4 space-y-3">
+              <input class="w-full bg-transparent border-b border-default pb-2 text-sm outline-none" placeholder="제목을 입력하세요" />
+              <div class="flex flex-wrap gap-2">
+                ${TAGS.map(
+                  (t, i) =>
+                    `<button class="pill ${TAG_CLASS[t]} ${i === 0 ? 'ring-2 ring-pink-500/50' : 'opacity-50'}">${t}</button>`
+                ).join('')}
+              </div>
+              <textarea rows="4" class="w-full bg-transparent text-sm outline-none resize-none" placeholder="당신의 생각을 적어주세요..."></textarea>
+              <div class="flex items-center justify-between border-t border-default pt-2 -mx-4 px-4">
+                <span class="text-xs text-muted">Ctrl + Enter로 빠르게 게시</span>
+                <button class="btn-primary text-xs" onclick="toast('게시됨 (mock)')">게시</button>
+              </div>
+            </div>
+
+            <div class="mt-6 flex gap-2 text-sm">
+              <button class="px-3 py-1.5 border-b-2 border-white font-semibold">최신순</button>
+              <button class="px-3 py-1.5 text-muted hover:text-white">추천순</button>
+              <button class="px-3 py-1.5 text-muted hover:text-white">댓글순</button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              ${POSTS.map(postCard).join('')}
+            </div>
+
+            <p class="text-center text-xs text-muted py-6">스크롤하여 더 불러오기...</p>
+          </main>
+          ${sidePanel()}
+        </div>
+        ${footer()}`;
+      }
+
+      function renderSkeleton() {
+        const sk = (w, h, cls = '') => `<div class="skeleton ${cls}" style="width:${w};height:${h}"></div>`;
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <div class="flex gap-2 mb-4">${sk('100px', '32px')} ${sk('100px', '32px')}</div>
+            <div class="rounded-lg border border-default bg-card p-4 space-y-3">
+              ${sk('100%', '40px')}
+              <div class="flex gap-2">${[...Array(5)].map(() => sk('50px', '28px')).join('')}</div>
+              ${sk('100%', '100px')}
+              <div class="flex justify-end">${sk('80px', '32px')}</div>
+            </div>
+            ${[1, 2, 3, 4].map(() => `
+              <div class="mt-4 rounded-lg border border-default bg-card p-4 flex gap-3">
+                <div class="space-y-2">${sk('24px', '24px')} ${sk('30px', '18px')} ${sk('24px', '24px')}</div>
+                <div class="flex-1 space-y-2">
+                  <div class="flex gap-2">${sk('40px', '16px')} ${sk('100px', '16px')} ${sk('60px', '16px')}</div>
+                  ${sk('80%', '20px')}
+                  ${sk('100%', '14px')}
+                  <div class="flex gap-3">${sk('40px', '12px')} ${sk('40px', '12px')}</div>
+                </div>
+              </div>`).join('')}
+            <p class="text-center text-xs text-muted py-6">로딩 중...</p>
+          </main>
+          <aside class="hidden lg:block w-72 shrink-0 space-y-4">
+            <div class="rounded-lg border border-default bg-card p-4 space-y-2">${sk('120px', '18px')} ${sk('100%', '60px')} ${sk('100%', '32px')}</div>
+            <div class="rounded-lg border border-default bg-card p-4 space-y-2">
+              ${sk('80px', '16px')}
+              ${[...Array(5)].map(() => sk('100%', '20px')).join('')}
+            </div>
+            <div class="rounded-lg border border-default bg-card p-4 space-y-2">
+              ${sk('60px', '16px')}
+              ${[...Array(7)].map(() => sk('100%', '18px')).join('')}
+            </div>
+          </aside>
+        </div>`;
+      }
+
+      function renderNoLoginHome() {
+        return `
+        ${navbar({ noLogin: true })}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <div class="border-b border-default flex">
+              <button class="px-4 py-2.5 text-sm font-medium border-b-2 border-pink-500">전체 게시글</button>
+            </div>
+            <div class="mt-4 rounded-lg border border-default border-t-pink-500 bg-card p-8 flex flex-col items-center gap-4">
+              <p class="text-sm text-muted">글을 작성하려면 닉네임을 생성하세요</p>
+              <button class="btn-primary" data-go="/nickname">닉네임 생성</button>
+            </div>
+            <div class="mt-6 flex gap-2 text-sm">
+              <button class="px-3 py-1.5 border-b-2 border-white font-semibold">최신순</button>
+              <button class="px-3 py-1.5 text-muted">추천순</button>
+              <button class="px-3 py-1.5 text-muted">댓글순</button>
+            </div>
+            <div class="mt-4 space-y-3">${POSTS.map(postCard).join('')}</div>
+          </main>
+          ${sidePanel()}
+        </div>
+        ${footer()}`;
+      }
+
+      function renderNicknameModal() {
+        return `
+        ${navbar({ noLogin: true })}
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 scanline relative">
+          <div class="relative w-full max-w-md mx-4">
+            <div class="border-2 border-pink-500 bg-[#08080a] p-6 rounded-md relative" style="box-shadow:0 0 40px rgba(236,72,153,0.25)">
+              <div class="flex gap-2 mb-4">
+                <span class="arena-stamp">CLASSIFIED</span>
+                <span class="arena-stamp">RESTRICTED</span>
+                <span class="arena-stamp">TOP SECRET</span>
+              </div>
+              <div class="flex gap-1 mb-4">
+                <span class="arena-redacted" style="width:80px"></span>
+                <span class="arena-redacted" style="width:40px"></span>
+                <span class="arena-redacted" style="width:100px"></span>
+              </div>
+              <div class="border-t border-pink-500/30 my-4"></div>
+              <div class="flex justify-center mb-3">
+                <svg viewBox="0 0 200 120" class="w-24 h-14" fill="none" stroke="#ec4899" stroke-width="2.5">
+                  <path d="M20 55 Q100 15 180 55 Q170 95 100 105 Q30 95 20 55Z"/>
+                  <path d="M55 52 Q75 35 95 52 Q75 65 55 52Z" fill="#ec4899"/>
+                  <path d="M105 52 Q125 35 145 52 Q125 65 105 52Z" fill="#ec4899"/>
+                </svg>
+              </div>
+              <p class="text-center text-xs text-muted">잠깐이지만, 여기선 누구든 될 수 있다.</p>
+              <p class="text-center text-[10px] accent mt-3 mono tracking-widest">▌ CODENAME ASSIGNMENT ▌</p>
+              <div class="text-center my-4">
+                <span class="text-3xl font-black tracking-wider" style="text-shadow:0 0 12px rgba(236,72,153,0.6)">매혹적인 고래</span>
+              </div>
+              <div class="flex gap-3 justify-center">
+                <button class="btn-primary px-8" onclick="go('/home')">입장</button>
+                <button class="btn-ghost px-8" onclick="toast('재배정됨 (mock)')">재배정</button>
+              </div>
+              <div class="border-t border-pink-500/30 my-4"></div>
+              <div class="flex gap-1 mb-3">
+                <span class="arena-redacted" style="width:60px"></span>
+                <span class="arena-redacted" style="width:120px"></span>
+              </div>
+              <div class="flex justify-center gap-3 text-[10px] text-muted mono">
+                <span>매일 초기화</span><span>·</span><span>규칙 따윈 없다</span><span>·</span><span>투기장</span>
+              </div>
+              <p class="text-center text-[10px] text-pink-400/70 mt-2">⚠ 책임은 본인에게 있습니다만, 내일이면 아무도 기억하지 못할겁니다. ⚠</p>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      function commentTree(c, depth = 0) {
+        return `
+        <div class="${depth > 0 ? 'ml-6 border-l border-default pl-4' : ''}">
+          <div class="py-3 ${c.deleted ? 'opacity-40' : ''}">
+            <div class="flex justify-between items-start gap-2 text-xs text-muted">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-medium text-zinc-300">${c.author}</span>
+                <span class="mono accent">⚔ ${c.power.toLocaleString()}</span>
+                <span>· ${c.time}</span>
+                ${c.tag ? `<span class="pill tag-philosophy">${c.tag}</span>` : ''}
+              </div>
+            </div>
+            <p class="mt-1.5 text-sm">${c.deleted ? '<i>삭제된 댓글입니다.</i>' : c.content}</p>
+            ${!c.deleted ? `<button class="mt-1.5 text-xs text-muted hover:text-white" onclick="toast('답글 입력')">↩ 답글</button>` : ''}
+          </div>
+          ${(c.replies || []).map((r) => commentTree(r, depth + 1)).join('')}
+        </div>`;
+      }
+
+      function renderPostDetail() {
+        const p = POSTS[0];
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <button class="mb-4 text-sm text-muted hover:text-white" onclick="go('/home')">← 목록으로 돌아가기</button>
+            <article class="rounded-lg border border-default bg-card">
+              <div class="flex p-5">
+                <div class="flex flex-col items-center gap-1 pr-5 border-r border-default min-w-[60px]">
+                  <button class="text-muted hover:text-pink-400" onclick="toast('추천')">▲</button>
+                  <span class="text-sm font-bold accent">${p.votes}</span>
+                  <button class="text-muted hover:text-blue-400" onclick="toast('비추천')">▼</button>
+                </div>
+                <div class="flex-1 min-w-0 pl-5">
+                  <div class="flex items-center justify-between gap-2 text-xs text-muted">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="font-medium text-zinc-300">${p.author}</span>
+                      <span class="mono accent">⚔ ${p.votes}</span>
+                      <span class="text-pink-400">▲ ${p.ratio}%</span>
+                      <span>· 조회 ${p.views}</span>
+                    </div>
+                  </div>
+                  <h1 class="mt-2 text-xl font-bold">${p.title}</h1>
+                  <div class="flex flex-wrap gap-2 mt-2 text-[10px] mono text-muted">
+                    <span>작성 2026-03-19 08:30:24:15</span>
+                    <span>수정 2026-03-19 04:12:33</span>
+                    <span class="pill ${TAG_CLASS[p.tag]} normal-case">${p.tag}</span>
+                  </div>
+                  <div class="mt-5 text-sm leading-relaxed space-y-3">
+                    <p>삶이란 무엇인가. 우리는 왜 이 세상에 던져진 것인가. 하이데거의 현존재 분석을 통해 존재의 의미를 다시 묻는다. 우리는 매일 같은 일상을 반복하면서도 그 근본적인 질문을 외면하고 있다.</p>
+                    <p>존재의 시간에서 하이데거는 현존재(Dasein)의 개념을 통해 인간 존재의 본질을 탐구한다. 그에 따르면, 인간은 단순히 세계 속에 놓여진 자가 아니라, 자신의 존재를 묻는 유일한 존재이다. 이 세계-내-존재(In-der-Welt-sein)라는 구조 속에서 우리는 불안(Angst)을 통해 본래적 자기를 만난다.</p>
+                    <p>왕국 존재의 의미에 대한 물음은 답을 찾기 위한 것이 아니라, 그 물음 자체를 지속하는 것에 있다고 한다. 새벽 4시, 방구석에서 이 글을 쓰는 이 역시 던져진 존재로서 이 물음을 멈출 수 없다.</p>
+                  </div>
+                  <div class="mt-5 flex items-center gap-4 pt-3 border-t border-default">
+                    <button class="btn-ghost text-xs" onclick="toast('추천')">▲ 추천 [12]</button>
+                    <button class="btn-ghost text-xs" onclick="toast('비추천')">▼ 비추천</button>
+                    <button class="ml-auto text-xs text-muted hover:text-white" onclick="toast('북마크')">🔖 북마크</button>
+                    <button class="text-xs text-muted hover:text-pink-400" onclick="go('/report')">⚠ 신고</button>
+                    <button class="text-xs text-muted hover:text-white" onclick="go('/post/1/edit')">✎ 수정</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <section class="mt-6">
+              <h2 class="text-sm font-semibold">💬 댓글 ${p.comments}</h2>
+              <div class="mt-3 flex gap-2">
+                <input class="input-base flex-1" placeholder="댓글을 작성하세요." />
+                <button class="btn-primary text-xs" onclick="toast('댓글 작성')">댓글 작성</button>
+              </div>
+              <div class="mt-4 divide-y divide-[#1f1f27]">
+                ${COMMENTS.map((c) => commentTree(c)).join('')}
+              </div>
+            </section>
+          </main>
+          ${sidePanel()}
+        </div>
+        ${footer()}`;
+      }
+
+      function renderPostEdit() {
+        const p = POSTS[0];
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <button class="mb-4 text-sm text-muted hover:text-white" onclick="go('/post/1')">← 게시글로 돌아가기</button>
+            <article class="rounded-lg border border-default bg-card p-5">
+              <h2 class="text-sm font-semibold mb-4">📝 게시글 수정</h2>
+              <div class="space-y-3">
+                <input class="input-base w-full" value="${p.title}" />
+                <div class="flex flex-wrap gap-2">
+                  ${TAGS.map(
+                    (t, i) =>
+                      `<button class="pill ${TAG_CLASS[t]} ${t === p.tag ? 'ring-2 ring-pink-500/50' : 'opacity-50'}">${t}</button>`
+                  ).join('')}
+                </div>
+                <textarea rows="10" class="input-base w-full resize-y">${p.excerpt}\n\n존재의 시간에서 하이데거는 현존재의 개념을 통해 인간 존재의 본질을 탐구한다.</textarea>
+                <div class="flex justify-end gap-2">
+                  <button class="btn-ghost text-xs" onclick="go('/post/1')">취소</button>
+                  <button class="btn-primary text-xs" onclick="toast('저장됨'); go('/post/1')">저장</button>
+                </div>
+              </div>
+            </article>
+          </main>
+          ${sidePanel()}
+        </div>
+        ${footer()}`;
+      }
+
+      function renderMyPosts() {
+        const my = POSTS.slice(0, 3);
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">
+            <div class="border-b border-default flex">
+              <button class="px-4 py-2.5 text-sm text-muted hover:text-white" onclick="go('/home')">전체 게시글</button>
+              <button class="px-4 py-2.5 text-sm font-medium border-b-2 border-pink-500">내가 쓴 글</button>
+            </div>
+            <div class="mt-6 flex gap-2 text-sm">
+              <button class="px-3 py-1.5 border-b-2 border-white font-semibold">최신순</button>
+              <button class="px-3 py-1.5 text-muted">추천순</button>
+              <button class="px-3 py-1.5 text-muted">댓글순</button>
+            </div>
+            <p class="text-xs text-muted mt-2">총 ${my.length}개 (자정에 모두 초기화)</p>
+            <div class="mt-4 space-y-3">
+              ${my.map((p) => `
+                <article class="rounded-lg border border-default bg-card hover:bg-[#181820]">
+                  <div class="flex p-4">
+                    <div class="flex flex-col items-center gap-0.5 pr-3 min-w-[44px]">
+                      <button class="p-1 text-muted">▲</button>
+                      <span class="text-base font-bold">${p.votes}</span>
+                      <button class="p-1 text-muted">▼</button>
+                    </div>
+                    <div class="min-w-0 flex-1 cursor-pointer" onclick="go('/post/1')">
+                      <div class="flex items-center gap-2 text-[11px] text-muted">
+                        <span class="pill ${TAG_CLASS[p.tag]}">${p.tag}</span>
+                        <span class="text-zinc-300">${p.author}</span>
+                        <span>· ${p.time}</span>
+                      </div>
+                      <h3 class="mt-1.5 font-bold">${p.title}</h3>
+                      <p class="mt-1 text-xs text-muted line-clamp-1">${p.excerpt}</p>
+                      <div class="mt-3 flex items-center gap-4 border-t border-default pt-2 text-[11px] text-muted">
+                        <span>💬 ${p.comments}</span>
+                        <span>👁 ${p.views}</span>
+                        <span class="hover:text-white cursor-pointer" onclick="event.stopPropagation();go('/post/1/edit')">✎ 수정</span>
+                        <span class="hover:text-red-400 cursor-pointer" onclick="event.stopPropagation();confirm('이 게시글을 삭제할까요?')&&toast('삭제됨 (mock)')">🗑 삭제</span>
+                      </div>
+                    </div>
+                  </div>
+                </article>`).join('')}
+            </div>
+          </main>
+          ${sidePanel()}
+        </div>
+        ${footer()}`;
+      }
+
+      function renderSearch() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-4">🔍 검색</h1>
+          <div class="flex gap-2">
+            <input id="searchInput" class="input-base flex-1" placeholder="키워드, 닉네임, 태그..." value="존재" autofocus />
+            <button class="btn-primary text-xs">검색</button>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2 text-xs">
+            <span class="text-muted self-center">필터:</span>
+            <button class="btn-ghost text-xs">전체</button>
+            <button class="btn-ghost text-xs">게시글</button>
+            <button class="btn-ghost text-xs">댓글</button>
+            <button class="btn-ghost text-xs">유저</button>
+            ${TAGS.map((t) => `<span class="pill ${TAG_CLASS[t]} opacity-60 cursor-pointer">${t}</span>`).join('')}
+          </div>
+          <div class="mt-4 text-xs text-muted">"존재" 검색 결과 24건 · 0.12초</div>
+
+          <div class="mt-3 space-y-3">
+            ${POSTS.filter((p) => /존재|의미|개인|예술/.test(p.title)).map(postCard).join('')}
+          </div>
+
+          <h2 class="text-sm font-semibold mt-6 mb-2">🧑 유저 결과</h2>
+          <div class="space-y-2">
+            ${RANKINGS.slice(0, 3).map((u) => `
+              <div class="flex items-center gap-3 rounded-lg border border-default bg-card p-3 hover:bg-[#181820] cursor-pointer" onclick="go('/profile')">
+                <div class="rank-medal bg-pink-500/20 text-pink-300">${u.rank}</div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">${u.nickname}</p>
+                  <p class="text-xs text-muted mono">⚔ ${u.power.toLocaleString()} · 글 ${u.posts}</p>
+                </div>
+                <button class="btn-ghost text-xs">프로필 보기</button>
+              </div>`).join('')}
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderReport() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-6xl flex gap-6 px-4 py-6">
+          <main class="flex-1 min-w-0">${POSTS.slice(0, 3).map(postCard).join('')}</main>
+        </div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
+          <div class="w-full max-w-md rounded-lg border border-default bg-card p-6">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-base font-bold">⚠ 신고하기</h3>
+              <button onclick="history.back()" class="text-muted text-lg">×</button>
+            </div>
+            <p class="text-xs text-muted mb-4">게시글 #${POSTS[0].id} "${POSTS[0].title}"</p>
+            <div class="space-y-2 mb-4">
+              ${['스팸·광고', '욕설·혐오 표현', '음란·선정성', '개인정보 노출', '저작권 침해', '기타'].map(
+                (r, i) => `
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-[#181820]">
+                  <input type="radio" name="reason" ${i === 1 ? 'checked' : ''} />
+                  <span class="text-sm">${r}</span>
+                </label>`
+              ).join('')}
+            </div>
+            <textarea class="input-base w-full" rows="3" placeholder="추가 설명 (선택)"></textarea>
+            <div class="flex justify-end gap-2 mt-4">
+              <button class="btn-ghost text-xs" onclick="history.back()">취소</button>
+              <button class="btn-primary text-xs" onclick="toast('신고됨 (mock)'); history.back()">신고하기</button>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      function renderVS() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-5xl px-4 py-6">
+          <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-bold">⚔ 오늘의 VS 모드</h1>
+            <div class="text-xs text-muted mono">자정까지 <span class="accent" id="vsTimer">06:23:14</span></div>
+          </div>
+          <div class="rounded-lg border-2 border-pink-500/40 bg-card p-6 relative scanline">
+            <div class="text-center mb-4">
+              <p class="text-xs accent mono tracking-widest">▌ VS DEBATE ▌</p>
+              <h2 class="text-2xl font-bold mt-2">AI는 인간의 창작을 대체할 수 있는가?</h2>
+              <p class="text-xs text-muted mt-1">참여 4,512 · 댓글 1,234</p>
+            </div>
+            <div class="vs-bar mb-2 h-3"></div>
+            <div class="flex justify-between mono mb-6">
+              <div>
+                <div class="text-blue-400 text-xs">인문 진영</div>
+                <div class="text-2xl font-black text-blue-400">38%</div>
+                <div class="text-xs text-muted">1,715표</div>
+              </div>
+              <div class="text-right">
+                <div class="text-pink-400 text-xs">경제 진영</div>
+                <div class="text-2xl font-black text-pink-400">62%</div>
+                <div class="text-xs text-muted">2,797표</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <button class="rounded border border-blue-500/40 bg-blue-500/10 p-4 hover:bg-blue-500/20" onclick="toast('인문 투표')">
+                <div class="text-blue-400 font-bold">인문 진영</div>
+                <p class="text-xs text-muted mt-1">대체 불가능 · 인간만의 의미·맥락</p>
+              </button>
+              <button class="rounded border border-pink-500/40 bg-pink-500/10 p-4 hover:bg-pink-500/20" onclick="toast('경제 투표')">
+                <div class="text-pink-400 font-bold">경제 진영</div>
+                <p class="text-xs text-muted mt-1">대체 가능 · 결과물이 본질</p>
+              </button>
+            </div>
+          </div>
+
+          <h2 class="text-sm font-semibold mt-6 mb-3">📢 진영별 베스트 의견</h2>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="rounded border border-blue-500/30 bg-card p-4">
+              <p class="text-xs text-blue-400 mono mb-2">인문 진영 · 우울한 칸트</p>
+              <p class="text-sm">AI가 그림을 그릴 수는 있지만, "이 그림은 왜 이래야만 했는가"라는 의미는 만들 수 없다. 의미는 살아온 시간에서만 나온다.</p>
+              <div class="flex gap-3 mt-3 text-xs text-muted">
+                <span>▲ 2,891</span><span>💬 124</span>
+              </div>
+            </div>
+            <div class="rounded border border-pink-500/30 bg-card p-4">
+              <p class="text-xs text-pink-400 mono mb-2">경제 진영 · 고독한 소크라테스</p>
+              <p class="text-sm">결과물이 모든 것이다. 시청자가 감동하면 그 작품은 가치 있는 것이다. 작가가 인간인지 AI인지는 부차적이다.</p>
+              <div class="flex gap-3 mt-3 text-xs text-muted">
+                <span>▲ 3,456</span><span>💬 178</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderVoteTopic() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-3xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-1">🗳 내일의 주제 투표</h1>
+          <p class="text-xs text-muted mb-6">가장 많은 표를 받은 주제가 내일의 VS 논쟁이 됩니다 · 자정 마감</p>
+
+          <div class="space-y-3">
+            ${TOPIC_CANDIDATES.map((t, i) => `
+              <button class="w-full text-left rounded-lg border ${i === 1 ? 'border-pink-500' : 'border-default'} bg-card hover:bg-[#181820] p-4 transition" onclick="toast('투표됨: ${t.title}')">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <span class="pill tag-philosophy mr-2">${t.tag}</span>
+                    <span class="text-sm font-medium">${t.title}</span>
+                  </div>
+                  ${i === 1 ? '<span class="text-[10px] mono accent">선두</span>' : ''}
+                </div>
+                <div class="h-2 rounded-full bg-[#1f1f27] overflow-hidden">
+                  <div class="h-full bg-pink-500" style="width:${t.ratio}%"></div>
+                </div>
+                <p class="text-xs text-muted mt-1.5 mono">${t.votes.toLocaleString()}표 · ${t.ratio}%</p>
+              </button>`).join('')}
+          </div>
+
+          <div class="mt-6 rounded-lg border border-dashed border-default bg-card p-4">
+            <p class="text-sm font-medium mb-2">💡 직접 주제 제안하기</p>
+            <input class="input-base w-full" placeholder="새로운 토론 주제를 제안해보세요..." />
+            <button class="btn-primary mt-2 text-xs" onclick="toast('제안 등록됨')">제안 등록</button>
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderArchive() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-1">📚 토론 아카이브</h1>
+          <p class="text-xs text-muted mb-6">매일 자정에 사라지는 토론을 영원히 박제합니다</p>
+
+          <div class="flex gap-2 mb-4 text-xs">
+            <button class="btn-ghost">전체</button>
+            <button class="btn-ghost">VS 모드</button>
+            <button class="btn-ghost">최고 추천</button>
+            <button class="btn-ghost">최다 댓글</button>
+          </div>
+
+          <div class="space-y-3">
+            ${ARCHIVE.map((a) => `
+              <article class="rounded-lg border border-default bg-card p-4 hover:bg-[#181820] cursor-pointer" onclick="go('/post/1')">
+                <div class="flex items-center justify-between mb-2 text-xs text-muted mono">
+                  <span>📅 ${a.date}</span>
+                  <span>📊 게시글 ${a.posts} · 댓글 ${a.comments}</span>
+                </div>
+                <h3 class="font-bold">${a.topic}</h3>
+                <div class="mt-3 flex items-center gap-3">
+                  <span class="pill tag-economy">${a.winner}</span>
+                  <span class="text-muted text-xs">vs</span>
+                  <span class="pill tag-philosophy opacity-60">${a.loser}</span>
+                </div>
+              </article>`).join('')}
+          </div>
+
+          <div class="mt-6 flex justify-center gap-2">
+            <button class="btn-ghost text-xs">← 이전</button>
+            <button class="btn-ghost text-xs">1</button>
+            <button class="btn-primary text-xs">2</button>
+            <button class="btn-ghost text-xs">3</button>
+            <button class="btn-ghost text-xs">다음 →</button>
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderRanking() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-1">🏆 랭킹 보드</h1>
+          <p class="text-xs text-muted mb-6">전투력 = 추천 + 댓글 가중치 + 뱃지 보너스</p>
+
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            ${RANKINGS.slice(0, 3).map((u, i) => `
+              <div class="rounded-lg border border-default bg-card p-4 text-center ${i === 0 ? 'border-yellow-500/50' : i === 1 ? 'border-zinc-400/40' : 'border-orange-700/40'}">
+                <div class="text-3xl mb-2">${['🥇', '🥈', '🥉'][i]}</div>
+                <p class="font-bold text-sm">${u.nickname}</p>
+                <p class="mono accent text-xs mt-1">⚔ ${u.power.toLocaleString()}</p>
+                <p class="text-[10px] text-muted mt-2">글 ${u.posts} · 추천 ${u.votes.toLocaleString()}</p>
+              </div>`).join('')}
+          </div>
+
+          <div class="flex gap-2 mb-3 text-xs">
+            <button class="btn-primary">전체</button>
+            <button class="btn-ghost">오늘</button>
+            <button class="btn-ghost">이번주</button>
+            <button class="btn-ghost">이번달</button>
+          </div>
+
+          <div class="rounded-lg border border-default bg-card overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-[#181820] text-xs text-muted">
+                <tr>
+                  <th class="text-left p-3">순위</th>
+                  <th class="text-left p-3">닉네임</th>
+                  <th class="text-right p-3">전투력</th>
+                  <th class="text-right p-3">글</th>
+                  <th class="text-right p-3">추천</th>
+                  <th class="text-right p-3">뱃지</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${RANKINGS.map((u) => `
+                  <tr class="border-t border-default hover:bg-[#181820] cursor-pointer" onclick="go('/profile')">
+                    <td class="p-3"><span class="rank-medal ${u.rank <= 3 ? 'bg-pink-500/20 text-pink-300' : 'bg-[#1f1f27] text-muted'}">${u.rank}</span></td>
+                    <td class="p-3 font-medium">${u.nickname}</td>
+                    <td class="p-3 text-right mono accent">${u.power.toLocaleString()}</td>
+                    <td class="p-3 text-right mono">${u.posts}</td>
+                    <td class="p-3 text-right mono">${u.votes.toLocaleString()}</td>
+                    <td class="p-3 text-right">${u.badges}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderHallOfFame() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-1">👑 명예의 전당 + 후원</h1>
+          <p class="text-xs text-muted mb-6">위대한 발자국과 운영을 지지하는 후원자들</p>
+
+          <section class="rounded-lg border-2 border-yellow-500/40 bg-card p-6 mb-6 relative">
+            <div class="absolute top-3 right-3 text-[10px] mono text-yellow-400">ETERNAL</div>
+            <p class="text-yellow-400 mono text-xs tracking-widest mb-3">▌ HALL OF FAME ▌</p>
+            <div class="grid md:grid-cols-2 gap-4">
+              ${RANKINGS.slice(0, 4).map((u, i) => `
+                <div class="flex items-center gap-3 rounded border border-yellow-500/20 bg-[#16160c] p-3">
+                  <div class="text-2xl">${['👑', '⚔', '🦉', '🎯'][i]}</div>
+                  <div class="flex-1">
+                    <p class="font-bold">${u.nickname}</p>
+                    <p class="text-[10px] text-muted mono">2026-05-${20 - i} 등재 · ⚔ ${u.power.toLocaleString()}</p>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </section>
+
+          <section class="rounded-lg border border-default bg-card p-6 mb-6">
+            <h2 class="text-base font-bold mb-1">💖 후원하기</h2>
+            <p class="text-xs text-muted mb-4">자정 초기화를 막을 순 없지만, 서버는 살아남게 할 수 있다</p>
+            <div class="grid grid-cols-3 gap-3 mb-4">
+              <button class="rounded border border-default bg-[#181820] hover:border-pink-500 p-4 text-center transition" onclick="toast('₩3,000 후원 (mock)')">
+                <div class="text-2xl mb-1">☕</div>
+                <p class="text-sm font-medium">커피 한 잔</p>
+                <p class="text-xs text-muted mono">₩3,000</p>
+              </button>
+              <button class="rounded border border-pink-500/50 bg-pink-500/5 p-4 text-center" onclick="toast('₩10,000 후원 (mock)')">
+                <div class="text-2xl mb-1">🍺</div>
+                <p class="text-sm font-medium">맥주 한 잔</p>
+                <p class="text-xs text-muted mono">₩10,000</p>
+                <p class="text-[10px] text-pink-400 mt-1">+ 후원자 뱃지</p>
+              </button>
+              <button class="rounded border border-default bg-[#181820] hover:border-pink-500 p-4 text-center transition" onclick="toast('₩30,000 후원 (mock)')">
+                <div class="text-2xl mb-1">📚</div>
+                <p class="text-sm font-medium">철학책 한 권</p>
+                <p class="text-xs text-muted mono">₩30,000</p>
+              </button>
+            </div>
+            <button class="btn-primary w-full text-sm" onclick="toast('결제 페이지 (mock)')">후원하기</button>
+          </section>
+
+          <section class="rounded-lg border border-default bg-card p-6">
+            <h2 class="text-base font-bold mb-3">🌟 후원자 명단</h2>
+            <div class="flex flex-wrap gap-2 text-xs">
+              ${['익명의 칸트', '익명의 헤겔', '익명의 사르트르', '익명의 보부아르', '익명의 푸코', '익명의 들뢰즈', '익명의 후설', '익명의 비트겐슈타인', '익명의 데리다', '익명의 하이데거'].map(
+                (n) => `<span class="pill bg-yellow-500/10 text-yellow-300">${n}</span>`
+              ).join('')}
+            </div>
+          </section>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderCountdown() {
+        const h = '06', m = '23', s = '14';
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-3xl px-4 py-10 text-center scanline relative">
+          <p class="text-xs accent mono tracking-widest">▌ PURGE COUNTDOWN ▌</p>
+          <h1 class="text-3xl font-black mt-3 mb-2 glitch-title">자정의 망각까지</h1>
+          <p class="text-sm text-muted mb-8">모든 게시글, 댓글, 닉네임이 사라집니다</p>
+
+          <div class="my-8" id="countdownDigits">
+            ${h.split('').map((d) => `<span class="digit">${d}</span>`).join('')}
+            <span class="text-3xl text-muted mx-1">:</span>
+            ${m.split('').map((d) => `<span class="digit">${d}</span>`).join('')}
+            <span class="text-3xl text-muted mx-1">:</span>
+            ${s.split('').map((d) => `<span class="digit">${d}</span>`).join('')}
+          </div>
+          <div class="flex justify-center gap-6 text-xs mono text-muted mb-10">
+            <span>시</span>
+            <span>분</span>
+            <span>초</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 max-w-xl mx-auto">
+            <div class="rounded border border-default bg-card p-4">
+              <p class="text-2xl font-bold accent mono">12,381</p>
+              <p class="text-[11px] text-muted mt-1">오늘의 게시글</p>
+            </div>
+            <div class="rounded border border-default bg-card p-4">
+              <p class="text-2xl font-bold accent mono">48,920</p>
+              <p class="text-[11px] text-muted mt-1">오늘의 댓글</p>
+            </div>
+            <div class="rounded border border-default bg-card p-4">
+              <p class="text-2xl font-bold accent mono">3,512</p>
+              <p class="text-[11px] text-muted mt-1">오늘의 닉네임</p>
+            </div>
+          </div>
+
+          <p class="mt-10 text-xs text-muted">⚠ 잠깐이지만 누구든 될 수 있다. 내일이면 아무도 기억하지 못한다 ⚠</p>
+          <button class="btn-ghost mt-6 text-xs" onclick="go('/archive')">아카이브로 박제하기 →</button>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderNotifications() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-3xl px-4 py-6">
+          <div class="flex items-center justify-between mb-4">
+            <h1 class="text-xl font-bold">🔔 알림 센터</h1>
+            <button class="text-xs text-muted hover:text-white" onclick="toast('모두 읽음 처리')">모두 읽음</button>
+          </div>
+          <div class="flex gap-2 mb-4 text-xs">
+            <button class="btn-primary">전체 (5)</button>
+            <button class="btn-ghost">읽지 않음 (3)</button>
+            <button class="btn-ghost">답글</button>
+            <button class="btn-ghost">언급</button>
+            <button class="btn-ghost">시스템</button>
+          </div>
+          <div class="space-y-2">
+            ${NOTIFICATIONS.map((n) => `
+              <div class="flex gap-3 rounded-lg border ${n.unread ? 'border-pink-500/40 bg-pink-500/5' : 'border-default bg-card'} p-3 hover:bg-[#181820] cursor-pointer" onclick="go('/post/1')">
+                <div class="text-xl">${n.icon}</div>
+                <div class="flex-1">
+                  <p class="text-sm ${n.unread ? 'font-medium' : 'text-muted'}">${n.title}</p>
+                  <p class="text-xs text-muted mt-0.5">${n.excerpt}</p>
+                  <p class="text-[10px] text-muted mt-1 mono">${n.time}</p>
+                </div>
+                ${n.unread ? '<div class="w-2 h-2 rounded-full bg-pink-500 mt-2"></div>' : ''}
+              </div>`).join('')}
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderProfile() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-6">🪪 프로필 / ID 내보내기</h1>
+
+          <div class="rounded-lg border-2 border-pink-500/40 bg-card p-6 mb-6 relative scanline">
+            <p class="text-xs accent mono tracking-widest mb-2">▌ BATTLE PROFILE ▌</p>
+            <div class="flex items-start gap-4">
+              <div class="text-5xl">🎭</div>
+              <div class="flex-1">
+                <h2 class="text-2xl font-black">${MOCK_USER.nickname}</h2>
+                <p class="text-xs text-muted mono mt-1">CODENAME · 오늘 03:24:17 배정</p>
+                <div class="flex gap-3 mt-3 text-xs">
+                  <div>
+                    <p class="text-muted">전투력</p>
+                    <p class="accent mono text-base font-bold">⚔ ${MOCK_USER.power.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted">랭킹</p>
+                    <p class="mono text-base font-bold">#${MOCK_USER.rank}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted">승률</p>
+                    <p class="mono text-base font-bold text-pink-400">▲ 12%</p>
+                  </div>
+                  <div>
+                    <p class="text-muted">뱃지</p>
+                    <p class="mono text-base font-bold">6/12</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 p-4 rounded border border-dashed border-pink-500/40 bg-[#08080a]">
+              <p class="text-xs text-muted mb-2">스노우플레이크 ID</p>
+              <div class="flex items-center gap-2">
+                <code class="mono text-sm accent flex-1 break-all">${MOCK_USER.snowflakeId}</code>
+                <button class="btn-ghost text-xs" onclick="navigator.clipboard?.writeText('${MOCK_USER.snowflakeId}'); toast('ID 복사됨')">복사</button>
+                <button class="btn-primary text-xs" onclick="toast('JSON 내보내기 (mock)')">.json 내보내기</button>
+              </div>
+              <p class="text-[10px] text-muted mt-2">⚠ 자정에 캐릭터가 사라집니다. 박제하려면 ID를 보관하세요.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <section class="rounded-lg border border-default bg-card p-5">
+              <h3 class="text-sm font-bold mb-3">📜 작성 기록</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-muted">게시글</span><span class="mono">47</span></div>
+                <div class="flex justify-between"><span class="text-muted">댓글</span><span class="mono">312</span></div>
+                <div class="flex justify-between"><span class="text-muted">받은 추천</span><span class="mono accent">2,891</span></div>
+                <div class="flex justify-between"><span class="text-muted">베스트 댓글</span><span class="mono">8</span></div>
+              </div>
+            </section>
+            <section class="rounded-lg border border-default bg-card p-5">
+              <h3 class="text-sm font-bold mb-3">⚔ 전투 기록</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-muted">VS 참여</span><span class="mono">24</span></div>
+                <div class="flex justify-between"><span class="text-muted">우승</span><span class="mono text-pink-400">15</span></div>
+                <div class="flex justify-between"><span class="text-muted">베스트 의견</span><span class="mono">5</span></div>
+                <div class="flex justify-between"><span class="text-muted">신고당한 횟수</span><span class="mono text-red-400">2</span></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <button class="btn-ghost text-xs" onclick="go('/badges')">획득한 뱃지 보기 →</button>
+            <button class="btn-ghost text-xs" onclick="go('/settings')">⚙ 설정 →</button>
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderBadges() {
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-4xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-1">🏅 업적 / 뱃지</h1>
+          <p class="text-xs text-muted mb-6">획득 ${BADGES.filter((b) => b.earned).length} / ${BADGES.length}</p>
+          <div class="flex gap-2 mb-4 text-xs">
+            <button class="btn-primary">전체</button>
+            <button class="btn-ghost">획득</button>
+            <button class="btn-ghost">미획득</button>
+            <button class="btn-ghost">희귀</button>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            ${BADGES.map((b) => `
+              <div class="rounded-lg border ${b.earned ? (b.rare ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-default bg-card') : 'border-default bg-card opacity-40'} p-4 text-center hover:scale-[1.02] transition cursor-pointer" onclick="toast('${b.name}: ${b.desc}')">
+                <div class="text-4xl mb-2 ${b.earned ? '' : 'grayscale'}">${b.icon}</div>
+                <p class="text-sm font-bold ${b.rare && b.earned ? 'text-yellow-300' : ''}">${b.name}</p>
+                <p class="text-[10px] text-muted mt-1">${b.desc}</p>
+                ${b.rare ? '<p class="text-[9px] mono text-yellow-400 mt-1">✦ RARE</p>' : ''}
+                ${b.earned ? '<p class="text-[9px] mono accent mt-1">획득</p>' : '<p class="text-[9px] mono text-muted mt-1">미획득</p>'}
+              </div>`).join('')}
+          </div>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderSettings() {
+        const row = (label, ctrl) => `
+          <div class="flex justify-between items-center py-3 border-b border-default last:border-0">
+            <span class="text-sm">${label}</span>
+            <div>${ctrl}</div>
+          </div>`;
+        const tog = (on) => `<label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" class="sr-only peer" ${on ? 'checked' : ''}>
+          <div class="w-10 h-5 bg-[#1f1f27] peer-checked:bg-pink-500 rounded-full relative after:absolute after:left-0.5 after:top-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition peer-checked:after:translate-x-5"></div>
+        </label>`;
+        return `
+        ${navbar()}
+        <div class="mx-auto max-w-3xl px-4 py-6">
+          <h1 class="text-xl font-bold mb-6">⚙ 설정</h1>
+
+          <section class="rounded-lg border border-default bg-card p-5 mb-4">
+            <h2 class="text-sm font-bold mb-3">🎨 외관</h2>
+            ${row('테마', '<select class="input-base text-xs"><option>다크 (기본)</option><option>라이트</option><option>VHS 글리치</option></select>')}
+            ${row('VHS 글리치 효과', tog(true))}
+            ${row('스캔라인', tog(true))}
+            ${row('애니메이션 축소', tog(false))}
+          </section>
+
+          <section class="rounded-lg border border-default bg-card p-5 mb-4">
+            <h2 class="text-sm font-bold mb-3">🔔 알림</h2>
+            ${row('답글 알림', tog(true))}
+            ${row('추천 알림 (50+)', tog(true))}
+            ${row('@언급 알림', tog(true))}
+            ${row('자정 카운트다운', tog(false))}
+            ${row('이메일 알림', tog(false))}
+          </section>
+
+          <section class="rounded-lg border border-default bg-card p-5 mb-4">
+            <h2 class="text-sm font-bold mb-3">🛡 차단·필터</h2>
+            ${row('비속어 필터', tog(true))}
+            ${row('차단 키워드 관리', '<button class="btn-ghost text-xs" onclick="toast(\'2개 키워드\')">관리</button>')}
+            ${row('차단 유저 관리', '<button class="btn-ghost text-xs" onclick="toast(\'0명 차단 중\')">관리</button>')}
+          </section>
+
+          <section class="rounded-lg border border-default bg-card p-5 mb-4">
+            <h2 class="text-sm font-bold mb-3">💾 데이터</h2>
+            ${row('자동 백업 (.json)', tog(false))}
+            ${row('내 활동 내보내기', '<button class="btn-ghost text-xs" onclick="toast(\'다운로드 시작 (mock)\')">.json 다운로드</button>')}
+            ${row('계정 즉시 삭제', '<button class="btn-ghost text-xs text-red-400" onclick="confirm(\'정말 지금 사라지시겠습니까?\')&&toast(\'사라짐 (mock)\')">즉시 사라지기</button>')}
+          </section>
+
+          <section class="rounded-lg border border-pink-500/40 bg-pink-500/5 p-5">
+            <h2 class="text-sm font-bold mb-2 text-pink-300">⚠ 위험 구역</h2>
+            <p class="text-xs text-muted mb-3">매일 자정 초기화는 막을 수 없습니다. 단, 다음 항목은 영구 박제 가능:</p>
+            <div class="flex gap-2">
+              <button class="btn-ghost text-xs" onclick="toast(\'박제 신청 (mock)\')">명예의 전당 신청</button>
+              <button class="btn-ghost text-xs" onclick="go('/profile')">ID 영구 보관</button>
+            </div>
+          </section>
+        </div>
+        ${footer()}`;
+      }
+
+      function renderOnboarding() {
+        const steps = [
+          {
+            n: 1,
+            title: '환영합니다, 익명의 철학자',
+            icon: '🎭',
+            body: '여긴 매일 자정에 모든 것이 사라지는 익명 토론장입니다. 닉네임도, 게시글도, 댓글도, 흔적도 남지 않습니다.',
+            cta: '계속',
+          },
+          {
+            n: 2,
+            title: '닉네임은 자동으로 배정됩니다',
+            icon: '🎲',
+            body: '"매혹적인 고래"처럼 임의의 코드네임을 받게 됩니다. 마음에 안 들면 재배정하세요. 마음에 들어도 자정엔 사라집니다.',
+            cta: '계속',
+          },
+          {
+            n: 3,
+            title: '전투력 = 추천 + 댓글 + 뱃지',
+            icon: '⚔',
+            body: '글을 쓰고, 댓글을 달고, VS 모드에 참여하면 전투력이 오릅니다. 자정엔 전부 0으로. 매일이 시즌 1.',
+            cta: '계속',
+          },
+          {
+            n: 4,
+            title: '오늘의 VS, 오늘의 주제 투표',
+            icon: '🗳',
+            body: '매일 1개의 양극 논쟁이 진행됩니다. 인문 vs 경제, 자유 vs 평등. 진영을 골라 의견을 내고, 내일의 주제도 투표하세요.',
+            cta: '계속',
+          },
+          {
+            n: 5,
+            title: '박제하고 싶다면',
+            icon: '📜',
+            body: '명예의 전당, 토론 아카이브, ID 내보내기. 이 세 가지가 자정의 망각을 피하는 유일한 방법입니다.',
+            cta: '시작하기',
+          },
+        ];
+        return `
+        <div class="min-h-screen flex items-center justify-center px-4 py-10 scanline relative">
+          <div class="max-w-2xl w-full">
+            <div class="flex gap-2 justify-center mb-8">
+              ${steps.map((_, i) => `<div class="h-1 w-12 rounded-full ${i < 2 ? 'bg-pink-500' : 'bg-[#1f1f27]'}"></div>`).join('')}
+            </div>
+            ${steps.map((s, i) => `
+              <details class="mb-3" ${i === 1 ? 'open' : ''}>
+                <summary class="flex items-center gap-3 rounded-lg border border-default bg-card p-4 hover:bg-[#181820]">
+                  <span class="rank-medal bg-pink-500/20 text-pink-300">${s.n}</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-bold">${s.icon} ${s.title}</p>
+                  </div>
+                  <span class="text-muted">▾</span>
+                </summary>
+                <div class="rounded-b-lg border-x border-b border-default bg-card-soft p-5 -mt-1">
+                  <p class="text-sm text-muted">${s.body}</p>
+                  <button class="btn-primary mt-4 text-xs" onclick="${i === steps.length - 1 ? `go('/nickname')` : `toast('다음 단계')`}">${s.cta} →</button>
+                </div>
+              </details>`).join('')}
+            <div class="text-center mt-6">
+              <button class="text-xs text-muted hover:text-white" onclick="go('/home')">건너뛰기 (그래도 우린 잊혀집니다)</button>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      window.addEventListener('hashchange', renderApp);
+      window.addEventListener('DOMContentLoaded', renderApp);
+      // immediate first render
+      renderApp();
+    </script>
+  </body>
+</html>
