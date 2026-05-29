@@ -38,6 +38,9 @@ public class PostFacade {
 
     public PostDto.Response getPost(UUID id) {
         Post post = postRepository.getById(id);
+        if (post.isHidden()) {
+            throw new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id);
+        }
         return PostDto.Response.from(post);
     }
 
