@@ -47,6 +47,7 @@ export interface CommentResponse {
   userId: number;
   nickName: string;
   content: string;
+  hidden?: boolean;
   createdAt: string;
   deletedAt?: string | null;
   children: CommentResponse[];
