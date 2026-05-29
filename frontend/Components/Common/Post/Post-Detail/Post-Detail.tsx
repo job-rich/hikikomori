@@ -30,7 +30,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
 import ReportModal from '@/Components/Common/Modals/Report';
-import { ApiError } from '@/lib/api/client';
+import { isApiError } from '@/lib/api/client';
 
 interface PostDetailProps {
   postId: string;
@@ -82,7 +82,7 @@ function CommentItem({
       setReplyOpen(false);
       onCommentAdded();
     } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
+      if (isApiError(err, 403)) {
         window.alert('신고 누적으로 작성이 제한되었습니다.');
       } else {
         console.error('답글 작성 실패:', err);
@@ -392,7 +392,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
       setCommentContent('');
       await fetchComments();
     } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
+      if (isApiError(err, 403)) {
         window.alert('신고 누적으로 작성이 제한되었습니다.');
       } else {
         console.error('댓글 작성 실패:', err);

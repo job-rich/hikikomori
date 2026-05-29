@@ -10,6 +10,11 @@ export class ApiError extends Error {
   }
 }
 
+/** err가 ApiError이고, status를 주면 그 상태코드까지 일치하는지 확인한다. */
+export function isApiError(err: unknown, status?: number): err is ApiError {
+  return err instanceof ApiError && (status === undefined || err.status === status);
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}

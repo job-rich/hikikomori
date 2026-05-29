@@ -7,7 +7,7 @@ import {
   type ReportReason,
   type ReportTargetType,
 } from '@/lib/api/report';
-import { ApiError } from '@/lib/api/client';
+import { isApiError } from '@/lib/api/client';
 import { useUserStore } from '@/lib/stores/userStore';
 
 interface ReportModalProps {
@@ -47,9 +47,9 @@ export default function ReportModal({
       onReported?.();
       onClose();
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
+      if (isApiError(err, 409)) {
         setMessage('이미 신고한 콘텐츠입니다.');
-      } else if (err instanceof ApiError && err.status === 400) {
+      } else if (isApiError(err, 400)) {
         setMessage('본인의 콘텐츠는 신고할 수 없습니다.');
       } else {
         setMessage('신고 처리에 실패했습니다. 잠시 후 다시 시도하세요.');

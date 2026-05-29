@@ -1,6 +1,7 @@
 package org.hikikomori.community.repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.hikikomori.community.domain.Post;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface PostJpaRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findByUserId(Long userId, Pageable pageable);
+
+    Optional<Post> findByIdAndHiddenAtIsNull(UUID id);
 
     Page<Post> findByHiddenAtIsNull(Pageable pageable);
 

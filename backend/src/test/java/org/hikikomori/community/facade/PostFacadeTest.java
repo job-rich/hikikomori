@@ -93,19 +93,19 @@ class PostFacadeTest {
     @DisplayName("게시글 단건 조회")
     void getPost() {
         Post post = Post.builder().title("제목").content("내용").build();
-        given(postRepository.getById(POST_ID)).willReturn(post);
+        given(postRepository.getVisibleById(POST_ID)).willReturn(post);
 
         PostDto.Response result = postFacade.getPost(POST_ID);
 
         assertThat(result.title()).isEqualTo("제목");
-        verify(postRepository).getById(POST_ID);
+        verify(postRepository).getVisibleById(POST_ID);
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회 시 예외")
     void getPostNotFound() {
         UUID notFoundId = UUID.randomUUID();
-        given(postRepository.getById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
+        given(postRepository.getVisibleById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
 
         assertThatThrownBy(() -> postFacade.getPost(notFoundId))
                 .isInstanceOf(IllegalArgumentException.class)
