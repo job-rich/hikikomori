@@ -1,5 +1,15 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message?: string
+  ) {
+    super(message ?? `API 요청 실패: ${status}`);
+    this.name = 'ApiError';
+  }
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -26,7 +36,7 @@ export async function apiClient<T>(
   }
 
   if (!response.ok) {
-    throw new Error(`API 요청 실패: ${response.status}`);
+    throw new ApiError(response.status);
   }
 
   if (response.status === 204) {
