@@ -292,6 +292,8 @@ export default function PostDetail({ postId }: PostDetailProps) {
 
   console.log(commentContent);
 
+  console.log(commentContent);
+
   const fetchComments = useCallback(async () => {
     try {
       const data = await getComments(postId);
