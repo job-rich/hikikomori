@@ -9,6 +9,7 @@ import {
   getMyPosts,
   type PostResponse,
 } from '@/lib/api/posts';
+import { ApiError } from '@/lib/api/client';
 import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import './body.css';
@@ -131,8 +132,12 @@ export default function Body() {
         nickName: nickname!,
       });
       resetAndFetch(viewMode);
-    } catch (error) {
-      console.error('게시글 생성 실패:', error);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 403) {
+        window.alert('신고 누적으로 작성이 제한되었습니다.');
+      } else {
+        console.error('게시글 생성 실패:', err);
+      }
     } finally {
       setIsSubmitting(false);
     }
