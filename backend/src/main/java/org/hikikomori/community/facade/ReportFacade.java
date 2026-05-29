@@ -6,7 +6,6 @@ import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.domain.Report;
 import org.hikikomori.community.dto.ReportDto;
 import org.hikikomori.community.event.ReportCreatedEvent;
-import org.hikikomori.community.exception.DuplicateReportException;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.repository.ReportRepositoryImpl;
@@ -28,25 +27,14 @@ public class ReportFacade {
     @Transactional
     public ReportDto.Response report(Long targetUserId, ReportDto.CreateRequest request, String reporterIp) {
         Long actualAuthor = resolveTargetAuthor(request);
-        if (!actualAuthor.equals(targetUserId)) {
-            throw new IllegalArgumentException("신고 대상 작성자가 일치하지 않습니다");
-        }
+        reportService.checkTargetAuthor(actualAuthor, targetUserId);
         reportService.checkNotSelfReport(request.reporterId(), targetUserId);
-
         // 신고자 ID와 IP가 모두 동일할 때만 중복 신고로 차단한다. (ID를 바꾼 재신고는 허용)
-        if (reportRepository.existsReport(request.reporterId(), reporterIp, request.targetType(), request.targetId())) {
-            throw new DuplicateReportException("이미 신고한 콘텐츠입니다");
-        }
+        reportService.checkNotDuplicate(reportRepository.existsReport(
+                request.reporterId(), reporterIp, request.targetType(), request.targetId()));
 
-        Report report = reportRepository.save(Report.builder()
-                .reporterId(request.reporterId())
-                .reporterIp(reporterIp)
-                .targetUserId(targetUserId)
-                .targetType(request.targetType())
-                .targetId(request.targetId())
-                .reason(request.reason())
-                .description(request.description())
-                .build());
+        Report report = reportRepository.save(
+                reportService.buildReport(targetUserId, request, reporterIp));
 
         eventPublisher.publishEvent(new ReportCreatedEvent(
                 request.targetType(), request.targetId(), targetUserId));

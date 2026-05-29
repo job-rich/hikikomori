@@ -15,6 +15,7 @@ import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.repository.ReportRepositoryImpl;
+import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,10 +32,11 @@ class ReportJudgmentFacadeTest {
     @Mock CommentRepositoryImpl commentRepository;
 
     ReportService reportService = new ReportService();
+    BanService banService = new BanService();
     ReportPolicyProperties properties = new ReportPolicyProperties(5, 5);
 
     ReportJudgmentFacade facade() {
-        return new ReportJudgmentFacade(reportService, reportRepository,
+        return new ReportJudgmentFacade(reportService, banService, reportRepository,
                 banRepository, postRepository, commentRepository, properties);
     }
 

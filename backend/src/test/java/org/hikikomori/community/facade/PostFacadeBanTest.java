@@ -12,6 +12,7 @@ import org.hikikomori.community.exception.BannedUserException;
 import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
+import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
 import org.hikikomori.community.service.PostService;
 import org.junit.jupiter.api.DisplayName;
@@ -29,9 +30,10 @@ class PostFacadeBanTest {
 
     PostService postService = new PostService();
     CommentService commentService = new CommentService();
+    BanService banService = new BanService();
 
     PostFacade facade() {
-        return new PostFacade(postService, commentService, postRepository, commentRepository, banRepository);
+        return new PostFacade(postService, commentService, banService, postRepository, commentRepository, banRepository);
     }
 
     @Test

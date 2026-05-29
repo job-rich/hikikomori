@@ -16,6 +16,7 @@ import org.hikikomori.community.domain.PostTag;
 import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
+import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
 import org.hikikomori.community.service.PostService;
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +42,9 @@ class PostFacadeTest {
 
     @Spy
     private CommentService commentService = new CommentService();
+
+    @Spy
+    private BanService banService = new BanService();
 
     @Mock
     private PostRepositoryImpl postRepository;
