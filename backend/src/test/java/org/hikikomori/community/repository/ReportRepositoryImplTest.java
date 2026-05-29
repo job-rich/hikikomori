@@ -1,0 +1,59 @@
+package org.hikikomori.community.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.util.UUID;
+import org.hikikomori.community.domain.Report;
+import org.hikikomori.community.domain.ReportReason;
+import org.hikikomori.community.domain.ReportTargetType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class ReportRepositoryImplTest {
+
+    @Mock
+    ReportJpaRepository jpaRepository;
+
+    @InjectMocks
+    ReportRepositoryImpl repository;
+
+    @Test
+    @DisplayName("신고를 저장하면 JpaRepository.save 에 위임한다")
+    void 신고를_저장한다() {
+        // given
+        Report report = Report.builder()
+                .reporterId(1L).reporterIp("1.1.1.1").targetUserId(2L)
+                .targetType(ReportTargetType.POST).targetId(UUID.randomUUID())
+                .reason(ReportReason.SPAM).build();
+        given(jpaRepository.save(report)).willReturn(report);
+
+        // when
+        Report saved = repository.save(report);
+
+        // then
+        assertThat(saved).isSameAs(report);
+        verify(jpaRepository).save(report);
+    }
+
+    @Test
+    @DisplayName("동일 신고자가 같은 대상을 이미 신고했는지 확인한다")
+    void 중복신고_여부를_확인한다() {
+        // given
+        UUID targetId = UUID.randomUUID();
+        given(jpaRepository.existsByReporterIdAndTargetTypeAndTargetId(
+                1L, ReportTargetType.POST, targetId)).willReturn(true);
+
+        // when
+        boolean exists = repository.existsReport(1L, ReportTargetType.POST, targetId);
+
+        // then
+        assertThat(exists).isTrue();
+    }
+}
