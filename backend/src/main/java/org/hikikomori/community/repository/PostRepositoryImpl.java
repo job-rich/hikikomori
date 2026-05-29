@@ -24,11 +24,11 @@ public class PostRepositoryImpl {
     }
 
     public Page<Post> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable);
+        return jpaRepository.findByHiddenAtIsNull(pageable);
     }
 
     public Page<Post> findByUserId(Long userId, Pageable pageable) {
-        return jpaRepository.findByUserId(userId, pageable);
+        return jpaRepository.findByUserIdAndHiddenAtIsNull(userId, pageable);
     }
 
     public void deleteById(UUID id) {

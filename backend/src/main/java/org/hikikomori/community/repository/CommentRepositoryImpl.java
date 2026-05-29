@@ -28,7 +28,7 @@ public class CommentRepositoryImpl {
     }
 
     public List<Comment> findByPostIdAndParentIsNull(UUID postId) {
-        return jpaRepository.findByPostIdAndParentIsNull(postId);
+        return jpaRepository.findByPostIdAndParentIsNullAndHiddenAtIsNull(postId);
     }
 
     public void deleteAllByPostId(UUID postId) {

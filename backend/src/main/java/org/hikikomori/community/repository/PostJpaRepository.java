@@ -13,6 +13,10 @@ public interface PostJpaRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findByUserId(Long userId, Pageable pageable);
 
+    Page<Post> findByHiddenAtIsNull(Pageable pageable);
+
+    Page<Post> findByUserIdAndHiddenAtIsNull(Long userId, Pageable pageable);
+
     @Modifying
     @Query("DELETE FROM Post p WHERE p.createdAt >= :startAt AND p.createdAt < :endAt")
     long deleteByCreatedAtBetween(LocalDateTime startAt, LocalDateTime endAt);
