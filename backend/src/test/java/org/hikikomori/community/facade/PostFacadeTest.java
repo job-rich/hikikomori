@@ -13,6 +13,7 @@ import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.domain.PostTag;
+import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.service.CommentService;
@@ -46,6 +47,9 @@ class PostFacadeTest {
 
     @Mock
     private CommentRepositoryImpl commentRepository;
+
+    @Mock
+    private BanRepositoryImpl banRepository;
 
     private static final UUID POST_ID = UUID.randomUUID();
     private static final UUID COMMENT_ID = UUID.randomUUID();

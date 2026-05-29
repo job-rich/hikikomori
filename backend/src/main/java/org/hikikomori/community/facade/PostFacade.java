@@ -7,6 +7,8 @@ import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.dto.CommentDto;
 import org.hikikomori.community.dto.PostDto;
+import org.hikikomori.community.exception.BannedUserException;
+import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.service.CommentService;
@@ -24,6 +26,7 @@ public class PostFacade {
     private final CommentService commentService;
     private final PostRepositoryImpl postRepository;
     private final CommentRepositoryImpl commentRepository;
+    private final BanRepositoryImpl banRepository;
 
     public Page<PostDto.Response> getPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(PostDto.Response::from);
@@ -39,6 +42,7 @@ public class PostFacade {
     }
 
     public PostDto.Response createPost(PostDto.CreateRequest request) {
+        checkNotBanned(request.userId());
         Post post = postService.buildPost(request);
         Post saved = postRepository.save(post);
         return PostDto.Response.from(saved);
@@ -66,6 +70,7 @@ public class PostFacade {
     }
 
     public CommentDto.Response createComment(UUID postId, CommentDto.CreateRequest request) {
+        checkNotBanned(request.userId());
         Post post = postRepository.getById(postId);
         Comment parent = request.parentId() != null
                 ? commentRepository.getParentById(request.parentId())
@@ -89,5 +94,11 @@ public class PostFacade {
         commentService.checkOwnership(comment, userId, "삭제");
         commentService.applySoftDelete(comment);
         commentRepository.save(comment);
+    }
+
+    private void checkNotBanned(Long userId) {
+        if (banRepository.isBanned(userId)) {
+            throw new BannedUserException("신고 누적으로 작성이 제한된 사용자입니다");
+        }
     }
 }
