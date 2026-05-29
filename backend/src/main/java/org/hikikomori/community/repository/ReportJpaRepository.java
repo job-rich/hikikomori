@@ -9,11 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReportJpaRepository extends JpaRepository<Report, UUID> {
 
-    boolean existsByReporterIdAndTargetTypeAndTargetId(
-            Long reporterId, ReportTargetType targetType, UUID targetId);
-
-    boolean existsByReporterIpAndTargetTypeAndTargetId(
-            String reporterIp, ReportTargetType targetType, UUID targetId);
+    // 신고자 ID와 IP가 모두 같을 때만 중복 신고로 본다.
+    boolean existsByReporterIdAndReporterIpAndTargetTypeAndTargetId(
+            Long reporterId, String reporterIp, ReportTargetType targetType, UUID targetId);
 
     // 특정 콘텐츠의 서로 다른 신고자 수
     @Query("SELECT COUNT(DISTINCT r.reporterId) FROM Report r "

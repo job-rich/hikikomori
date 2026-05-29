@@ -16,12 +16,9 @@ public class ReportRepositoryImpl {
         return jpaRepository.save(report);
     }
 
-    public boolean existsReport(Long reporterId, ReportTargetType targetType, UUID targetId) {
-        return jpaRepository.existsByReporterIdAndTargetTypeAndTargetId(reporterId, targetType, targetId);
-    }
-
-    public boolean existsReportByIp(String reporterIp, ReportTargetType targetType, UUID targetId) {
-        return jpaRepository.existsByReporterIpAndTargetTypeAndTargetId(reporterIp, targetType, targetId);
+    public boolean existsReport(Long reporterId, String reporterIp, ReportTargetType targetType, UUID targetId) {
+        return jpaRepository.existsByReporterIdAndReporterIpAndTargetTypeAndTargetId(
+                reporterId, reporterIp, targetType, targetId);
     }
 
     public long countDistinctReporters(ReportTargetType targetType, UUID targetId) {

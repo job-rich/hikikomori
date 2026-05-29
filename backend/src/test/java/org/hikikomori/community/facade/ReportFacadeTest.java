@@ -49,8 +49,7 @@ class ReportFacadeTest {
     void 게시글_신고를_접수한다() {
         UUID targetId = UUID.randomUUID();
         given(postRepository.getById(targetId)).willReturn(postBy(2L));
-        given(reportRepository.existsReport(1L, ReportTargetType.POST, targetId)).willReturn(false);
-        given(reportRepository.existsReportByIp("1.1.1.1", ReportTargetType.POST, targetId)).willReturn(false);
+        given(reportRepository.existsReport(1L, "1.1.1.1", ReportTargetType.POST, targetId)).willReturn(false);
         given(reportRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         ReportDto.CreateRequest req = new ReportDto.CreateRequest(
@@ -88,11 +87,11 @@ class ReportFacadeTest {
     }
 
     @Test
-    @DisplayName("동일 신고자의 중복 신고는 거부한다")
+    @DisplayName("동일 신고자(ID+IP)의 중복 신고는 거부한다")
     void 중복신고_거부() {
         UUID targetId = UUID.randomUUID();
         given(postRepository.getById(targetId)).willReturn(postBy(2L));
-        given(reportRepository.existsReport(1L, ReportTargetType.POST, targetId)).willReturn(true);
+        given(reportRepository.existsReport(1L, "1.1.1.1", ReportTargetType.POST, targetId)).willReturn(true);
         ReportDto.CreateRequest req = new ReportDto.CreateRequest(
                 1L, ReportTargetType.POST, targetId, ReportReason.SPAM, null);
 

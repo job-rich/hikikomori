@@ -23,8 +23,8 @@ import org.hikikomori.community.util.UUIDGenerator;
                 @Index(name = "idx_report_target_user", columnList = "targetUserId")
         },
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_report_reporter_target",
-                columnNames = {"reporterId", "targetType", "targetId"}
+                name = "uk_report_reporter_ip_target",
+                columnNames = {"reporterId", "reporterIp", "targetType", "targetId"}
         )
 )
 @Getter

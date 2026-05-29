@@ -33,8 +33,8 @@ public class ReportFacade {
         }
         reportService.checkNotSelfReport(request.reporterId(), targetUserId);
 
-        if (reportRepository.existsReport(request.reporterId(), request.targetType(), request.targetId())
-                || reportRepository.existsReportByIp(reporterIp, request.targetType(), request.targetId())) {
+        // 신고자 ID와 IP가 모두 동일할 때만 중복 신고로 차단한다. (ID를 바꾼 재신고는 허용)
+        if (reportRepository.existsReport(request.reporterId(), reporterIp, request.targetType(), request.targetId())) {
             throw new DuplicateReportException("이미 신고한 콘텐츠입니다");
         }
 

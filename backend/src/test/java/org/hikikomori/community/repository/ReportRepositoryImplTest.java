@@ -43,15 +43,15 @@ class ReportRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("동일 신고자가 같은 대상을 이미 신고했는지 확인한다")
+    @DisplayName("신고자 ID와 IP가 모두 같은 중복 신고인지 확인한다")
     void 중복신고_여부를_확인한다() {
         // given
         UUID targetId = UUID.randomUUID();
-        given(jpaRepository.existsByReporterIdAndTargetTypeAndTargetId(
-                1L, ReportTargetType.POST, targetId)).willReturn(true);
+        given(jpaRepository.existsByReporterIdAndReporterIpAndTargetTypeAndTargetId(
+                1L, "1.1.1.1", ReportTargetType.POST, targetId)).willReturn(true);
 
         // when
-        boolean exists = repository.existsReport(1L, ReportTargetType.POST, targetId);
+        boolean exists = repository.existsReport(1L, "1.1.1.1", ReportTargetType.POST, targetId);
 
         // then
         assertThat(exists).isTrue();
