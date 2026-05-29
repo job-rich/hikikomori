@@ -18,6 +18,10 @@ spring:
     job:
       enabled: false
 
+report:
+  hide-threshold: 5
+  ban-threshold: 5
+
 springdoc:
   api-docs:
     path: /v3/api-docs
