@@ -1,3 +1,7 @@
+server:
+  # 신뢰 프록시 뒤에서만 X-Forwarded-* 해석 (직접 연결 시 무시) — getRemoteAddr가 진짜 클라 IP 반환
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: community

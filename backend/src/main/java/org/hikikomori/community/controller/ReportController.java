@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.dto.ReportDto;
 import org.hikikomori.community.facade.ReportFacade;
+import org.hikikomori.community.util.IpAddressUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,16 +26,11 @@ public class ReportController {
             @PathVariable Long userId,
             @Valid @RequestBody ReportDto.CreateRequest request,
             HttpServletRequest httpRequest) {
-        String ip = resolveClientIp(httpRequest);
+        // getRemoteAddr만 신뢰한다. 클라가 위조 가능한 X-Forwarded-For는 직접 파싱하지 않으며,
+        // 신뢰 프록시 뒤에서는 server.forward-headers-strategy 설정이 진짜 클라 IP로 해석한다.
+        // IPv6(IPv4-mapped·루프백)는 IPv4로 정규화해 중복 집계를 막는다.
+        String ip = IpAddressUtil.normalize(httpRequest.getRemoteAddr());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reportFacade.report(userId, request, ip));
-    }
-
-    private String resolveClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }
