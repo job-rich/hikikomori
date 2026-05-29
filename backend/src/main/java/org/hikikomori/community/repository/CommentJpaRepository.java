@@ -12,8 +12,6 @@ public interface CommentJpaRepository extends JpaRepository<Comment, UUID> {
 
     List<Comment> findByPostIdAndParentIsNull(UUID postId);
 
-    List<Comment> findByPostIdAndParentIsNullAndHiddenAtIsNull(UUID postId);
-
     @Modifying
     @Query("DELETE FROM Comment c WHERE c.post.id = :postId")
     void deleteAllByPostId(UUID postId);

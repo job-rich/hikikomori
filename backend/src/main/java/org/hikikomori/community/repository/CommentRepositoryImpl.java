@@ -28,7 +28,8 @@ public class CommentRepositoryImpl {
     }
 
     public List<Comment> findByPostIdAndParentIsNull(UUID postId) {
-        return jpaRepository.findByPostIdAndParentIsNullAndHiddenAtIsNull(postId);
+        // 숨김 댓글도 트리에 유지한다 — 응답에서 내용만 가린 placeholder로 노출(자식 노출 유지).
+        return jpaRepository.findByPostIdAndParentIsNull(postId);
     }
 
     public void deleteAllByPostId(UUID postId) {

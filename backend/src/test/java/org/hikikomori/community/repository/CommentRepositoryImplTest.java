@@ -111,14 +111,14 @@ class CommentRepositoryImplTest {
                 Comment.builder().userId(2L).nickName("댓글러1").content("댓글1").post(post).build(),
                 Comment.builder().userId(3L).nickName("댓글러2").content("댓글2").post(post).build()
         );
-        given(jpaRepository.findByPostIdAndParentIsNullAndHiddenAtIsNull(postId)).willReturn(comments);
+        given(jpaRepository.findByPostIdAndParentIsNull(postId)).willReturn(comments);
 
         // when
         List<Comment> result = commentRepository.findByPostIdAndParentIsNull(postId);
 
         // then
         assertThat(result).hasSize(2);
-        verify(jpaRepository).findByPostIdAndParentIsNullAndHiddenAtIsNull(postId);
+        verify(jpaRepository).findByPostIdAndParentIsNull(postId);
     }
 
     @Test
