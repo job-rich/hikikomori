@@ -32,7 +32,10 @@ public class ReportJudgmentFacade {
         if (!reportService.shouldHide(reporters, properties.hideThreshold())) {
             return;
         }
-        hideTarget(event);
+        boolean newlyHidden = hideTarget(event);
+        if (!newlyHidden) {
+            return; // 이미 숨김 처리된 콘텐츠 — 작성자 누적 변화 없음, 밴 재집계 불필요
+        }
 
         long hiddenContents = reportRepository.countHiddenContents(
                 event.targetUserId(), properties.hideThreshold());
@@ -45,18 +48,27 @@ public class ReportJudgmentFacade {
         }
     }
 
-    private void hideTarget(ReportCreatedEvent event) {
+    private boolean hideTarget(ReportCreatedEvent event) {
         switch (event.targetType()) {
             case POST -> {
                 Post post = postRepository.getById(event.targetId());
+                if (post.isHidden()) {
+                    return false;
+                }
                 post.hide();
                 postRepository.save(post);
+                return true;
             }
             case COMMENT -> {
                 Comment comment = commentRepository.getById(event.targetId());
+                if (comment.isHidden()) {
+                    return false;
+                }
                 comment.hide();
                 commentRepository.save(comment);
+                return true;
             }
         }
+        return false;
     }
 }

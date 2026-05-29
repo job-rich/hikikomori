@@ -51,7 +51,9 @@ public class PostFacade {
         return PostDto.Response.from(saved);
     }
 
+    @Transactional
     public void updatePost(UUID postId, PostDto.UpdateRequest request) {
+        checkNotBanned(request.userId());
         Post post = postRepository.getById(postId);
         postService.checkOwnership(post, request.userId(), "수정");
         postService.applyUpdate(post, request);
@@ -85,7 +87,9 @@ public class PostFacade {
         return CommentDto.Response.from(saved);
     }
 
+    @Transactional
     public void updateComment(UUID commentId, CommentDto.UpdateRequest request) {
+        checkNotBanned(request.userId());
         Comment comment = commentRepository.getById(commentId);
         commentService.checkOwnership(comment, request.userId(), "수정");
         commentService.applyUpdate(comment, request.content());
