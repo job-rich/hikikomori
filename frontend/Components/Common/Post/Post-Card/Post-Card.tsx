@@ -5,16 +5,16 @@ import {
   Eye,
   TriangleAlert,
   ChevronUp,
-  ChevronDown,
   Bookmark,
   Pencil,
   Trash2,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/formatDate';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useUserStore } from '@/lib/stores/userStore';
 import { TAG_STYLES } from '@/lib/utils/tagColors';
-import { deletePost } from '@/lib/api/posts';
+import { deletePost, likePost } from '@/lib/api/posts';
 
 interface PostCardProps {
   id: string | number;
@@ -24,9 +24,8 @@ interface PostCardProps {
   timestamp: string;
   username: string;
   commentCount?: number;
-  replies?: number;
   views?: number;
-  votes?: number;
+  likeCount?: number;
   voteRatio?: number;
   /** 현재 로그인 사용자가 작성한 글이면 상세와 동일하게 수정·삭제 진입 */
   isOwner?: boolean;
@@ -42,9 +41,8 @@ export default function PostCard({
   timestamp,
   username,
   commentCount,
-  replies = 0,
   views = 0,
-  votes = 0,
+  likeCount = 0,
   voteRatio = 0,
   isOwner = false,
   onDeleted,
@@ -54,6 +52,8 @@ export default function PostCard({
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
+  const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+  const [liked, setLiked] = useState(false);
 
   const goToEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -72,6 +72,20 @@ export default function PostCard({
     }
   };
 
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (liked) return;
+    setLocalLikeCount((prev) => prev + 1);
+    setLiked(true);
+    try {
+      await likePost(String(id));
+    } catch (err) {
+      console.error('추천 실패:', err);
+      setLocalLikeCount((prev) => prev - 1);
+      setLiked(false);
+    }
+  };
+
   return (
     <article
       className="w-full cursor-pointer rounded-lg border border-border bg-card transition-colors hover:bg-muted/50"
@@ -82,21 +96,15 @@ export default function PostCard({
         <div className="flex min-w-[48px] flex-col items-center gap-0.5 pr-4">
           <button
             type="button"
-            className="rounded p-1 text-muted-foreground hover:text-foreground"
+            className={`rounded p-1 transition-colors ${liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400'}`}
             aria-label="추천"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleLike}
           >
             <ChevronUp className="h-5 w-5" />
           </button>
-          <span className="text-lg font-bold text-foreground">{votes}</span>
-          <button
-            type="button"
-            className="rounded p-1 text-muted-foreground hover:text-foreground"
-            aria-label="비추천"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ChevronDown className="h-5 w-5" />
-          </button>
+          <span className="text-lg font-bold text-foreground">
+            {localLikeCount}
+          </span>
         </div>
 
         {/* 콘텐츠 영역 */}

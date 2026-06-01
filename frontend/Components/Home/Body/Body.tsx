@@ -58,7 +58,9 @@ export default function Body() {
             ? 'createdAt,desc'
             : sortTabRef.current === 'comments'
               ? 'commentCount,desc'
-              : undefined;
+              : sortTabRef.current === 'votes'
+                ? 'likeCount,desc'
+                : undefined;
 
         const data =
           mode === 'my' && !isEmpty(snowflakeId)
@@ -199,6 +201,7 @@ export default function Body() {
                 timestamp={post.createdAt}
                 username={post.nickName}
                 commentCount={post.commentCount}
+                likeCount={post.likeCount}
                 isOwner={!!snowflakeId && post.userId === Number(snowflakeId)}
                 onDeleted={() => resetAndFetch(viewMode)}
               />

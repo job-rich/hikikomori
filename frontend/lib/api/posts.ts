@@ -21,6 +21,7 @@ export interface PostResponse {
   content: string;
   tag: string;
   commentCount: number;
+  likeCount: number;
   createdAt: string;
 }
 
@@ -117,6 +118,10 @@ export function deletePost(id: string, userId: number): Promise<void> {
   return apiClient<void>(`/api/posts/${id}?${q}`, {
     method: 'DELETE',
   });
+}
+
+export function likePost(id: string): Promise<void> {
+  return apiClient<void>(`/api/posts/${id}/like`, { method: 'POST' });
 }
 
 // 댓글 목록 조회
