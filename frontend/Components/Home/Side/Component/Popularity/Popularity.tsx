@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronUp, Flame } from 'lucide-react';
+import { ChevronUp, Trophy } from 'lucide-react';
 import { getPosts, type PostResponse } from '@/lib/api/posts';
 
 export default function Popularity() {
@@ -20,7 +20,7 @@ export default function Popularity() {
   return (
     <section className="rounded-lg border border-border bg-card p-4">
       <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-foreground">
-        <Flame className="h-4 w-4 text-orange-500" />
+        <Trophy className="h-4 w-4 text-amber-400" />
         인기 게시글
       </h2>
 
@@ -42,15 +42,7 @@ export default function Popularity() {
                 onClick={() => router.push(`/posts/${post.id}`)}
               >
                 <span
-                  className={`mt-0.5 min-w-[18px] text-center text-xs font-bold ${
-                    idx === 0
-                      ? 'text-orange-500'
-                      : idx === 1
-                        ? 'text-rose-400'
-                        : idx === 2
-                          ? 'text-amber-400'
-                          : 'text-muted-foreground'
-                  }`}
+                  className={`mt-0.5 min-w-[18px] text-center text-md font-bold text-[#F31260]`}
                 >
                   {idx + 1}
                 </span>
@@ -58,10 +50,12 @@ export default function Popularity() {
                   <span className="line-clamp-1 text-xs font-medium text-foreground">
                     {post.title || post.content}
                   </span>
-                  <span className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <ChevronUp className="h-3 w-3 text-rose-400" />
-                    {post.likeCount}
+                  <span className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
                     <span className="ml-1">{post.nickName}</span>
+                    <div className="flex items-center gap-1">
+                      <ChevronUp className="h-3 w-3 text-rose-400" />
+                      {post.likeCount}
+                    </div>
                   </span>
                 </span>
               </button>
