@@ -31,6 +31,10 @@ public class PostRepositoryImpl {
         return jpaRepository.findByUserId(userId, pageable);
     }
 
+    public void incrementLikeCount(UUID id) {
+        jpaRepository.incrementLikeCount(id);
+    }
+
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }

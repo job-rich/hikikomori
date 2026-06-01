@@ -39,6 +39,9 @@ public class Post {
     @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")
     private long commentCount;
 
+    @Column(columnDefinition = "bigint default 0")
+    private long likeCount = 0;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

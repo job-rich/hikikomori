@@ -60,6 +60,12 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> like(@PathVariable UUID id) {
+        postFacade.likePost(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id, @RequestParam Long userId) {
         postFacade.deletePost(id, userId);
