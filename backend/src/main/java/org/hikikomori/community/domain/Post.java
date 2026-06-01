@@ -36,7 +36,7 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private PostTag tag;
 
-    @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")
+    @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = {alias}.id)")
     private long commentCount;
 
     @Column(columnDefinition = "bigint default 0")

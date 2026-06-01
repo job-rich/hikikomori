@@ -5,7 +5,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.domain.Post;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -24,7 +26,10 @@ public class PostRepositoryImpl {
     }
 
     public Page<Post> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable);
+        Sort sortWithId = pageable.getSort().and(Sort.by(Sort.Direction.ASC, "id"));
+        Pageable deterministicPageable = PageRequest.of(
+                pageable.getPageNumber(), pageable.getPageSize(), sortWithId);
+        return jpaRepository.findAll(deterministicPageable);
     }
 
     public Page<Post> findByUserId(Long userId, Pageable pageable) {
