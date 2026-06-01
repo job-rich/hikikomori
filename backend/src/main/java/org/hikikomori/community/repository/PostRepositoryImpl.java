@@ -36,6 +36,10 @@ public class PostRepositoryImpl {
         return jpaRepository.findByUserId(userId, pageable);
     }
 
+    public void incrementViewCount(UUID id) {
+        jpaRepository.incrementViewCount(id);
+    }
+
     public void incrementLikeCount(UUID id) {
         jpaRepository.incrementLikeCount(id);
     }

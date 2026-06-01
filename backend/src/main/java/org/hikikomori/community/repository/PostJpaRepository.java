@@ -14,6 +14,10 @@ public interface PostJpaRepository extends JpaRepository<Post, UUID> {
     Page<Post> findByUserId(Long userId, Pageable pageable);
 
     @Modifying
+    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
+    void incrementViewCount(UUID id);
+
+    @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
     void incrementLikeCount(UUID id);
 

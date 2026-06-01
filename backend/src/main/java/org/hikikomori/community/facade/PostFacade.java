@@ -52,6 +52,12 @@ public class PostFacade {
     }
 
     @Transactional
+    public void recordView(UUID postId) {
+        postRepository.getById(postId);
+        postRepository.incrementViewCount(postId);
+    }
+
+    @Transactional
     public void likePost(UUID postId) {
         postRepository.getById(postId);
         postRepository.incrementLikeCount(postId);

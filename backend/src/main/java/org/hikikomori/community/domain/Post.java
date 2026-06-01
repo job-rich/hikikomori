@@ -40,7 +40,14 @@ public class Post {
     private long commentCount;
 
     @Column(columnDefinition = "bigint default 0")
+    private long viewCount = 0;
+
+    @Column(columnDefinition = "bigint default 0")
     private long likeCount = 0;
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 
     private LocalDateTime createdAt;
 
