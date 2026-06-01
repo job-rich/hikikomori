@@ -22,6 +22,16 @@ export const TAG_STYLES: Record<string, string> = {
   VOID: 'bg-gray-500 text-white',
 };
 
+export const TAG_COLORS: Record<string, string> = {
+  철학: 'text-rose-500  ',
+  사회: 'text-blue-500',
+  정치: 'text-purple-500',
+  경제: 'text-emerald-500',
+  문화: 'text-amber-500',
+  일상: 'text-pink-400',
+  기타: 'text-gray-500',
+};
+
 export const TAG_DOT_COLORS: Record<string, string> = {
   철학: 'bg-rose-500',
   사회: 'bg-blue-500',

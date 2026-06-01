@@ -10,6 +10,7 @@ import {
   type PostResponse,
 } from '@/lib/api/posts';
 import { useUserStore } from '@/lib/stores/userStore';
+import { usePostsStore } from '@/lib/stores/postsStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import './body.css';
 import FillterTab from './component/fillterTab/FillterTab';
@@ -21,6 +22,7 @@ type SortTab = 'latest' | 'votes' | 'comments';
 
 export default function Body() {
   const { snowflakeId, nickname, openNicknameModal } = useUserStore();
+  const setStorePosts = usePostsStore((s) => s.setPosts);
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
@@ -104,6 +106,10 @@ export default function Body() {
     },
     [fetchPosts]
   );
+
+  useEffect(() => {
+    setStorePosts(posts);
+  }, [posts, setStorePosts]);
 
   useEffect(() => {
     resetAndFetch(viewMode);
