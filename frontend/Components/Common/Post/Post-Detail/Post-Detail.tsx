@@ -23,6 +23,7 @@ import {
   deletePost,
   updateComment,
   deleteComment,
+  recordView,
   type PostResponse,
   type CommentResponse,
 } from '@/lib/api/posts';
@@ -260,8 +261,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  console.log(commentContent);
-
   const fetchComments = useCallback(async () => {
     try {
       const data = await getComments(postId);
@@ -289,6 +288,14 @@ export default function PostDetail({ postId }: PostDetailProps) {
     fetchPost();
     fetchComments();
   }, [postId, fetchComments, reloadPost]);
+
+  useEffect(() => {
+    const key = `viewed:${postId}`;
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      recordView(postId).catch(() => {});
+    }
+  }, [postId]);
 
   const isOwner =
     !isEmpty(snowflakeId) &&
@@ -534,7 +541,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
               </div>
               <div className="flex items-center gap-1.5">
                 <Eye className="h-3.5 w-3.5" />
-                <span>0</span>
+                <span>{post.viewCount.toLocaleString()}</span>
               </div>
               {!isOwner && (
                 <button

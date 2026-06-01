@@ -210,6 +210,7 @@ export default function Body() {
                 timestamp={post.createdAt}
                 username={post.nickName}
                 commentCount={post.commentCount}
+                views={post.viewCount}
                 likeCount={post.likeCount}
                 isOwner={!!snowflakeId && post.userId === Number(snowflakeId)}
                 onDeleted={() => resetAndFetch(viewMode)}

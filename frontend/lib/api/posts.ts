@@ -21,6 +21,7 @@ export interface PostResponse {
   content: string;
   tag: string;
   commentCount: number;
+  viewCount: number;
   likeCount: number;
   createdAt: string;
 }
@@ -118,6 +119,10 @@ export function deletePost(id: string, userId: number): Promise<void> {
   return apiClient<void>(`/api/posts/${id}?${q}`, {
     method: 'DELETE',
   });
+}
+
+export function recordView(id: string): Promise<void> {
+  return apiClient<void>(`/api/posts/${id}/view`, { method: 'POST' });
 }
 
 export function likePost(id: string): Promise<void> {

@@ -133,7 +133,6 @@ export default function PostCard({
 
           {/* 본문 미리보기 */}
           <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-muted-foreground">
-            <span className="mr-1 text-xs">▼</span>
             {content}
           </p>
 
