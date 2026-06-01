@@ -68,7 +68,10 @@ export default function Body() {
             : await getPosts(pageNum, 6, sortParam);
 
         if (append) {
-          setPosts((prev) => [...prev, ...data.content]);
+          setPosts((prev) => {
+            const seen = new Set(prev.map((p) => p.id));
+            return [...prev, ...data.content.filter((p) => !seen.has(p.id))];
+          });
         } else {
           setPosts(data.content);
         }
