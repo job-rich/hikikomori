@@ -12,7 +12,16 @@ export default function Popularity() {
 
   useEffect(() => {
     getPosts(0, 5, 'likeCount,desc')
-      .then((data) => setPosts(data.content))
+      .then((data) => {
+        const seen = new Set<string>();
+        setPosts(
+          data.content.filter((post) => {
+            if (seen.has(post.id)) return false;
+            seen.add(post.id);
+            return true;
+          }),
+        );
+      })
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
   }, []);
