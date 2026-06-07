@@ -57,14 +57,6 @@ class VoteServiceTest {
     }
 
     @Test
-    @DisplayName("resultVote: 추천 보유 상태에서 추천 클릭 → null(취소)")
-    void 결과표() {
-        assertThat(service.resultVote(true, false, VoteValue.UP)).isNull();
-        assertThat(service.resultVote(false, false, VoteValue.UP)).isEqualTo(VoteValue.UP);
-        assertThat(service.resultVote(false, true, VoteValue.UP)).isEqualTo(VoteValue.UP);
-    }
-
-    @Test
     @DisplayName("buildVote: 액션대로 Vote 생성")
     void buildVote() {
         UUID t = UUID.randomUUID();

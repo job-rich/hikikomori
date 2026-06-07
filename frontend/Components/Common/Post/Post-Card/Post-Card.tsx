@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { useUserStore } from '@/lib/stores/userStore';
 import { TAG_STYLES } from '@/lib/utils/tagColors';
 import { deletePost } from '@/lib/api/posts';
-import { vote, type VoteValue } from '@/lib/api/vote';
+import { useVote } from '@/lib/hooks/useVote';
 import ReportModal from '@/Components/Common/Modals/Report';
 
 interface PostCardProps {
@@ -57,34 +57,16 @@ export default function PostCard({
 }: PostCardProps) {
   const router = useRouter();
   const [reportOpen, setReportOpen] = useState(false);
-  const [score, setScore] = useState<number>(votes);
-  const [myVote, setMyVote] = useState<VoteValue | null>(null);
-  const [voting, setVoting] = useState(false); // in-flight 가드 (동시 더블클릭 race 방지)
+  const { score, myVote, voting, castVote } = useVote({
+    targetType: 'POST',
+    targetId: String(id),
+    authorUserId,
+    initialScore: votes,
+  });
   const snowflakeId = useUserStore((s) => s.snowflakeId);
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
-
-  const castVote = async (value: VoteValue, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (snowflakeId == null || authorUserId == null || voting) return; // in-flight 중 무시
-    if (Number(snowflakeId) === authorUserId) return; // 자기추천 불가
-    setVoting(true);
-    try {
-      const res = await vote(authorUserId, {
-        voterId: Number(snowflakeId),
-        targetType: 'POST',
-        targetId: String(id),
-        value,
-      });
-      setScore(res.score);
-      setMyVote(res.value);
-    } catch (err) {
-      console.error('추천 실패:', err);
-    } finally {
-      setVoting(false);
-    }
-  };
 
   const goToEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -119,7 +101,10 @@ export default function PostCard({
               }`}
               aria-label="추천"
               disabled={voting}
-              onClick={(e) => castVote('UP', e)}
+              onClick={(e) => {
+                e.stopPropagation();
+                castVote('UP');
+              }}
             >
               <ChevronUp className="h-5 w-5" />
             </button>
@@ -131,7 +116,10 @@ export default function PostCard({
               }`}
               aria-label="비추천"
               disabled={voting}
-              onClick={(e) => castVote('DOWN', e)}
+              onClick={(e) => {
+                e.stopPropagation();
+                castVote('DOWN');
+              }}
             >
               <ChevronDown className="h-5 w-5" />
             </button>

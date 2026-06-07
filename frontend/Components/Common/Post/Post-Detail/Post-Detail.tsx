@@ -26,7 +26,7 @@ import {
   type PostResponse,
   type CommentResponse,
 } from '@/lib/api/posts';
-import { vote, type VoteValue } from '@/lib/api/vote';
+import { useVote } from '@/lib/hooks/useVote';
 import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
@@ -60,34 +60,21 @@ function CommentItem({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
-  const [commentScore, setCommentScore] = useState<number>(
-    comment.voteScore ?? 0
-  );
-  const [voting, setVoting] = useState(false); // in-flight 가드
+  const {
+    score: commentScore,
+    voting,
+    castVote: castCommentVote,
+  } = useVote({
+    targetType: 'COMMENT',
+    targetId: comment.id,
+    authorUserId: comment.userId,
+    initialScore: comment.voteScore ?? 0,
+  });
 
   const isCommentOwner =
     !isEmpty(snowflakeId) && comment.userId === Number(snowflakeId);
 
   const isCommentDeleted = comment.deletedAt != null;
-
-  const castCommentVote = async (value: VoteValue) => {
-    if (isEmpty(snowflakeId) || voting) return; // in-flight 중 무시
-    if (comment.userId === Number(snowflakeId)) return; // 자기추천 불가
-    setVoting(true);
-    try {
-      const res = await vote(comment.userId, {
-        voterId: Number(snowflakeId!),
-        targetType: 'COMMENT',
-        targetId: comment.id,
-        value,
-      });
-      setCommentScore(res.score);
-    } catch (err) {
-      console.error('추천 실패:', err);
-    } finally {
-      setVoting(false);
-    }
-  };
 
   const handleReply = async () => {
     if (!replyContent.trim() || isSubmitting) return;
@@ -334,13 +321,17 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [postReportOpen, setPostReportOpen] = useState(false);
-  const [postScore, setPostScore] = useState<number>(0);
-  const [myPostVote, setMyPostVote] = useState<VoteValue | null>(null);
-  const [postVoting, setPostVoting] = useState(false); // in-flight 가드
-
-  console.log(commentContent);
-
-  console.log(commentContent);
+  const {
+    score: postScore,
+    myVote: myPostVote,
+    voting: postVoting,
+    castVote: castPostVote,
+  } = useVote({
+    targetType: 'POST',
+    targetId: postId,
+    authorUserId: post?.userId ?? null,
+    initialScore: post?.voteScore ?? 0,
+  });
 
   const fetchComments = useCallback(async () => {
     try {
@@ -354,7 +345,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const reloadPost = useCallback(async () => {
     const data = await getPost(postId);
     setPost(data);
-    setPostScore(data.voteScore ?? 0);
   }, [postId]);
 
   useEffect(() => {
@@ -450,26 +440,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
       }
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const castPostVote = async (value: VoteValue) => {
-    if (!post || isEmpty(snowflakeId) || postVoting) return; // in-flight 중 무시
-    if (post.userId === Number(snowflakeId)) return; // 자기추천 불가
-    setPostVoting(true);
-    try {
-      const res = await vote(post.userId, {
-        voterId: Number(snowflakeId!),
-        targetType: 'POST',
-        targetId: postId,
-        value,
-      });
-      setPostScore(res.score);
-      setMyPostVote(res.value);
-    } catch (err) {
-      console.error('추천 실패:', err);
-    } finally {
-      setPostVoting(false);
     }
   };
 

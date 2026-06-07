@@ -23,12 +23,10 @@ public class VoteRepositoryImpl {
     }
 
     public long netByTargetUser(Long targetUserId) {
-        return jpaRepository.sumDeltaByTargetUserValue(targetUserId, VoteValue.UP)
-                - jpaRepository.sumDeltaByTargetUserValue(targetUserId, VoteValue.DOWN);
+        return jpaRepository.netByTargetUser(targetUserId);
     }
 
     public long netByContent(VoteTargetType targetType, UUID targetId) {
-        return jpaRepository.sumDeltaByContentValue(targetType, targetId, VoteValue.UP)
-                - jpaRepository.sumDeltaByContentValue(targetType, targetId, VoteValue.DOWN);
+        return jpaRepository.netByContent(targetType, targetId);
     }
 }

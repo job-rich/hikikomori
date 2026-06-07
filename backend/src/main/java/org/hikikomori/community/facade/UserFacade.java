@@ -1,5 +1,6 @@
 package org.hikikomori.community.facade;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.config.ScoreWeights;
 import org.hikikomori.community.domain.User;
@@ -29,8 +30,11 @@ public class UserFacade {
 
     @Transactional
     public void touch(Long userId, String nickName) {
-        User user = userService.upsert(userRepository.findByUserId(userId), userId, nickName);
-        userRepository.save(user);
+        Optional<User> existing = userRepository.findByUserId(userId);
+        if (existing.isPresent() && nickName.equals(existing.get().getNickName())) {
+            return; // 닉네임 변경 없음 → 불필요한 UPDATE 스킵
+        }
+        userRepository.save(userService.upsert(existing, userId, nickName));
     }
 
     @Transactional

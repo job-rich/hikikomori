@@ -3,7 +3,11 @@ package org.hikikomori.community.repository;
 import java.util.Optional;
 import java.util.UUID;
 import org.hikikomori.community.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UserJpaRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUserId(Long userId);
@@ -15,7 +19,7 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
         boolean getBanned();
     }
 
-    @org.springframework.data.jpa.repository.Query(value = """
+    @Query(value = """
             SELECT u.user_id AS userId, u.nick_name AS nickName, u.banned AS banned,
                    GREATEST(0, :wVote * COALESCE(vn.net, 0) - :wReport * COALESCE(rc.cnt, 0)) AS power
             FROM users u
@@ -28,12 +32,9 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
             """,
             countQuery = "SELECT COUNT(*) FROM users",
             nativeQuery = true)
-    org.springframework.data.domain.Page<RankingRow> findRanking(
-            @org.springframework.data.repository.query.Param("wVote") int wVote,
-            @org.springframework.data.repository.query.Param("wReport") int wReport,
-            org.springframework.data.domain.Pageable pageable);
+    Page<RankingRow> findRanking(@Param("wVote") int wVote, @Param("wReport") int wReport, Pageable pageable);
 
-    @org.springframework.data.jpa.repository.Query(value = """
+    @Query(value = """
             SELECT COUNT(*) FROM (
               SELECT u.user_id,
                      GREATEST(0, :wVote * COALESCE(vn.net,0) - :wReport * COALESCE(rc.cnt,0)) AS power
@@ -42,8 +43,5 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
               LEFT JOIN (SELECT target_user_id, COUNT(*) cnt FROM report GROUP BY target_user_id) rc ON rc.target_user_id=u.user_id
             ) p WHERE p.power > :myPower
             """, nativeQuery = true)
-    long countHigherPower(
-            @org.springframework.data.repository.query.Param("wVote") int wVote,
-            @org.springframework.data.repository.query.Param("wReport") int wReport,
-            @org.springframework.data.repository.query.Param("myPower") long myPower);
+    long countHigherPower(@Param("wVote") int wVote, @Param("wReport") int wReport, @Param("myPower") long myPower);
 }

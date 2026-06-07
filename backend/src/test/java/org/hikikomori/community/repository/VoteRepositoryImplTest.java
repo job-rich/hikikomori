@@ -20,19 +20,17 @@ class VoteRepositoryImplTest {
     @InjectMocks VoteRepositoryImpl repository;
 
     @Test
-    @DisplayName("작성자 받은 순추천 = UP델타합 − DOWN델타합")
+    @DisplayName("작성자 받은 순추천을 위임 집계한다")
     void 순추천_집계() {
-        given(jpaRepository.sumDeltaByTargetUserValue(2L, VoteValue.UP)).willReturn(7L);
-        given(jpaRepository.sumDeltaByTargetUserValue(2L, VoteValue.DOWN)).willReturn(2L);
+        given(jpaRepository.netByTargetUser(2L)).willReturn(5L);
         assertThat(repository.netByTargetUser(2L)).isEqualTo(5L);
     }
 
     @Test
-    @DisplayName("콘텐츠 순추천 = UP델타합 − DOWN델타합")
+    @DisplayName("콘텐츠 순추천을 위임 집계한다")
     void 콘텐츠_순추천() {
         UUID id = UUID.randomUUID();
-        given(jpaRepository.sumDeltaByContentValue(VoteTargetType.POST, id, VoteValue.UP)).willReturn(3L);
-        given(jpaRepository.sumDeltaByContentValue(VoteTargetType.POST, id, VoteValue.DOWN)).willReturn(1L);
+        given(jpaRepository.netByContent(VoteTargetType.POST, id)).willReturn(2L);
         assertThat(repository.netByContent(VoteTargetType.POST, id)).isEqualTo(2L);
     }
 

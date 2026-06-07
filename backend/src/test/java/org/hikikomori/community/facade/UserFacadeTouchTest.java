@@ -44,6 +44,17 @@ class UserFacadeTouchTest {
     }
 
     @Test
+    @DisplayName("touch: 닉네임이 동일하면 저장하지 않는다(불필요한 UPDATE 스킵)")
+    void touch_무변경_스킵() {
+        User user = User.builder().userId(1L).nickName("same").build();
+        given(userRepository.findByUserId(1L)).willReturn(Optional.of(user));
+
+        facade().touch(1L, "same");
+
+        org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
     @DisplayName("touch: 없는 유저면 생성 후 저장")
     void touch_생성() {
         given(userRepository.findByUserId(1L)).willReturn(Optional.empty());

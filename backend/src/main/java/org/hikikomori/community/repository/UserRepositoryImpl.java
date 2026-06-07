@@ -3,6 +3,8 @@ package org.hikikomori.community.repository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,16 +22,11 @@ public class UserRepositoryImpl {
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
     }
 
-    public boolean isBanned(Long userId) {
-        return jpaRepository.findByUserId(userId).map(User::isBanned).orElse(false);
-    }
-
     public User save(User user) {
         return jpaRepository.save(user);
     }
 
-    public org.springframework.data.domain.Page<UserJpaRepository.RankingRow> findRanking(
-            int wVote, int wReport, org.springframework.data.domain.Pageable pageable) {
+    public Page<UserJpaRepository.RankingRow> findRanking(int wVote, int wReport, Pageable pageable) {
         return jpaRepository.findRanking(wVote, wReport, pageable);
     }
 

@@ -1,5 +1,6 @@
 package org.hikikomori.community.facade;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
@@ -30,11 +31,12 @@ public class VoteFacade {
         boolean up = voteRepository.has(request.voterId(), request.targetType(), request.targetId(), VoteValue.UP);
         boolean down = voteRepository.has(request.voterId(), request.targetType(), request.targetId(), VoteValue.DOWN);
 
-        for (VoteService.VoteAction action : voteService.resolveActions(up, down, request.value())) {
-            voteRepository.save(voteService.buildVote(targetUserId, request, action));
-        }
+        List<VoteService.VoteAction> actions = voteService.resolveActions(up, down, request.value());
+        actions.forEach(action -> voteRepository.save(voteService.buildVote(targetUserId, request, action)));
 
-        VoteValue myVote = voteService.resultVote(up, down, request.value());
+        // 토글 후 내 표: 요청 value를 +1로 행사한 액션이 있으면 그 value, 없으면(취소) null
+        VoteValue myVote = actions.stream()
+                .anyMatch(a -> a.value() == request.value() && a.delta() > 0) ? request.value() : null;
         long score = voteRepository.netByContent(request.targetType(), request.targetId());
         return VoteDto.Response.of(myVote, score);
     }

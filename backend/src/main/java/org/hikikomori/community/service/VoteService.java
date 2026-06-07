@@ -51,14 +51,6 @@ public class VoteService {
         return actions;
     }
 
-    /** 토글 후 내 표 상태 */
-    public VoteValue resultVote(boolean currentUp, boolean currentDown, VoteValue requested) {
-        if (requested == VoteValue.UP) {
-            return currentUp ? null : VoteValue.UP;
-        }
-        return currentDown ? null : VoteValue.DOWN;
-    }
-
     public Vote buildVote(Long targetUserId, VoteDto.CreateRequest request, VoteAction action) {
         return Vote.builder()
                 .voterId(request.voterId())

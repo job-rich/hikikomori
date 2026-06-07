@@ -27,12 +27,10 @@ class UserRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("밴 여부는 banned 플래그로 판정하며, 유저가 없으면 false")
-    void 밴_여부() {
-        given(jpaRepository.findByUserId(1L))
-                .willReturn(Optional.of(User.builder().userId(1L).nickName("n").build()));
-        assertThat(repository.isBanned(1L)).isFalse(); // 기본 false
-        given(jpaRepository.findByUserId(2L)).willReturn(Optional.empty());
-        assertThat(repository.isBanned(2L)).isFalse(); // 없으면 false
+    @DisplayName("getByUserId: 없으면 예외")
+    void getByUserId_없으면_예외() {
+        given(jpaRepository.findByUserId(9L)).willReturn(Optional.empty());
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> repository.getByUserId(9L))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
