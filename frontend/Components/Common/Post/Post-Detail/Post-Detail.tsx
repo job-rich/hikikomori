@@ -26,6 +26,7 @@ import {
   type PostResponse,
   type CommentResponse,
 } from '@/lib/api/posts';
+import { vote, type VoteValue } from '@/lib/api/vote';
 import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
@@ -59,11 +60,34 @@ function CommentItem({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [commentScore, setCommentScore] = useState<number>(
+    comment.voteScore ?? 0
+  );
+  const [voting, setVoting] = useState(false); // in-flight 가드
 
   const isCommentOwner =
     !isEmpty(snowflakeId) && comment.userId === Number(snowflakeId);
 
   const isCommentDeleted = comment.deletedAt != null;
+
+  const castCommentVote = async (value: VoteValue) => {
+    if (isEmpty(snowflakeId) || voting) return; // in-flight 중 무시
+    if (comment.userId === Number(snowflakeId)) return; // 자기추천 불가
+    setVoting(true);
+    try {
+      const res = await vote(comment.userId, {
+        voterId: Number(snowflakeId!),
+        targetType: 'COMMENT',
+        targetId: comment.id,
+        value,
+      });
+      setCommentScore(res.score);
+    } catch (err) {
+      console.error('추천 실패:', err);
+    } finally {
+      setVoting(false);
+    }
+  };
 
   const handleReply = async () => {
     if (!replyContent.trim() || isSubmitting) return;
@@ -216,6 +240,27 @@ function CommentItem({
           </button>
         )}
         {!isCommentOwner && !isCommentDeleted && (
+          <span className="mt-1.5 ml-3 inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <button
+              type="button"
+              onClick={() => castCommentVote('UP')}
+              disabled={voting}
+              className="hover:text-foreground disabled:opacity-50"
+            >
+              ▲
+            </button>
+            <span>{commentScore}</span>
+            <button
+              type="button"
+              onClick={() => castCommentVote('DOWN')}
+              disabled={voting}
+              className="hover:text-foreground disabled:opacity-50"
+            >
+              ▼
+            </button>
+          </span>
+        )}
+        {!isCommentOwner && !isCommentDeleted && (
           <button
             type="button"
             onClick={() => setReportOpen(true)}
@@ -289,6 +334,9 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [postReportOpen, setPostReportOpen] = useState(false);
+  const [postScore, setPostScore] = useState<number>(0);
+  const [myPostVote, setMyPostVote] = useState<VoteValue | null>(null);
+  const [postVoting, setPostVoting] = useState(false); // in-flight 가드
 
   console.log(commentContent);
 
@@ -306,6 +354,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const reloadPost = useCallback(async () => {
     const data = await getPost(postId);
     setPost(data);
+    setPostScore(data.voteScore ?? 0);
   }, [postId]);
 
   useEffect(() => {
@@ -404,6 +453,26 @@ export default function PostDetail({ postId }: PostDetailProps) {
     }
   };
 
+  const castPostVote = async (value: VoteValue) => {
+    if (!post || isEmpty(snowflakeId) || postVoting) return; // in-flight 중 무시
+    if (post.userId === Number(snowflakeId)) return; // 자기추천 불가
+    setPostVoting(true);
+    try {
+      const res = await vote(post.userId, {
+        voterId: Number(snowflakeId!),
+        targetType: 'POST',
+        targetId: postId,
+        value,
+      });
+      setPostScore(res.score);
+      setMyPostVote(res.value);
+    } catch (err) {
+      console.error('추천 실패:', err);
+    } finally {
+      setPostVoting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -446,16 +515,28 @@ export default function PostDetail({ postId }: PostDetailProps) {
           <div className="flex flex-col items-center gap-1 pr-5 border-r border-border">
             <button
               type="button"
-              className="p-1 text-muted-foreground hover:text-foreground"
+              className={`p-1 hover:text-foreground disabled:opacity-50 ${
+                myPostVote === 'UP' ? 'text-rose-500' : 'text-muted-foreground'
+              }`}
               aria-label="추천"
+              disabled={postVoting}
+              onClick={() => castPostVote('UP')}
             >
               <ArrowUp className="h-5 w-5" />
             </button>
-            <span className="text-sm font-medium text-muted-foreground">0</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              {postScore}
+            </span>
             <button
               type="button"
-              className="p-1 text-muted-foreground hover:text-foreground"
+              className={`p-1 hover:text-foreground disabled:opacity-50 ${
+                myPostVote === 'DOWN'
+                  ? 'text-blue-500'
+                  : 'text-muted-foreground'
+              }`}
               aria-label="비추천"
+              disabled={postVoting}
+              onClick={() => castPostVote('DOWN')}
             >
               <ArrowDown className="h-5 w-5" />
             </button>
