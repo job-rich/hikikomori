@@ -11,6 +11,7 @@ import org.hikikomori.community.domain.Ban;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.domain.ReportTargetType;
 import org.hikikomori.community.event.ReportCreatedEvent;
+import org.hikikomori.community.event.UserBannedEvent;
 import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class ReportJudgmentFacadeTest {
@@ -35,9 +37,11 @@ class ReportJudgmentFacadeTest {
     BanService banService = new BanService();
     ReportPolicyProperties properties = new ReportPolicyProperties(5, 5);
 
+    @Mock ApplicationEventPublisher eventPublisher;
+
     ReportJudgmentFacade facade() {
         return new ReportJudgmentFacade(reportService, banService, reportRepository,
-                banRepository, postRepository, commentRepository, properties);
+                banRepository, postRepository, commentRepository, properties, eventPublisher);
     }
 
     @Test
@@ -68,6 +72,7 @@ class ReportJudgmentFacadeTest {
 
         verify(postRepository).save(post);
         verify(banRepository).save(any(Ban.class));
+        verify(eventPublisher).publishEvent(any(UserBannedEvent.class));
     }
 
     @Test
@@ -84,5 +89,6 @@ class ReportJudgmentFacadeTest {
         facade().judge(new ReportCreatedEvent(ReportTargetType.POST, targetId, 2L));
 
         verify(banRepository, never()).save(any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }

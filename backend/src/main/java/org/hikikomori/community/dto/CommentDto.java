@@ -30,7 +30,8 @@ public class CommentDto {
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             LocalDateTime deletedAt,
-            List<Response> children
+            List<Response> children,
+            long voteScore
     ) {
         public static Response from(Comment comment) {
             List<Response> childResponses = comment.getChildren().stream()
@@ -50,7 +51,8 @@ public class CommentDto {
                     comment.getCreatedAt(),
                     comment.getUpdatedAt(),
                     comment.getDeletedAt(),
-                    childResponses
+                    childResponses,
+                    comment.getVoteScore()
             );
         }
     }

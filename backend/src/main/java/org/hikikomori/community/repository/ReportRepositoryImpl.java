@@ -28,4 +28,8 @@ public class ReportRepositoryImpl {
     public long countHiddenContents(Long targetUserId, int hideThreshold) {
         return jpaRepository.countHiddenContentsForUser(targetUserId, hideThreshold);
     }
+
+    public long countByTargetUser(Long targetUserId) {
+        return jpaRepository.countByTargetUserId(targetUserId);
+    }
 }

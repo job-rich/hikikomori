@@ -42,8 +42,8 @@ class PostControllerTest {
         // given
         Long userId = 12345L;
         List<PostDto.Response> posts = List.of(
-                new PostDto.Response(null, userId, "유저", "제목1", "내용1", PostTag.ETC, 0L, null, null),
-                new PostDto.Response(null, userId, "유저", "제목2", "내용2", PostTag.ETC, 0L, null, null)
+                new PostDto.Response(null, userId, "유저", "제목1", "내용1", PostTag.ETC, 0L, null, null, 0L),
+                new PostDto.Response(null, userId, "유저", "제목2", "내용2", PostTag.ETC, 0L, null, null, 0L)
         );
         given(postFacade.getMyPosts(eq(userId), any(Pageable.class)))
                 .willReturn(new PageImpl<>(posts));
@@ -62,7 +62,7 @@ class PostControllerTest {
     void createPost() throws Exception {
         // given
         UUID postId = UUID.randomUUID();
-        PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", PostTag.ETC, 0L, null, null);
+        PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", PostTag.ETC, 0L, null, null, 0L);
         given(postFacade.createPost(any(PostDto.CreateRequest.class))).willReturn(response);
 
         String requestBody = """
@@ -90,7 +90,7 @@ class PostControllerTest {
     void findById() throws Exception {
         // given
         UUID postId = UUID.randomUUID();
-        PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", PostTag.ETC, 0L, null, null);
+        PostDto.Response response = new PostDto.Response(postId, 1L, "테스터", "제목", "내용", PostTag.ETC, 0L, null, null, 0L);
         given(postFacade.getPost(postId)).willReturn(response);
 
         // when & then
@@ -106,8 +106,8 @@ class PostControllerTest {
     void findAll() throws Exception {
         // given
         List<PostDto.Response> posts = List.of(
-                new PostDto.Response(null, 1L, "유저1", "제목1", "내용1", PostTag.ETC, 0L, null, null),
-                new PostDto.Response(null, 2L, "유저2", "제목2", "내용2", PostTag.ETC, 0L, null, null)
+                new PostDto.Response(null, 1L, "유저1", "제목1", "내용1", PostTag.ETC, 0L, null, null, 0L),
+                new PostDto.Response(null, 2L, "유저2", "제목2", "내용2", PostTag.ETC, 0L, null, null, 0L)
         );
         given(postFacade.getPosts(any(Pageable.class))).willReturn(new PageImpl<>(posts));
 
@@ -163,8 +163,8 @@ class PostControllerTest {
         // given
         UUID postId = UUID.randomUUID();
         List<CommentDto.Response> comments = List.of(
-                new CommentDto.Response(null, 1L, "댓글러1", "댓글1", false, null, null, null, List.of()),
-                new CommentDto.Response(null, 2L, "댓글러2", "댓글2", false, null, null, null, List.of())
+                new CommentDto.Response(null, 1L, "댓글러1", "댓글1", false, null, null, null, List.of(), 0L),
+                new CommentDto.Response(null, 2L, "댓글러2", "댓글2", false, null, null, null, List.of(), 0L)
         );
         given(postFacade.getComments(postId)).willReturn(comments);
 
@@ -182,7 +182,7 @@ class PostControllerTest {
         // given
         UUID postId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
-        CommentDto.Response response = new CommentDto.Response(commentId, 2L, "댓글러", "댓글 내용", false, null, null, null, List.of());
+        CommentDto.Response response = new CommentDto.Response(commentId, 2L, "댓글러", "댓글 내용", false, null, null, null, List.of(), 0L);
         given(postFacade.createComment(eq(postId), any(CommentDto.CreateRequest.class))).willReturn(response);
 
         String requestBody = """

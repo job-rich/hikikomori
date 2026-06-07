@@ -39,6 +39,11 @@ public class Post {
     @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")
     private long commentCount;
 
+    @Formula(
+        "(SELECT COALESCE(SUM(CASE WHEN v.vote_value = 'UP' THEN v.delta ELSE -v.delta END), 0) "
+        + "FROM vote v WHERE v.target_type = 'POST' AND v.target_id = id)")
+    private long voteScore;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

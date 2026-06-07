@@ -32,8 +32,10 @@ class PostFacadeBanTest {
     CommentService commentService = new CommentService();
     BanService banService = new BanService();
 
+    @Mock UserFacade userFacade;
+
     PostFacade facade() {
-        return new PostFacade(postService, commentService, banService, postRepository, commentRepository, banRepository);
+        return new PostFacade(postService, commentService, banService, postRepository, commentRepository, banRepository, userFacade);
     }
 
     @Test
