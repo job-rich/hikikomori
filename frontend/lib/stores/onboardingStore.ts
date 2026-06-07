@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { OnboardingState } from '@/lib/types/onboarding';
-import { FINAL_STEP_INDEX, TOTAL_STEPS } from '@/lib/data/onboardingSteps';
+import { FINAL_STEP_INDEX, TOTAL_STEPS } from '@/lib/data/onboarding';
 
 export const useOnboardingStore = create<OnboardingState>()(
   persist(

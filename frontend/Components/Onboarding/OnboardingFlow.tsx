@@ -5,7 +5,7 @@ import {
   useOnboardingActions,
   useOnboardingProgress,
 } from '@/lib/stores/onboardingStore';
-import { onboardingSteps } from '@/lib/data/onboardingSteps';
+import { onboardingSteps } from '@/lib/data/onboarding';
 import { useScrolledToBottom } from '@/lib/hooks/useScrolledToBottom';
 import BriefingHeader from './BriefingHeader';
 import OnboardingStep from './OnboardingStep';

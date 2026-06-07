@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useOnboardingStore } from '@/lib/stores/onboardingStore';
-import { FINAL_STEP_INDEX } from '@/lib/data/onboardingSteps';
+import { FINAL_STEP_INDEX } from '@/lib/data/onboarding';
 
 beforeEach(() => {
   localStorage.clear();

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import OnboardingFlow from '@/Components/Onboarding/OnboardingFlow';
 import { useOnboardingStore } from '@/lib/stores/onboardingStore';
-import { FINAL_STEP_INDEX } from '@/lib/data/onboardingSteps';
+import { FINAL_STEP_INDEX } from '@/lib/data/onboarding';
 
 beforeEach(() => {
   localStorage.clear();

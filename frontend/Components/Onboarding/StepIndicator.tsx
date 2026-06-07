@@ -1,4 +1,4 @@
-import { TOTAL_STEPS } from '@/lib/data/onboardingSteps';
+import { TOTAL_STEPS } from '@/lib/data/onboarding';
 
 interface StepIndicatorProps {
   current: number;
