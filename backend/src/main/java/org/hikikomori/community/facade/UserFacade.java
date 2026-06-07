@@ -39,10 +39,10 @@ public class UserFacade {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "profile", key = "#userId")
     public UserDto.ProfileResponse getProfile(Long userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+        User user = userRepository.getByUserId(userId);
         long voteNet = voteRepository.netByTargetUser(userId);
         long reports = reportRepository.countByTargetUser(userId);
         long power = scoreService.compute(voteNet, reports, weights);
@@ -51,6 +51,7 @@ public class UserFacade {
                 userId, user.getNickName(), power, voteNet, reports, rank, user.isBanned());
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "ranking", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserDto.RankingResponse> getRanking(Pageable pageable) {
         Page<UserJpaRepository.RankingRow> page =

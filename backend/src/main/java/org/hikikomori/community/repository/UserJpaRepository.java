@@ -25,7 +25,9 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
             LEFT JOIN (SELECT target_user_id, COUNT(*) AS cnt
                        FROM report GROUP BY target_user_id) rc ON rc.target_user_id = u.user_id
             ORDER BY power DESC
-            """, nativeQuery = true)
+            """,
+            countQuery = "SELECT COUNT(*) FROM users",
+            nativeQuery = true)
     org.springframework.data.domain.Page<RankingRow> findRanking(
             @org.springframework.data.repository.query.Param("wVote") int wVote,
             @org.springframework.data.repository.query.Param("wReport") int wReport,

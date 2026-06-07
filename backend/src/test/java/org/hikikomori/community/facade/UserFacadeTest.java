@@ -35,8 +35,8 @@ class UserFacadeTest {
     @Test
     @DisplayName("프로필: 순추천·신고로 전투력 계산 + rank")
     void 프로필() {
-        given(userRepository.findByUserId(2L))
-                .willReturn(Optional.of(User.builder().userId(2L).nickName("니체").build()));
+        given(userRepository.getByUserId(2L))
+                .willReturn(User.builder().userId(2L).nickName("니체").build());
         given(voteRepository.netByTargetUser(2L)).willReturn(5L);
         given(reportRepository.countByTargetUser(2L)).willReturn(1L);
         given(userRepository.countHigherPower(10, 20, 30L)).willReturn(11L); // power=30

@@ -15,6 +15,11 @@ public class UserRepositoryImpl {
         return jpaRepository.findByUserId(userId);
     }
 
+    public User getByUserId(Long userId) {
+        return jpaRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+    }
+
     public boolean isBanned(Long userId) {
         return jpaRepository.findByUserId(userId).map(User::isBanned).orElse(false);
     }
