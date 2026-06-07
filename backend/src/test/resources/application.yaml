@@ -15,3 +15,8 @@ spring:
 report:
   hide-threshold: 5
   ban-threshold: 5
+
+score:
+  weight:
+    vote: 10
+    report: 20
