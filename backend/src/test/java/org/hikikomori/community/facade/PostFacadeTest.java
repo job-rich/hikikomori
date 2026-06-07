@@ -55,6 +55,9 @@ class PostFacadeTest {
     @Mock
     private BanRepositoryImpl banRepository;
 
+    @Mock
+    private UserFacade userFacade;
+
     private static final UUID POST_ID = UUID.randomUUID();
     private static final UUID COMMENT_ID = UUID.randomUUID();
     private static final UUID REPLY_ID = UUID.randomUUID();

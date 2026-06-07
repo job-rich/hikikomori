@@ -28,6 +28,7 @@ public class PostFacade {
     private final PostRepositoryImpl postRepository;
     private final CommentRepositoryImpl commentRepository;
     private final BanRepositoryImpl banRepository;
+    private final UserFacade userFacade;
 
     public Page<PostDto.Response> getPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(PostDto.Response::from);
@@ -46,6 +47,7 @@ public class PostFacade {
         banService.checkNotBanned(banRepository.isBanned(request.userId()));
         Post post = postService.buildPost(request);
         Post saved = postRepository.save(post);
+        userFacade.touch(saved.getUserId(), saved.getNickName());
         return PostDto.Response.from(saved);
     }
 
@@ -82,6 +84,7 @@ public class PostFacade {
         commentService.checkNestingDepth(parent);
         Comment comment = commentService.buildComment(request, post, parent);
         Comment saved = commentRepository.save(comment);
+        userFacade.touch(saved.getUserId(), saved.getNickName());
         return CommentDto.Response.from(saved);
     }
 
