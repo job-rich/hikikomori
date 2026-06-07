@@ -13,8 +13,10 @@ import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.domain.PostTag;
+import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
+import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
 import org.hikikomori.community.service.PostService;
 import org.junit.jupiter.api.DisplayName;
@@ -41,11 +43,17 @@ class PostFacadeTest {
     @Spy
     private CommentService commentService = new CommentService();
 
+    @Spy
+    private BanService banService = new BanService();
+
     @Mock
     private PostRepositoryImpl postRepository;
 
     @Mock
     private CommentRepositoryImpl commentRepository;
+
+    @Mock
+    private BanRepositoryImpl banRepository;
 
     private static final UUID POST_ID = UUID.randomUUID();
     private static final UUID COMMENT_ID = UUID.randomUUID();
@@ -89,19 +97,19 @@ class PostFacadeTest {
     @DisplayName("게시글 단건 조회")
     void getPost() {
         Post post = Post.builder().title("제목").content("내용").build();
-        given(postRepository.getById(POST_ID)).willReturn(post);
+        given(postRepository.getVisibleById(POST_ID)).willReturn(post);
 
         PostDto.Response result = postFacade.getPost(POST_ID);
 
         assertThat(result.title()).isEqualTo("제목");
-        verify(postRepository).getById(POST_ID);
+        verify(postRepository).getVisibleById(POST_ID);
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회 시 예외")
     void getPostNotFound() {
         UUID notFoundId = UUID.randomUUID();
-        given(postRepository.getById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
+        given(postRepository.getVisibleById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
 
         assertThatThrownBy(() -> postFacade.getPost(notFoundId))
                 .isInstanceOf(IllegalArgumentException.class)

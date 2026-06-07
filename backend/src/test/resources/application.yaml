@@ -11,3 +11,7 @@ spring:
   docker:
     compose:
       enabled: false
+
+report:
+  hide-threshold: 5
+  ban-threshold: 5

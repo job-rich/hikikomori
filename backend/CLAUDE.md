@@ -65,9 +65,9 @@ Controller
 | 계층 | 책임 | 의존 |
 |------|------|------|
 | Controller | HTTP 요청/응답, 형식 검증(`@Valid`) | Facade |
-| Facade | 오케스트레이션, 비즈니스 검증, 트랜잭션 | Service + RepositoryImpl |
-| Service | 비즈니스 로직 (가공/변환/검증, 외부 의존 없음) | DTO만 수신 |
-| RepositoryImpl | DB 접근, DB 예외 → 도메인 예외 변환 | JpaRepository |
+| Facade | 오케스트레이션(호출·조합), 트랜잭션 경계 — **직접 예외를 던지지 않음** | Service + RepositoryImpl |
+| Service | 비즈니스 로직 (가공/변환/검증·예외, 엔티티 빌드, 외부 의존 없음) | DTO·값 수신 |
+| RepositoryImpl | DB 접근(가져오기만), 데이터 없으면 도메인 예외 | JpaRepository |
 
 ### 패키지 구조
 
@@ -111,13 +111,14 @@ org.hikikomori.community
 - **트랜잭션:** Facade에 `@Transactional` (Service와 Repository는 트랜잭션 무관)
 - **엔티티:** Lombok `@Getter`, `@NoArgsConstructor`, `@Builder` 사용. ID는 UUID (TimeBasedEpoch 자동 생성)
 - **예외 처리 전략:**
-  - Service: 단일 관심사 검증 (소유권, 중첩 깊이 등) — `check` 네이밍
-  - RepositoryImpl: DB 예외 → 도메인 예외 변환 (`getById` → `IllegalArgumentException`)
-  - Facade: 복합 검증 (여러 Service/DB 결과 조합)
-  - Controller: `@ControllerAdvice`로 HTTP 응답 변환
+  - **Service: 모든 비즈니스 검증·예외를 담당** (소유권, 자기신고, 중복, 밴, 작성자 일치 등) — `check` 네이밍, 예외 throw
+  - RepositoryImpl: **값을 가져오기만 하고, 데이터가 없으면** 도메인 예외 (`getById`/`getVisibleById` → `IllegalArgumentException`)
+  - **Facade는 직접 예외를 던지지 않는다** — Repository에서 값(존재 여부 등)을 조회해 Service에 넘기고, 검증·예외 판단은 Service에 위임
+  - Controller: 예외는 `@ResponseStatus`를 단 도메인 예외(또는 `@ControllerAdvice`)로 HTTP 상태 매핑
 - **검증:**
   - 형식 검증(`@NotBlank`, `@Size`): Controller/DTO (`@Valid`)
-  - 비즈니스 검증(중복 체크 등): Facade (Repository를 직접 알고 있으므로)
+  - 비즈니스 검증(중복·존재 여부 포함): **Service**. DB 의존 검증도 Facade가 Repository에서 boolean/값을 조회해 Service 검증 메서드에 넘긴다
+- **엔티티 생성:** Service의 `buildXxx`에서 조립 (예: `buildPost`, `buildReport`, `buildBan`). Facade는 빌드하지 않는다
 - **로깅:** Lombok `@Slf4j`, 한국어 로그 메시지
 - **테스트:**
   - Service: 순수 단위 테스트 (mock 불필요, 입력→출력 검증)

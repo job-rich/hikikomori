@@ -7,8 +7,10 @@ import org.hikikomori.community.domain.Comment;
 import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.dto.CommentDto;
 import org.hikikomori.community.dto.PostDto;
+import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
+import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
 import org.hikikomori.community.service.PostService;
 import org.springframework.data.domain.Page;
@@ -22,8 +24,10 @@ public class PostFacade {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final BanService banService;
     private final PostRepositoryImpl postRepository;
     private final CommentRepositoryImpl commentRepository;
+    private final BanRepositoryImpl banRepository;
 
     public Page<PostDto.Response> getPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(PostDto.Response::from);
@@ -34,17 +38,20 @@ public class PostFacade {
     }
 
     public PostDto.Response getPost(UUID id) {
-        Post post = postRepository.getById(id);
+        Post post = postRepository.getVisibleById(id);
         return PostDto.Response.from(post);
     }
 
     public PostDto.Response createPost(PostDto.CreateRequest request) {
+        banService.checkNotBanned(banRepository.isBanned(request.userId()));
         Post post = postService.buildPost(request);
         Post saved = postRepository.save(post);
         return PostDto.Response.from(saved);
     }
 
+    @Transactional
     public void updatePost(UUID postId, PostDto.UpdateRequest request) {
+        banService.checkNotBanned(banRepository.isBanned(request.userId()));
         Post post = postRepository.getById(postId);
         postService.checkOwnership(post, request.userId(), "수정");
         postService.applyUpdate(post, request);
@@ -66,6 +73,7 @@ public class PostFacade {
     }
 
     public CommentDto.Response createComment(UUID postId, CommentDto.CreateRequest request) {
+        banService.checkNotBanned(banRepository.isBanned(request.userId()));
         Post post = postRepository.getById(postId);
         Comment parent = request.parentId() != null
                 ? commentRepository.getParentById(request.parentId())
@@ -77,7 +85,9 @@ public class PostFacade {
         return CommentDto.Response.from(saved);
     }
 
+    @Transactional
     public void updateComment(UUID commentId, CommentDto.UpdateRequest request) {
+        banService.checkNotBanned(banRepository.isBanned(request.userId()));
         Comment comment = commentRepository.getById(commentId);
         commentService.checkOwnership(comment, request.userId(), "수정");
         commentService.applyUpdate(comment, request.content());

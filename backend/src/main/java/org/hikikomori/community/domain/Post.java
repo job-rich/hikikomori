@@ -43,11 +43,23 @@ public class Post {
 
     private LocalDateTime updatedAt;
 
+    private LocalDateTime hiddenAt;
+
     public void update(String title, String content, PostTag tag) {
         this.title = title;
         this.content = content;
         this.tag = tag;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void hide() {
+        if (this.hiddenAt == null) {
+            this.hiddenAt = LocalDateTime.now();
+        }
+    }
+
+    public boolean isHidden() {
+        return this.hiddenAt != null;
     }
 
     @Builder

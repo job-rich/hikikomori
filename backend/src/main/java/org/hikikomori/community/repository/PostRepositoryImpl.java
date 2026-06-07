@@ -19,16 +19,22 @@ public class PostRepositoryImpl {
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
     }
 
+    /** 숨김 처리된 게시글은 없는 것으로 취급한다(목록 제외와 동일 규칙). */
+    public Post getVisibleById(UUID id) {
+        return jpaRepository.findByIdAndHiddenAtIsNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다: " + id));
+    }
+
     public Post save(Post post) {
         return jpaRepository.save(post);
     }
 
     public Page<Post> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable);
+        return jpaRepository.findByHiddenAtIsNull(pageable);
     }
 
     public Page<Post> findByUserId(Long userId, Pageable pageable) {
-        return jpaRepository.findByUserId(userId, pageable);
+        return jpaRepository.findByUserIdAndHiddenAtIsNull(userId, pageable);
     }
 
     public void deleteById(UUID id) {
