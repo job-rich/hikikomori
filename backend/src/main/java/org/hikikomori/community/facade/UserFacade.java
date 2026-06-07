@@ -10,6 +10,7 @@ import org.hikikomori.community.repository.UserRepositoryImpl;
 import org.hikikomori.community.repository.VoteRepositoryImpl;
 import org.hikikomori.community.service.ScoreService;
 import org.hikikomori.community.service.UserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class UserFacade {
         userRepository.save(user);
     }
 
+    @Cacheable(value = "profile", key = "#userId")
     public UserDto.ProfileResponse getProfile(Long userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
@@ -49,6 +51,7 @@ public class UserFacade {
                 userId, user.getNickName(), power, voteNet, reports, rank, user.isBanned());
     }
 
+    @Cacheable(value = "ranking", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserDto.RankingResponse> getRanking(Pageable pageable) {
         Page<UserJpaRepository.RankingRow> page =
                 userRepository.findRanking(weights.vote(), weights.report(), pageable);
