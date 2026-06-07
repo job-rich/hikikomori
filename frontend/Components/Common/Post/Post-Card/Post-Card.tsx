@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useUserStore } from '@/lib/stores/userStore';
 import { TAG_STYLES } from '@/lib/utils/tagColors';
 import { deletePost } from '@/lib/api/posts';
+import { vote, type VoteValue } from '@/lib/api/vote';
 import ReportModal from '@/Components/Common/Modals/Report';
 
 interface PostCardProps {
@@ -56,10 +57,34 @@ export default function PostCard({
 }: PostCardProps) {
   const router = useRouter();
   const [reportOpen, setReportOpen] = useState(false);
+  const [score, setScore] = useState<number>(votes);
+  const [myVote, setMyVote] = useState<VoteValue | null>(null);
+  const [voting, setVoting] = useState(false); // in-flight 가드 (동시 더블클릭 race 방지)
   const snowflakeId = useUserStore((s) => s.snowflakeId);
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
+
+  const castVote = async (value: VoteValue, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (snowflakeId == null || authorUserId == null || voting) return; // in-flight 중 무시
+    if (Number(snowflakeId) === authorUserId) return; // 자기추천 불가
+    setVoting(true);
+    try {
+      const res = await vote(authorUserId, {
+        voterId: Number(snowflakeId),
+        targetType: 'POST',
+        targetId: String(id),
+        value,
+      });
+      setScore(res.score);
+      setMyVote(res.value);
+    } catch (err) {
+      console.error('추천 실패:', err);
+    } finally {
+      setVoting(false);
+    }
+  };
 
   const goToEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -89,18 +114,24 @@ export default function PostCard({
           <div className="flex min-w-[48px] flex-col items-center gap-0.5 pr-4">
             <button
               type="button"
-              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              className={`rounded p-1 hover:text-foreground disabled:opacity-50 ${
+                myVote === 'UP' ? 'text-rose-500' : 'text-muted-foreground'
+              }`}
               aria-label="추천"
-              onClick={(e) => e.stopPropagation()}
+              disabled={voting}
+              onClick={(e) => castVote('UP', e)}
             >
               <ChevronUp className="h-5 w-5" />
             </button>
-            <span className="text-lg font-bold text-foreground">{votes}</span>
+            <span className="text-lg font-bold text-foreground">{score}</span>
             <button
               type="button"
-              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              className={`rounded p-1 hover:text-foreground disabled:opacity-50 ${
+                myVote === 'DOWN' ? 'text-blue-500' : 'text-muted-foreground'
+              }`}
               aria-label="비추천"
-              onClick={(e) => e.stopPropagation()}
+              disabled={voting}
+              onClick={(e) => castVote('DOWN', e)}
             >
               <ChevronDown className="h-5 w-5" />
             </button>

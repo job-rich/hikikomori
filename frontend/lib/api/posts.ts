@@ -22,6 +22,7 @@ export interface PostResponse {
   tag: string;
   commentCount: number;
   createdAt: string;
+  voteScore?: number;
 }
 
 export interface PageResponse<T> {
@@ -51,6 +52,7 @@ export interface CommentResponse {
   createdAt: string;
   deletedAt?: string | null;
   children: CommentResponse[];
+  voteScore?: number;
 }
 
 export interface CommentCreateRequest {
