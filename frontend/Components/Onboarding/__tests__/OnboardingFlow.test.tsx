@@ -115,6 +115,26 @@ describe('OnboardingFlow (modal)', () => {
   });
 });
 
+describe('OnboardingStep — onb-step-head sticky 구조', () => {
+  it('.onb-step-head 래퍼가 존재한다', () => {
+    const { container } = render(<OnboardingFlow />);
+    expect(container.querySelector('.onb-step-head')).not.toBeNull();
+  });
+
+  it('.onb-step-head 안에 step.titleKorean 이 들어 있다', () => {
+    const { container } = render(<OnboardingFlow />);
+    const head = container.querySelector('.onb-step-head');
+    expect(head?.textContent).toContain('환영한다, 새로운 철학자여');
+  });
+
+  it('.onb-content 는 .onb-step-head 밖에 렌더된다', () => {
+    const { container } = render(<OnboardingFlow />);
+    const head = container.querySelector('.onb-step-head');
+    expect(head?.querySelector('.onb-content')).toBeNull();
+    expect(container.querySelector('.onb-content')).not.toBeNull();
+  });
+});
+
 describe('OnboardingFlow — 스크롤 잠금', () => {
   // jsdom 은 layout 측정을 안 하므로 prototype 으로 mock.
   // 이 describe 블록 안에서만 적용 → 기존 14개 테스트 회귀 안전.

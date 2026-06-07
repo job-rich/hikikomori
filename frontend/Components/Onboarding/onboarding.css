@@ -106,6 +106,13 @@
   padding: 0.5rem 1rem 0.25rem;
 }
 
+.onb-step-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0d0d0d;
+}
+
 .onb-meta {
   display: flex;
   justify-content: space-between;
