@@ -8,6 +8,7 @@ import {
 import { onboardingSteps } from '@/lib/data/onboarding';
 import { useScrolledToBottom } from '@/lib/hooks/useScrolledToBottom';
 import BriefingHeader from './BriefingHeader';
+import OnboardingStepHeader from './OnboardingStepHeader';
 import OnboardingStep from './OnboardingStep';
 import ClassifiedStamps from './ClassifiedStamps';
 import StepIndicator from './StepIndicator';
@@ -62,6 +63,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       >
         <ClassifiedStamps />
         <BriefingHeader onSkip={handleSkip} />
+        <OnboardingStepHeader step={step} />
         <div
           key={currentStep}
           ref={ref}

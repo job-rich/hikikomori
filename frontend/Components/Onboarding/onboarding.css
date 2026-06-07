@@ -106,10 +106,11 @@
   padding: 0.5rem 1rem 0.25rem;
 }
 
+/* 스크롤 컨테이너(.onb-step-slide) 밖에 위치하는 고정 헤더.
+ * flex-shrink:0 으로 shell 의 flex column 에서 눌리지 않고 자연 높이 유지 →
+ * 본문만 스크롤되고 title 은 절대 밀리지 않는다. */
 .onb-step-head {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  flex-shrink: 0;
   background: #0d0d0d;
 }
 

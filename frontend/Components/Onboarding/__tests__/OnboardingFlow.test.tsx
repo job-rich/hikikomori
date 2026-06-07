@@ -115,7 +115,7 @@ describe('OnboardingFlow (modal)', () => {
   });
 });
 
-describe('OnboardingStep — onb-step-head sticky 구조', () => {
+describe('OnboardingStep — onb-step-head 고정 헤더 구조', () => {
   it('.onb-step-head 래퍼가 존재한다', () => {
     const { container } = render(<OnboardingFlow />);
     expect(container.querySelector('.onb-step-head')).not.toBeNull();
@@ -132,6 +132,15 @@ describe('OnboardingStep — onb-step-head sticky 구조', () => {
     const head = container.querySelector('.onb-step-head');
     expect(head?.querySelector('.onb-content')).toBeNull();
     expect(container.querySelector('.onb-content')).not.toBeNull();
+  });
+
+  it('.onb-step-head 는 스크롤 컨테이너(.onb-step-slide) 밖에 있다 — 스크롤에 안 밀림', () => {
+    const { container } = render(<OnboardingFlow />);
+    const slide = container.querySelector('.onb-step-slide');
+    // 헤더가 스크롤 컨테이너의 자손이 아니어야 본문 스크롤 시 title 이 고정된다.
+    expect(slide?.querySelector('.onb-step-head')).toBeNull();
+    // 본문(.onb-content)은 스크롤 컨테이너 안에 있다.
+    expect(slide?.querySelector('.onb-content')).not.toBeNull();
   });
 });
 
