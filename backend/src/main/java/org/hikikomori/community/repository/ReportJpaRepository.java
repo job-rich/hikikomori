@@ -30,4 +30,6 @@ public interface ReportJpaRepository extends JpaRepository<Report, UUID> {
     long countHiddenContentsForUser(
             @Param("targetUserId") Long targetUserId,
             @Param("hideThreshold") int hideThreshold);
+
+    long countByTargetUserId(Long targetUserId);
 }

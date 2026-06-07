@@ -56,4 +56,11 @@ class ReportRepositoryImplTest {
         // then
         assertThat(exists).isTrue();
     }
+
+    @Test
+    @DisplayName("작성자가 받은 신고 수를 센다")
+    void 받은_신고수() {
+        org.mockito.BDDMockito.given(jpaRepository.countByTargetUserId(2L)).willReturn(3L);
+        assertThat(repository.countByTargetUser(2L)).isEqualTo(3L);
+    }
 }
