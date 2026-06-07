@@ -33,7 +33,8 @@ public class PostDto {
             PostTag tag,
             long commentCount,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            long voteScore
     ) {
         public static Response from(Post post) {
             return new Response(
@@ -45,7 +46,8 @@ public class PostDto {
                     post.getTag(),
                     post.getCommentCount(),
                     post.getCreatedAt(),
-                    post.getUpdatedAt()
+                    post.getUpdatedAt(),
+                    post.getVoteScore()
             );
         }
     }

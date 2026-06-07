@@ -1,5 +1,6 @@
 package org.hikikomori.community.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -39,7 +40,9 @@ public class Vote {
 
     private UUID targetId;
 
+    // "value"는 H2 등 일부 DB의 예약어라 컬럼명을 vote_value로 매핑
     @Enumerated(EnumType.STRING)
+    @Column(name = "vote_value")
     private VoteValue value;
 
     private int delta; // +1 = 행사, -1 = 취소

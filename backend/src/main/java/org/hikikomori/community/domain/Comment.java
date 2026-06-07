@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
+import org.hibernate.annotations.Formula;
 import org.hikikomori.community.util.UUIDGenerator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,11 @@ public class Comment {
     private LocalDateTime deletedAt;
 
     private LocalDateTime hiddenAt;
+
+    @Formula(
+        "(SELECT COALESCE(SUM(CASE WHEN v.vote_value = 'UP' THEN v.delta ELSE -v.delta END), 0) "
+        + "FROM vote v WHERE v.target_type = 'COMMENT' AND v.target_id = id)")
+    private long voteScore;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")

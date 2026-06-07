@@ -20,7 +20,7 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
                    GREATEST(0, :wVote * COALESCE(vn.net, 0) - :wReport * COALESCE(rc.cnt, 0)) AS power
             FROM users u
             LEFT JOIN (SELECT target_user_id,
-                              SUM(CASE WHEN value = 'UP' THEN delta ELSE -delta END) AS net
+                              SUM(CASE WHEN vote_value = 'UP' THEN delta ELSE -delta END) AS net
                        FROM vote GROUP BY target_user_id) vn ON vn.target_user_id = u.user_id
             LEFT JOIN (SELECT target_user_id, COUNT(*) AS cnt
                        FROM report GROUP BY target_user_id) rc ON rc.target_user_id = u.user_id
@@ -36,7 +36,7 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
               SELECT u.user_id,
                      GREATEST(0, :wVote * COALESCE(vn.net,0) - :wReport * COALESCE(rc.cnt,0)) AS power
               FROM users u
-              LEFT JOIN (SELECT target_user_id, SUM(CASE WHEN value='UP' THEN delta ELSE -delta END) net FROM vote GROUP BY target_user_id) vn ON vn.target_user_id=u.user_id
+              LEFT JOIN (SELECT target_user_id, SUM(CASE WHEN vote_value='UP' THEN delta ELSE -delta END) net FROM vote GROUP BY target_user_id) vn ON vn.target_user_id=u.user_id
               LEFT JOIN (SELECT target_user_id, COUNT(*) cnt FROM report GROUP BY target_user_id) rc ON rc.target_user_id=u.user_id
             ) p WHERE p.power > :myPower
             """, nativeQuery = true)
