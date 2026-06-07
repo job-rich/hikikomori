@@ -206,6 +206,7 @@ export default function Body() {
                 timestamp={post.createdAt}
                 username={post.nickName}
                 commentCount={post.commentCount}
+                votes={post.voteScore ?? 0}
                 isOwner={!!snowflakeId && post.userId === Number(snowflakeId)}
                 authorUserId={post.userId}
                 onDeleted={() => resetAndFetch(viewMode)}
