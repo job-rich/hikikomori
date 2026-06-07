@@ -1,5 +1,20 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message?: string
+  ) {
+    super(message ?? `API 요청 실패: ${status}`);
+    this.name = 'ApiError';
+  }
+}
+
+/** err가 ApiError이고, status를 주면 그 상태코드까지 일치하는지 확인한다. */
+export function isApiError(err: unknown, status?: number): err is ApiError {
+  return err instanceof ApiError && (status === undefined || err.status === status);
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -26,7 +41,7 @@ export async function apiClient<T>(
   }
 
   if (!response.ok) {
-    throw new Error(`API 요청 실패: ${response.status}`);
+    throw new ApiError(response.status);
   }
 
   if (response.status === 204) {

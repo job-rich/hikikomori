@@ -26,6 +26,7 @@ public class CommentDto {
             Long userId,
             String nickName,
             String content,
+            boolean hidden,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             LocalDateTime deletedAt,
@@ -36,11 +37,16 @@ public class CommentDto {
                     .map(Response::from)
                     .toList();
 
+            boolean hidden = comment.isHidden();
+            boolean deleted = comment.getDeletedAt() != null;
+            String content = (hidden || deleted) ? null : comment.getContent();
+
             return new Response(
                     comment.getId(),
                     comment.getUserId(),
                     comment.getNickName(),
-                    comment.getDeletedAt() == null ? comment.getContent() : null,
+                    content,
+                    hidden,
                     comment.getCreatedAt(),
                     comment.getUpdatedAt(),
                     comment.getDeletedAt(),

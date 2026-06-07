@@ -85,14 +85,14 @@ class PostRepositoryImplTest {
                 Post.builder().title("제목2").content("내용2").build()
         );
         Page<Post> page = new PageImpl<>(posts);
-        given(jpaRepository.findAll(pageable)).willReturn(page);
+        given(jpaRepository.findByHiddenAtIsNull(pageable)).willReturn(page);
 
         // when
         Page<Post> result = postRepository.findAll(pageable);
 
         // then
         assertThat(result.getContent()).hasSize(2);
-        verify(jpaRepository).findAll(pageable);
+        verify(jpaRepository).findByHiddenAtIsNull(pageable);
     }
 
     @Test
@@ -105,14 +105,14 @@ class PostRepositoryImplTest {
                 Post.builder().userId(userId).title("제목1").content("내용1").build()
         );
         Page<Post> page = new PageImpl<>(posts);
-        given(jpaRepository.findByUserId(userId, pageable)).willReturn(page);
+        given(jpaRepository.findByUserIdAndHiddenAtIsNull(userId, pageable)).willReturn(page);
 
         // when
         Page<Post> result = postRepository.findByUserId(userId, pageable);
 
         // then
         assertThat(result.getContent()).hasSize(1);
-        verify(jpaRepository).findByUserId(userId, pageable);
+        verify(jpaRepository).findByUserIdAndHiddenAtIsNull(userId, pageable);
     }
 
     @Test
