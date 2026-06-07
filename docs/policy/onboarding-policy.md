@@ -80,19 +80,19 @@ store 구독은 `OnboardingFlow` 한 곳에서만 수행한다. 자식 컴포넌
 
 `OnboardingStep`은 콘텐츠를 모르고 틀만 제공한다. 보조 데이터(`RULE_DEFINITIONS`, `HALL_OF_FAME` 등)는 해당 데이터를 사용하는 스텝 파일에 co-locate한다.
 
-## 5. 스텝 헤더 sticky 정책
+## 5. 스텝 헤더 고정 정책
 
-긴 스텝 본문 스크롤 중에도 현재 단계 title 인지를 유지하기 위해 스텝 헤더를 상단에 고정한다.
+긴 스텝 본문 스크롤 중에도 현재 단계 title 인지를 유지하기 위해 스텝 헤더를 스크롤 컨테이너 **밖**에 두어 고정한다. (sticky 방식은 스크롤 시작 시 title 이 살짝 밀리는 느낌이 있어 구조 분리로 대체.)
 
 | 항목 | 값 |
 |------|-----|
-| 고정 대상 | `onb-step-head` (meta + header + divider) |
-| 스크롤 컨테이너 | `.onb-step-slide` |
-| 고정 방식 | `position: sticky` (CSS 전용) |
-| 스크롤 대상 | `onb-content` (본문 영역만) |
-| 배경 | 불투명 — 본문 비침 차단 |
+| 고정 헤더 컴포넌트 | `OnboardingStepHeader` (`onb-step-head`: meta + header + divider) |
+| 스크롤 컨테이너 | `.onb-step-slide` — **헤더의 형제**, 헤더를 포함하지 않음 |
+| 고정 방식 | 구조 분리 — 헤더는 shell 의 flex 자식(`flex-shrink:0`), 스크롤 컨테이너 밖 |
+| 스크롤 대상 | `OnboardingStep` = `onb-content` (본문 영역만) |
+| 배경 | 불투명 — shell 과 동일(`#0d0d0d`) |
 
-sticky는 CSS로만 구현한다. `useScrolledToBottom`의 "끝 도달" 게이팅 수학에 영향을 주지 않는다.
+헤더가 스크롤 컨테이너의 자손이 아니므로 본문 스크롤 시 title 은 전혀 밀리지 않는다. `useScrolledToBottom` 는 본문 컨테이너(`.onb-step-slide`) 기준으로 "끝 도달"을 측정하며 게이팅 수학은 불변.
 
 ## 6. 다음 버튼 게이팅 정책
 
