@@ -22,4 +22,13 @@ public class UserRepositoryImpl {
     public User save(User user) {
         return jpaRepository.save(user);
     }
+
+    public org.springframework.data.domain.Page<UserJpaRepository.RankingRow> findRanking(
+            int wVote, int wReport, org.springframework.data.domain.Pageable pageable) {
+        return jpaRepository.findRanking(wVote, wReport, pageable);
+    }
+
+    public long countHigherPower(int wVote, int wReport, long myPower) {
+        return jpaRepository.countHigherPower(wVote, wReport, myPower);
+    }
 }

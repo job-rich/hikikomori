@@ -1,12 +1,12 @@
 package org.hikikomori.community.facade;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 import org.hikikomori.community.config.ScoreWeights;
 import org.hikikomori.community.domain.User;
+import org.hikikomori.community.dto.UserDto;
 import org.hikikomori.community.repository.ReportRepositoryImpl;
 import org.hikikomori.community.repository.UserRepositoryImpl;
 import org.hikikomori.community.repository.VoteRepositoryImpl;
@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UserFacadeTouchTest {
+class UserFacadeTest {
 
     @Mock UserRepositoryImpl userRepository;
     @Mock VoteRepositoryImpl voteRepository;
@@ -33,33 +33,20 @@ class UserFacadeTouchTest {
     }
 
     @Test
-    @DisplayName("touch: 기존 유저면 닉네임 갱신 후 저장")
-    void touch_갱신() {
-        User user = User.builder().userId(1L).nickName("old").build();
-        given(userRepository.findByUserId(1L)).willReturn(Optional.of(user));
+    @DisplayName("프로필: 순추천·신고로 전투력 계산 + rank")
+    void 프로필() {
+        given(userRepository.findByUserId(2L))
+                .willReturn(Optional.of(User.builder().userId(2L).nickName("니체").build()));
+        given(voteRepository.netByTargetUser(2L)).willReturn(5L);
+        given(reportRepository.countByTargetUser(2L)).willReturn(1L);
+        given(userRepository.countHigherPower(10, 20, 30L)).willReturn(11L); // power=30
 
-        facade().touch(1L, "new");
+        UserDto.ProfileResponse res = facade().getProfile(2L);
 
-        verify(userRepository).save(user);
-    }
-
-    @Test
-    @DisplayName("touch: 없는 유저면 생성 후 저장")
-    void touch_생성() {
-        given(userRepository.findByUserId(1L)).willReturn(Optional.empty());
-
-        facade().touch(1L, "n");
-
-        verify(userRepository).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("markBanned: 유저를 밴 상태로 표시 후 저장(없으면 생성)")
-    void markBanned() {
-        given(userRepository.findByUserId(1L)).willReturn(Optional.empty());
-
-        facade().markBanned(1L);
-
-        verify(userRepository).save(any(User.class));
+        assertThat(res.power()).isEqualTo(30L);
+        assertThat(res.voteNet()).isEqualTo(5L);
+        assertThat(res.reports()).isEqualTo(1L);
+        assertThat(res.rank()).isEqualTo(12L); // 11 + 1
+        assertThat(res.nickName()).isEqualTo("니체");
     }
 }
