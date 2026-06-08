@@ -1,0 +1,508 @@
+/* Onboarding visual tokens — Figma 와이어프레임의 다크 브리핑 톤을 흉내냄.
+ * 외부 폰트(Menlo) 의존성 없이 mono 폰트 + tracking·uppercase 로 표현.
+ * 라운드 3: 다시 모달 안에서 렌더되되 backdrop 톤다운(50%) + 상단 15vh 정렬.
+ * 라운드 4: 모바일/태블릿은 backdrop align-items:center 로 viewport 중앙 정렬. */
+
+/* 모달 backdrop 자체 — globals.css 의 .modal-backdrop 위에 덧씌움 */
+.onb-backdrop {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding-block: 6vh 4vh;
+}
+
+/* 모달 안 카드 컨테이너 정렬 — dead center 가 아니라 상단 쪽 */
+.onb-modal-content {
+  display: flex;
+  justify-content: center;
+}
+
+.onb-shell {
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+  background: #0d0d0d;
+  border: 2px solid rgba(127, 29, 29, 0.5);
+  color: #e4e4e7;
+  font-family: var(--font-geist-mono), Menlo, Consolas, monospace;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 12px 48px rgba(239, 68, 68, 0.18),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* 스텝 간 콘텐츠 높이 차이로 dots/버튼이 위아래로 점프하는 현상 제거.
+ * height clamp(min, ideal, max) 로 shell 외형을 step 무관 완전 고정.
+ * lower 36rem 은 콘텐츠 최소 보장, upper 44rem 은 데스크톱 cap, ideal 80vh 는
+ * 노트북 ~ 큰 모니터 사이를 자연스럽게 비례. max-height 90vh 로 절대 viewport 안 넘김. */
+.onb-shell-stable {
+  height: clamp(36rem, 80vh, 44rem);
+  max-height: 90vh;
+}
+
+/* 카드 entrance — 위에서 살짝 떨어지면서 scale 살짝 확대 */
+.onb-shell-enter {
+  animation: onb-shell-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+@keyframes onb-shell-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-32px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 스텝 전환 슬라이드 — key 변경 시 div 재마운트로 자동 트리거.
+ * flex:1 로 shell 안에서 가능한 공간을 모두 차지해 콘텐츠가 짧은 스텝(1, 4) 에서도
+ * dots/버튼이 shell 바닥에 붙는다. min-height:0 은 flex item default(min-height:auto)
+ * 가 overflow 를 가로막는 known browser issue 해결 — 이 한 줄 없으면 overflow-y 무효.
+ * overflow-y:auto 로 STEP 3 처럼 긴 콘텐츠는 모달 외형 그대로 둔 채 inner scroll. */
+.onb-step-slide {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: onb-step-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+@keyframes onb-step-slide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.onb-briefing {
+  text-align: center;
+  padding: 0 1rem;
+}
+.onb-briefing-title {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 6px;
+  margin-top: 1rem;
+}
+.onb-briefing-sub {
+  color: #52525b;
+  font-size: 0.625rem;
+  letter-spacing: 3px;
+  margin-top: 0.25rem;
+}
+.onb-briefing-skip {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+/* 스크롤 컨테이너(.onb-step-slide) 밖에 위치하는 고정 헤더.
+ * flex-shrink:0 으로 shell 의 flex column 에서 눌리지 않고 자연 높이 유지 →
+ * 본문만 스크롤되고 title 은 절대 밀리지 않는다. */
+.onb-step-head {
+  flex-shrink: 0;
+  background: #0d0d0d;
+}
+
+.onb-meta {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem 0;
+  color: #3f3f46;
+  font-size: 0.5625rem;
+  letter-spacing: 2px;
+}
+
+.onb-stamps {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+.onb-stamp {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+.onb-stamp--classified {
+  color: rgba(239, 68, 68, 0.6);
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  transform: rotate(12deg);
+}
+.onb-stamp--secret {
+  color: rgba(245, 158, 11, 0.5);
+  border: 2px solid rgba(245, 158, 11, 0.5);
+  transform: rotate(-6deg);
+  margin-right: 0.5rem;
+}
+
+.onb-header {
+  padding: 1rem 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.onb-step-badge {
+  display: inline-block;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 0.25rem 0.625rem;
+  align-self: flex-start;
+}
+.onb-step-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+.onb-step-title {
+  color: #e4e4e7;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.onb-step-subtitle {
+  color: #52525b;
+  font-size: 0.6875rem;
+  letter-spacing: 2px;
+}
+
+.onb-divider {
+  height: 1px;
+  background: rgba(127, 29, 29, 0.2);
+  margin: 1rem 1.5rem 0;
+}
+
+.onb-content {
+  padding: 1rem 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.onb-intro {
+  text-align: center;
+}
+.onb-intro-line {
+  color: #e4e4e7;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.onb-intro-sub {
+  color: #52525b;
+  font-size: 0.6875rem;
+  line-height: 1.6;
+}
+.onb-body-paragraph {
+  color: #a1a1aa;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.onb-warning {
+  background: rgba(245, 158, 11, 0.05);
+  border-left: 3px solid #f59e0b;
+  color: #f59e0b;
+  font-size: 0.6875rem;
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.onb-list {
+  display: flex;
+  flex-direction: column;
+}
+.onb-list-item {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+}
+.onb-list-item:last-child {
+  border-bottom: none;
+}
+.onb-list-num {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 0.625rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.onb-list-text {
+  flex: 1;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #a1a1aa;
+}
+
+.onb-formula {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: center;
+}
+.onb-formula-caption {
+  color: #52525b;
+  font-size: 0.5625rem;
+  letter-spacing: 3px;
+}
+.onb-formula-eq {
+  color: #ef4444;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.onb-formula-note {
+  color: #71717a;
+  font-size: 0.625rem;
+}
+
+.onb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+.onb-grid-cell {
+  background: rgba(39, 39, 42, 0.3);
+  border: 1px solid #27272a;
+  padding: 0.75rem 0;
+  text-align: center;
+}
+.onb-grid-emoji {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+.onb-grid-caption {
+  color: #52525b;
+  font-size: 0.5625rem;
+  letter-spacing: 1px;
+  margin-top: 0.25rem;
+}
+
+.onb-vs {
+  background: rgba(39, 39, 42, 0.2);
+  border: 1px solid #27272a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem;
+}
+.onb-vs-side {
+  flex: 1;
+  text-align: center;
+}
+.onb-vs-label {
+  color: #71717a;
+  font-size: 0.625rem;
+  letter-spacing: 1px;
+}
+.onb-vs-text {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+.onb-vs-divider {
+  color: #ef4444;
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 2px;
+}
+
+.onb-hall {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+.onb-hall-item {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+.onb-hall-rank {
+  color: #f59e0b;
+  font-weight: 900;
+  font-size: 1rem;
+  width: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+.onb-hall-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.onb-hall-title {
+  color: #e4e4e7;
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.onb-hall-meta {
+  color: #52525b;
+  font-size: 0.625rem;
+}
+.onb-hall-tag {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 0.5625rem;
+  letter-spacing: 1px;
+  padding: 0.125rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.onb-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+.onb-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: #27272a;
+  transition: background 200ms;
+}
+.onb-dot--passed {
+  background: #52525b;
+}
+.onb-dot--active {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.onb-nav {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+/* === 태블릿 (641-1024px) — iPad portrait/landscape =====================
+ *  데스크톱(>=1025px) 의 상단 정렬(6vh) 은 iPad 처럼 작은 viewport 에선
+ *  시각적으로 카드가 위로 박힌 느낌. backdrop 을 dead-center 로 회귀.
+ *  카드 max-width 도 28rem -> 30rem 으로 살짝 키워 가독성 폭 확보. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .onb-backdrop {
+    align-items: center;
+    padding-block: 4vh;
+  }
+  .onb-shell {
+    max-width: 30rem;
+  }
+}
+
+/* === 모바일 (max-width: 640px) =====================================
+ *  - 카드 max-width 100% (좌우 여백은 modal-content margin-inline:1rem)
+ *  - backdrop 도 align center + padding-block 3vh 로 viewport 중앙 회귀
+ *  - 헤더/본문 폰트 1단계 축소
+ *  - 좌우 패딩 50% 축소
+ *  - 2열 그리드(추천/댓글 가중치) → 1열
+ *  - VS 패널: 가로 → 세로 배치
+ *  - 명예의 전당 제목: nowrap → wrap 허용 (말줄임 대신 줄바꿈)
+ * 응집도(3-1): 반응형 규칙도 onboarding.css 한 파일 안에 같이 둔다. */
+@media (max-width: 640px) {
+  .onb-backdrop {
+    align-items: center;
+    padding-block: 3vh;
+  }
+  .onb-shell {
+    max-width: 100%;
+  }
+  .onb-shell-stable {
+    height: clamp(28rem, 85vh, 40rem);
+    max-height: 92vh;
+  }
+  .onb-meta,
+  .onb-header,
+  .onb-content,
+  .onb-nav {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .onb-divider {
+    margin-inline: 1rem;
+  }
+  .onb-briefing-title {
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+  }
+  .onb-briefing-sub {
+    font-size: 0.5625rem;
+    letter-spacing: 2px;
+  }
+  .onb-step-icon {
+    font-size: 2.25rem;
+  }
+  .onb-step-title {
+    font-size: 1rem;
+  }
+  .onb-step-subtitle {
+    font-size: 0.625rem;
+  }
+  .onb-body-paragraph {
+    font-size: 0.75rem;
+  }
+  .onb-grid {
+    grid-template-columns: 1fr;
+  }
+  .onb-vs {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+  }
+  .onb-vs-divider {
+    font-size: 0.875rem;
+  }
+  .onb-hall-title {
+    white-space: normal;
+    text-overflow: clip;
+  }
+  .onb-stamp {
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+    padding: 0.0625rem 0.375rem;
+  }
+  .onb-nav {
+    gap: 0.5rem;
+  }
+}
