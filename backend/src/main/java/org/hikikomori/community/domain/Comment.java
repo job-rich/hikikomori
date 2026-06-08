@@ -38,6 +38,8 @@ public class Comment {
 
     private LocalDateTime deletedAt;
 
+    private LocalDateTime hiddenAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
@@ -64,6 +66,16 @@ public class Comment {
     public void softDelete() {
         this.updatedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void hide() {
+        if (this.hiddenAt == null) {
+            this.hiddenAt = LocalDateTime.now();
+        }
+    }
+
+    public boolean isHidden() {
+        return this.hiddenAt != null;
     }
 
     @Builder

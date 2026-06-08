@@ -163,8 +163,8 @@ class PostControllerTest {
         // given
         UUID postId = UUID.randomUUID();
         List<CommentDto.Response> comments = List.of(
-                new CommentDto.Response(null, 1L, "댓글러1", "댓글1", null, null, null, List.of()),
-                new CommentDto.Response(null, 2L, "댓글러2", "댓글2", null, null, null, List.of())
+                new CommentDto.Response(null, 1L, "댓글러1", "댓글1", false, null, null, null, List.of()),
+                new CommentDto.Response(null, 2L, "댓글러2", "댓글2", false, null, null, null, List.of())
         );
         given(postFacade.getComments(postId)).willReturn(comments);
 
@@ -182,7 +182,7 @@ class PostControllerTest {
         // given
         UUID postId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
-        CommentDto.Response response = new CommentDto.Response(commentId, 2L, "댓글러", "댓글 내용", null, null, null, List.of());
+        CommentDto.Response response = new CommentDto.Response(commentId, 2L, "댓글러", "댓글 내용", false, null, null, null, List.of());
         given(postFacade.createComment(eq(postId), any(CommentDto.CreateRequest.class))).willReturn(response);
 
         String requestBody = """

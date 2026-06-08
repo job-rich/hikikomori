@@ -9,6 +9,7 @@ import {
   getMyPosts,
   type PostResponse,
 } from '@/lib/api/posts';
+import { isApiError } from '@/lib/api/client';
 import { useUserStore } from '@/lib/stores/userStore';
 import { usePostsStore } from '@/lib/stores/postsStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
@@ -155,8 +156,12 @@ export default function Body() {
         nickName: nickname!,
       });
       resetAndFetch(viewMode);
-    } catch (error) {
-      console.error('게시글 생성 실패:', error);
+    } catch (err) {
+      if (isApiError(err, 403)) {
+        window.alert('신고 누적으로 작성이 제한되었습니다.');
+      } else {
+        console.error('게시글 생성 실패:', err);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -213,6 +218,7 @@ export default function Body() {
                 views={post.viewCount}
                 likeCount={post.likeCount}
                 isOwner={!!snowflakeId && post.userId === Number(snowflakeId)}
+                authorUserId={post.userId}
                 onDeleted={() => resetAndFetch(viewMode)}
               />
             ))

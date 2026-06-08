@@ -30,6 +30,8 @@ import {
 import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
+import ReportModal from '@/Components/Common/Modals/Report';
+import { isApiError } from '@/lib/api/client';
 
 interface PostDetailProps {
   postId: string;
@@ -57,6 +59,7 @@ function CommentItem({
   const [editDraft, setEditDraft] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const isCommentOwner =
     !isEmpty(snowflakeId) && comment.userId === Number(snowflakeId);
@@ -79,8 +82,12 @@ function CommentItem({
       setReplyContent('');
       setReplyOpen(false);
       onCommentAdded();
-    } catch (error) {
-      console.error('답글 작성 실패:', error);
+    } catch (err) {
+      if (isApiError(err, 403)) {
+        window.alert('신고 누적으로 작성이 제한되었습니다.');
+      } else {
+        console.error('답글 작성 실패:', err);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -190,6 +197,10 @@ function CommentItem({
               </button>
             </div>
           </div>
+        ) : comment.hidden ? (
+          <p className="mt-1.5 text-sm italic text-muted-foreground">
+            신고 누적으로 숨겨진 댓글입니다.
+          </p>
         ) : (
           <p className="mt-1.5 text-sm text-foreground leading-relaxed">
             {comment.content}
@@ -204,6 +215,24 @@ function CommentItem({
             <Reply className="h-3 w-3" />
             답글
           </button>
+        )}
+        {!isCommentOwner && !isCommentDeleted && (
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            className="mt-1.5 ml-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
+          >
+            <TriangleAlert className="h-3 w-3" />
+            신고
+          </button>
+        )}
+        {reportOpen && (
+          <ReportModal
+            targetType="COMMENT"
+            targetId={comment.id}
+            targetUserId={comment.userId}
+            onClose={() => setReportOpen(false)}
+          />
         )}
         {replyOpen && (
           <div className="mt-2 flex gap-2">
@@ -260,6 +289,9 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [editTag, setEditTag] = useState<string>(TAGS[0]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [postReportOpen, setPostReportOpen] = useState(false);
+
+  console.log(commentContent);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -369,7 +401,11 @@ export default function PostDetail({ postId }: PostDetailProps) {
       setCommentContent('');
       await fetchComments();
     } catch (err) {
-      console.error('댓글 작성 실패:', err);
+      if (isApiError(err, 403)) {
+        window.alert('신고 누적으로 작성이 제한되었습니다.');
+      } else {
+        console.error('댓글 작성 실패:', err);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -548,6 +584,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
                   type="button"
                   className="flex items-center gap-1.5 hover:text-destructive ml-auto"
                   aria-label="신고"
+                  onClick={() => setPostReportOpen(true)}
                 >
                   <TriangleAlert className="h-3.5 w-3.5" />
                 </button>
@@ -603,6 +640,15 @@ export default function PostDetail({ postId }: PostDetailProps) {
           )}
         </div>
       </section>
+
+      {postReportOpen && (
+        <ReportModal
+          targetType="POST"
+          targetId={postId}
+          targetUserId={post.userId}
+          onClose={() => setPostReportOpen(false)}
+        />
+      )}
     </div>
   );
 }
