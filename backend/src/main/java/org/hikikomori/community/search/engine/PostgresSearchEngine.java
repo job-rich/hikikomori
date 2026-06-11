@@ -11,7 +11,6 @@ import org.hikikomori.community.domain.PostTag;
 import org.hikikomori.community.search.model.HitType;
 import org.hikikomori.community.search.model.SearchCriteria;
 import org.hikikomori.community.search.model.SearchHit;
-import org.hikikomori.community.search.model.SortType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

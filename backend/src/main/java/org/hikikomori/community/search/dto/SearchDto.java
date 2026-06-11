@@ -2,7 +2,6 @@ package org.hikikomori.community.search.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import org.hikikomori.community.domain.PostTag;
 import org.hikikomori.community.search.model.SearchHit;
 
 public class SearchDto {

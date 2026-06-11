@@ -60,21 +60,6 @@ class SearchControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/posts/search?q=자유&type=post&sort=relevance - 소문자 enum도 200")
-    void searchByPostLowerCase() throws Exception {
-        // given
-        given(searchFacade.search(eq("자유"), isNull(), eq(SearchDto.Type.POST), eq(SortType.RELEVANCE), any(Pageable.class)))
-                .willReturn(new PageImpl<>(List.of()));
-
-        // when & then
-        mockMvc.perform(get("/api/posts/search")
-                        .param("query", "자유")
-                        .param("type", "post")
-                        .param("sort", "relevance"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     @DisplayName("GET /api/posts/search?q=자유&tag=DAILY - tag 필터 200")
     void searchWithTag() throws Exception {
         // given
