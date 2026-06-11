@@ -59,6 +59,18 @@ public class PostFacade {
     }
 
     @Transactional
+    public void recordView(UUID postId) {
+        postRepository.getById(postId);
+        postRepository.incrementViewCount(postId);
+    }
+
+    @Transactional
+    public void likePost(UUID postId) {
+        postRepository.getById(postId);
+        postRepository.incrementLikeCount(postId);
+    }
+
+    @Transactional
     public void deletePost(UUID postId, Long userId) {
         Post post = postRepository.getById(postId);
         postService.checkOwnership(post, userId, "삭제");

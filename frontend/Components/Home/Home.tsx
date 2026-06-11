@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <div className="mx-auto mt-10 flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-6 sm:flex-row sm:px-6">
+      <div className="mx-auto mt-10 flex w-full max-w-6xl flex-1 flex-col  px-4 py-6 sm:flex-row sm:px-6">
         <Body />
         <Side />
       </div>

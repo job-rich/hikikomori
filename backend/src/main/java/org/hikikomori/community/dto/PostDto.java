@@ -32,6 +32,8 @@ public class PostDto {
             String content,
             PostTag tag,
             long commentCount,
+            long viewCount,
+            long likeCount,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -44,6 +46,8 @@ public class PostDto {
                     post.getContent(),
                     post.getTag(),
                     post.getCommentCount(),
+                    post.getViewCount(),
+                    post.getLikeCount(),
                     post.getCreatedAt(),
                     post.getUpdatedAt()
             );

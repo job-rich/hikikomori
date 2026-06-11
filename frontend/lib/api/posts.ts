@@ -21,6 +21,8 @@ export interface PostResponse {
   content: string;
   tag: string;
   commentCount: number;
+  viewCount: number;
+  likeCount: number;
   createdAt: string;
 }
 
@@ -62,10 +64,13 @@ export interface CommentCreateRequest {
 
 export async function getPosts(
   page = 0,
-  size = 6
+  size = 6,
+  sort?: string
 ): Promise<PageResponse<PostResponse>> {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  if (sort) params.append('sort', sort);
   const data = await apiClient<PageResponse<PostResponse>>(
-    `/api/posts?page=${page}&size=${size}`
+    `/api/posts?${params}`
   );
   return { ...data, content: data.content.map(mapPost) };
 }
@@ -73,10 +78,13 @@ export async function getPosts(
 export async function getMyPosts(
   userId: number,
   page = 0,
-  size = 6
+  size = 6,
+  sort?: string
 ): Promise<PageResponse<PostResponse>> {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  if (sort) params.append('sort', sort);
   const data = await apiClient<PageResponse<PostResponse>>(
-    `/api/posts/my/${userId}?page=${page}&size=${size}`
+    `/api/posts/my/${userId}?${params}`
   );
   return { ...data, content: data.content.map(mapPost) };
 }
@@ -112,6 +120,14 @@ export function deletePost(id: string, userId: number): Promise<void> {
   return apiClient<void>(`/api/posts/${id}?${q}`, {
     method: 'DELETE',
   });
+}
+
+export function recordView(id: string): Promise<void> {
+  return apiClient<void>(`/api/posts/${id}/view`, { method: 'POST' });
+}
+
+export function likePost(id: string): Promise<void> {
+  return apiClient<void>(`/api/posts/${id}/like`, { method: 'POST' });
 }
 
 // 댓글 목록 조회

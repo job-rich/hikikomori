@@ -36,8 +36,18 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private PostTag tag;
 
-    @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = id)")
+    @Formula("(SELECT COUNT(*) FROM comment c WHERE c.post_id = {alias}.id)")
     private long commentCount;
+
+    @Column(columnDefinition = "bigint default 0")
+    private long viewCount = 0;
+
+    @Column(columnDefinition = "bigint default 0")
+    private long likeCount = 0;
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 
     private LocalDateTime createdAt;
 

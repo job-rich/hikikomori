@@ -5,7 +5,6 @@ import {
   Eye,
   TriangleAlert,
   ChevronUp,
-  ChevronDown,
   Bookmark,
   Pencil,
   Trash2,
@@ -15,8 +14,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useUserStore } from '@/lib/stores/userStore';
 import { TAG_STYLES } from '@/lib/utils/tagColors';
+
+import { deletePost, likePost } from '@/lib/api/posts';
+
 import { deletePost } from '@/lib/api/posts';
 import ReportModal from '@/Components/Common/Modals/Report';
+
 
 interface PostCardProps {
   id: string | number;
@@ -26,9 +29,8 @@ interface PostCardProps {
   timestamp: string;
   username: string;
   commentCount?: number;
-  replies?: number;
   views?: number;
-  votes?: number;
+  likeCount?: number;
   voteRatio?: number;
   /** 현재 로그인 사용자가 작성한 글이면 상세와 동일하게 수정·삭제 진입 */
   isOwner?: boolean;
@@ -46,9 +48,8 @@ export default function PostCard({
   timestamp,
   username,
   commentCount,
-  replies = 0,
   views = 0,
-  votes = 0,
+  likeCount = 0,
   voteRatio = 0,
   isOwner = false,
   onDeleted,
@@ -60,6 +61,8 @@ export default function PostCard({
   const isLoggedIn = useUserStore(
     (s) => s.nickname !== null && s.snowflakeId !== null
   );
+  const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+  const [liked, setLiked] = useState(false);
 
   const goToEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -78,7 +81,57 @@ export default function PostCard({
     }
   };
 
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (liked) return;
+    setLocalLikeCount((prev) => prev + 1);
+    setLiked(true);
+    try {
+      await likePost(String(id));
+    } catch (err) {
+      console.error('추천 실패:', err);
+      setLocalLikeCount((prev) => prev - 1);
+      setLiked(false);
+    }
+  };
+
   return (
+
+    <article
+      className="w-full cursor-pointer rounded-lg border border-border bg-card transition-colors hover:bg-muted/50"
+      onClick={() => router.push(`/posts/${id}`)}
+    >
+      <div className="flex gap-0 p-4">
+        {/* 투표 영역 */}
+        <div className="flex min-w-[48px] flex-col items-center gap-0.5 pr-4">
+          <button
+            type="button"
+            className={`rounded p-1 transition-colors ${liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400'}`}
+            aria-label="추천"
+            onClick={handleLike}
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+          <span className="text-lg font-bold text-foreground">
+            {localLikeCount}
+          </span>
+        </div>
+
+        {/* 콘텐츠 영역 */}
+        <div className="min-w-0 flex-1">
+          {/* 메타 정보 */}
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {tag && (
+              <span
+                className={`rounded px-2 py-0.5 text-xs font-medium ${TAG_STYLES[tag] ?? 'bg-gray-500 text-white'}`}
+              >
+                {tag}
+              </span>
+            )}
+            <span className="font-medium">{username}</span>
+            <span>✕ {views.toLocaleString()}</span>
+            <span className="text-rose-500">▲ {voteRatio}%</span>
+
     <>
       <article
         className="w-full cursor-pointer rounded-lg border border-border bg-card transition-colors hover:bg-muted/50"
@@ -104,6 +157,7 @@ export default function PostCard({
             >
               <ChevronDown className="h-5 w-5" />
             </button>
+
           </div>
 
           {/* 콘텐츠 영역 */}
@@ -123,6 +177,12 @@ export default function PostCard({
               <span>· {formatDate(timestamp)}</span>
             </div>
 
+
+          {/* 본문 미리보기 */}
+          <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-muted-foreground">
+            {content}
+          </p>
+
             {/* 제목 */}
             {title && (
               <h3 className="mt-1.5 line-clamp-1 text-base font-bold text-foreground">
@@ -130,11 +190,8 @@ export default function PostCard({
               </h3>
             )}
 
-            {/* 본문 미리보기 */}
-            <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-muted-foreground">
-              <span className="mr-1 text-xs">▼</span>
-              {content}
-            </p>
+
+         
 
             {/* 하단 액션 */}
             <div className="mt-3 flex items-center gap-4 border-t border-border pt-2 text-xs text-muted-foreground">
