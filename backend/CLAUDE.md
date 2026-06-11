@@ -84,8 +84,17 @@ org.hikikomori.community
 │   └── *RepositoryImpl   # DB 접근 + 예외 처리
 ├── domain/               # JPA 엔티티
 ├── util/                 # 유틸리티 (UUIDGenerator)
-└── batch/                # 배치 (Scheduler, Job, Tasklet)
+├── batch/                # 배치 (Scheduler, Job, Tasklet)
+└── search/               # 검색 기능 모듈 (batch처럼 자기완결, JPA 미사용)
+    ├── controller/       # 검색 API (@RestController)
+    ├── facade/           # 오케스트레이션
+    ├── service/          # 스니펫·토큰화 텍스트 유틸
+    ├── dto/              # SearchDto
+    ├── engine/           # SearchEngine 포트 + PostgresSearchEngine(pg_trgm) + 인덱스 초기화
+    └── model/            # SearchCriteria·SearchHit·SortType·HitType
 ```
+
+> **도메인 vs 기능 모듈**: `search`는 자기 엔티티 없는 read capability라 비즈니스 도메인이 아닌 기능 모듈로 분리한다. ArchUnit 수평 의존성 규칙은 공유 레이어 프리픽스(controller·facade·service 등)에만 적용되며, `search`·`batch`처럼 자기완결 기능 모듈은 면제된다.
 
 ## API 엔드포인트
 
@@ -93,6 +102,7 @@ org.hikikomori.community
 |--------|------|------|----------|
 | GET | `/api/posts` | 게시글 목록 (페이징, 기본 6개) | 200 |
 | GET | `/api/posts/{id}` | 게시글 단건 조회 | 200 |
+| GET | `/api/posts/search` | 게시글/댓글/사용자 통합 검색 (q, tag, type, sort, 페이징) | 200 |
 | GET | `/api/posts/my/{userId}` | 내 게시글 목록 (페이징) | 200 |
 | POST | `/api/posts` | 게시글 생성 | 201 |
 | PATCH | `/api/posts/{id}` | 게시글 수정 | 204 |
