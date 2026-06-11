@@ -1,0 +1,344 @@
+/* Navbar 타이틀 — 텍스트 전용 TV 정적(지지직) 글리치 */
+
+.navbar-title-static {
+  position: relative;
+  display: inline-block;
+  color: hsl(var(--neon));
+  text-shadow: 0 0 10px hsl(var(--neon) / 0.5);
+  animation:
+    navbar-title-flicker 2.4s infinite,
+    navbar-title-shake 0.12s steps(2) infinite;
+}
+
+.navbar-title-static::before,
+.navbar-title-static::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.navbar-title-static::before {
+  color: hsl(var(--destructive));
+  z-index: -1;
+  animation: navbar-title-glitch-a 2.4s infinite;
+}
+
+.navbar-title-static::after {
+  color: hsl(var(--glitch));
+  z-index: -2;
+  animation: navbar-title-glitch-b 2.4s infinite;
+}
+
+/* 상시 미세 흔들림 */
+@keyframes navbar-title-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(0.5px, 0);
+  }
+  50% {
+    transform: translate(-0.5px, 0.5px);
+  }
+  75% {
+    transform: translate(0, -0.5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes navbar-title-flicker {
+  /* 1차 버스트 */
+  0%,
+  7%,
+  9%,
+  38%,
+  40%,
+  68%,
+  70%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    text-shadow: 0 0 10px hsl(var(--neon) / 0.5);
+  }
+  7.5% {
+    opacity: 0.55;
+    filter: brightness(2);
+    text-shadow:
+      0 0 20px hsl(var(--destructive)),
+      4px 0 hsl(var(--neon)),
+      -4px 0 hsl(var(--glitch));
+  }
+  8% {
+    opacity: 0.85;
+    filter: brightness(0.4);
+    text-shadow: 0 0 5px hsl(var(--neon) / 0.2);
+  }
+  8.5% {
+    opacity: 0.4;
+    filter: brightness(2.2);
+    text-shadow:
+      0 0 25px hsl(var(--destructive)),
+      -5px 0 hsl(var(--neon)),
+      5px 0 hsl(var(--glitch));
+  }
+  /* 2차 버스트 */
+  38.5% {
+    opacity: 0.5;
+    filter: brightness(1.9);
+    text-shadow:
+      0 0 18px hsl(var(--destructive)),
+      3px 0 hsl(var(--neon)),
+      -3px 0 hsl(var(--glitch));
+  }
+  39% {
+    opacity: 0.9;
+    filter: brightness(0.5);
+  }
+  39.5% {
+    opacity: 0.35;
+    filter: brightness(2.5);
+    text-shadow:
+      0 0 30px hsl(var(--destructive)),
+      6px 0 hsl(var(--neon)),
+      -6px 0 hsl(var(--glitch));
+  }
+  /* 3차 버스트 */
+  68.5% {
+    opacity: 0.45;
+    filter: brightness(2.1);
+    text-shadow:
+      0 0 22px hsl(var(--destructive)),
+      -4px 0 hsl(var(--neon)),
+      4px 0 hsl(var(--glitch));
+  }
+  69% {
+    opacity: 0.8;
+    filter: brightness(0.35);
+  }
+  69.5% {
+    opacity: 0.3;
+    filter: brightness(2.8);
+    text-shadow:
+      0 0 35px hsl(var(--destructive)),
+      7px 0 hsl(var(--neon)),
+      -7px 0 hsl(var(--glitch));
+  }
+}
+
+@keyframes navbar-title-glitch-a {
+  0%,
+  6%,
+  10%,
+  37%,
+  41%,
+  67%,
+  71%,
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+    transform: translate(0) skew(0);
+  }
+  /* 1차 */
+  7% {
+    opacity: 1;
+    clip-path: inset(8% 0 68% 0);
+    transform: translate(-8px, 0) skew(-2deg);
+  }
+  7.5% {
+    opacity: 0.9;
+    clip-path: inset(55% 0 12% 0);
+    transform: translate(7px, 2px) skew(3deg);
+  }
+  8% {
+    opacity: 1;
+    clip-path: inset(3% 0 82% 0);
+    transform: translate(-6px, -2px) skew(-1deg);
+  }
+  8.5% {
+    opacity: 0.85;
+    clip-path: inset(42% 0 38% 0);
+    transform: translate(9px, 1px) skew(2deg);
+  }
+  9% {
+    opacity: 0.95;
+    clip-path: inset(72% 0 5% 0);
+    transform: translate(-5px, 3px) skew(-3deg);
+  }
+  9.5% {
+    opacity: 0.8;
+    clip-path: inset(22% 0 58% 0);
+    transform: translate(6px, -1px) skew(1deg);
+  }
+  /* 2차 */
+  38% {
+    opacity: 1;
+    clip-path: inset(15% 0 62% 0);
+    transform: translate(-7px, 1px) skew(-2deg);
+  }
+  38.5% {
+    opacity: 0.9;
+    clip-path: inset(48% 0 28% 0);
+    transform: translate(8px, -2px) skew(2deg);
+  }
+  39% {
+    opacity: 1;
+    clip-path: inset(5% 0 78% 0);
+    transform: translate(-9px, 0) skew(-3deg);
+  }
+  39.5% {
+    opacity: 0.85;
+    clip-path: inset(60% 0 18% 0);
+    transform: translate(5px, 2px) skew(1deg);
+  }
+  40% {
+    opacity: 0.95;
+    clip-path: inset(30% 0 48% 0);
+    transform: translate(-6px, -2px) skew(-1deg);
+  }
+  /* 3차 */
+  68% {
+    opacity: 1;
+    clip-path: inset(10% 0 72% 0);
+    transform: translate(8px, 0) skew(3deg);
+  }
+  68.5% {
+    opacity: 0.9;
+    clip-path: inset(50% 0 25% 0);
+    transform: translate(-7px, 2px) skew(-2deg);
+  }
+  69% {
+    opacity: 1;
+    clip-path: inset(2% 0 85% 0);
+    transform: translate(6px, -1px) skew(2deg);
+  }
+  69.5% {
+    opacity: 0.85;
+    clip-path: inset(65% 0 10% 0);
+    transform: translate(-8px, 1px) skew(-3deg);
+  }
+  70% {
+    opacity: 0.95;
+    clip-path: inset(35% 0 42% 0);
+    transform: translate(7px, -2px) skew(1deg);
+  }
+}
+
+@keyframes navbar-title-glitch-b {
+  0%,
+  5%,
+  10%,
+  36%,
+  41%,
+  66%,
+  71%,
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+    transform: translate(0) skew(0);
+  }
+  /* 1차 — a와 타이밍 어긋남 */
+  6.5% {
+    opacity: 1;
+    clip-path: inset(25% 0 45% 0);
+    transform: translate(7px, -2px) skew(2deg);
+  }
+  7% {
+    opacity: 0.9;
+    clip-path: inset(58% 0 8% 0);
+    transform: translate(-8px, 1px) skew(-3deg);
+  }
+  7.5% {
+    opacity: 1;
+    clip-path: inset(12% 0 68% 0);
+    transform: translate(6px, 2px) skew(1deg);
+  }
+  8% {
+    opacity: 0.85;
+    clip-path: inset(68% 0 5% 0);
+    transform: translate(-7px, -1px) skew(-2deg);
+  }
+  8.5% {
+    opacity: 0.95;
+    clip-path: inset(38% 0 38% 0);
+    transform: translate(9px, 0) skew(3deg);
+  }
+  9% {
+    opacity: 0.8;
+    clip-path: inset(5% 0 80% 0);
+    transform: translate(-5px, 2px) skew(-1deg);
+  }
+  9.5% {
+    opacity: 1;
+    clip-path: inset(48% 0 28% 0);
+    transform: translate(8px, -2px) skew(2deg);
+  }
+  /* 2차 */
+  37.5% {
+    opacity: 1;
+    clip-path: inset(20% 0 55% 0);
+    transform: translate(-6px, -1px) skew(-2deg);
+  }
+  38% {
+    opacity: 0.9;
+    clip-path: inset(62% 0 12% 0);
+    transform: translate(7px, 2px) skew(3deg);
+  }
+  38.5% {
+    opacity: 1;
+    clip-path: inset(8% 0 75% 0);
+    transform: translate(-8px, 0) skew(-1deg);
+  }
+  39% {
+    opacity: 0.85;
+    clip-path: inset(45% 0 35% 0);
+    transform: translate(6px, -2px) skew(2deg);
+  }
+  40% {
+    opacity: 0.95;
+    clip-path: inset(70% 0 8% 0);
+    transform: translate(-9px, 1px) skew(-3deg);
+  }
+  40.5% {
+    opacity: 0.8;
+    clip-path: inset(18% 0 62% 0);
+    transform: translate(5px, 2px) skew(1deg);
+  }
+  /* 3차 */
+  67.5% {
+    opacity: 1;
+    clip-path: inset(32% 0 42% 0);
+    transform: translate(7px, 1px) skew(2deg);
+  }
+  68% {
+    opacity: 0.9;
+    clip-path: inset(58% 0 15% 0);
+    transform: translate(-6px, -2px) skew(-2deg);
+  }
+  68.5% {
+    opacity: 1;
+    clip-path: inset(6% 0 82% 0);
+    transform: translate(8px, 0) skew(3deg);
+  }
+  69% {
+    opacity: 0.85;
+    clip-path: inset(52% 0 28% 0);
+    transform: translate(-7px, 2px) skew(-1deg);
+  }
+  69.5% {
+    opacity: 0.95;
+    clip-path: inset(78% 0 3% 0);
+    transform: translate(9px, -1px) skew(2deg);
+  }
+  70% {
+    opacity: 0.8;
+    clip-path: inset(14% 0 65% 0);
+    transform: translate(-8px, 1px) skew(-3deg);
+  }
+}

@@ -20,13 +20,17 @@ public interface PostJpaRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findByUserIdAndHiddenAtIsNull(Long userId, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
     void incrementViewCount(UUID id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
     void incrementLikeCount(UUID id);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :id AND p.likeCount > 0")
+    void decrementLikeCount(UUID id);
 
     @Modifying
     @Query("DELETE FROM Post p WHERE p.createdAt >= :startAt AND p.createdAt < :endAt")

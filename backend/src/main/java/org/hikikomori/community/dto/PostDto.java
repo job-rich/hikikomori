@@ -24,6 +24,8 @@ public class PostDto {
             @NotNull PostTag tag
     ) {}
 
+    public record LikeToggleResponse(boolean liked, long likeCount) {}
+
     public record Response(
             UUID id,
             Long userId,
@@ -34,10 +36,15 @@ public class PostDto {
             long commentCount,
             long viewCount,
             long likeCount,
+            boolean likedByMe,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
         public static Response from(Post post) {
+            return from(post, false);
+        }
+
+        public static Response from(Post post, boolean likedByMe) {
             return new Response(
                     post.getId(),
                     post.getUserId(),
@@ -48,6 +55,7 @@ public class PostDto {
                     post.getCommentCount(),
                     post.getViewCount(),
                     post.getLikeCount(),
+                    likedByMe,
                     post.getCreatedAt(),
                     post.getUpdatedAt()
             );

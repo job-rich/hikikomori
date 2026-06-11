@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronUp, Trophy } from 'lucide-react';
+import { Heart, Trophy } from 'lucide-react';
 import { getPosts, type PostResponse } from '@/lib/api/posts';
 
 export default function Popularity() {
@@ -19,7 +19,7 @@ export default function Popularity() {
             if (seen.has(post.id)) return false;
             seen.add(post.id);
             return true;
-          }),
+          })
         );
       })
       .catch(() => setPosts([]))
@@ -61,10 +61,6 @@ export default function Popularity() {
                   </span>
                   <span className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
                     <span className="ml-1">{post.nickName}</span>
-                    <div className="flex items-center gap-1">
-                      <ChevronUp className="h-3 w-3 text-rose-400" />
-                      {post.likeCount}
-                    </div>
                   </span>
                 </span>
               </button>

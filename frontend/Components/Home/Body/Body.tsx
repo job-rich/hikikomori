@@ -197,7 +197,7 @@ export default function Body() {
         <FillterTab sortTab={sortTab} setSortTab={setSortTab} />
 
         {/* 게시글 목록 */}
-        <div className="mt-4 flex w-full flex-col gap-3">
+        <div className="mt-4 flex w-full flex-col gap-5">
           {posts.length === 0 && !isLoading ? (
             <p className="w-full py-10 text-center text-sm text-muted-foreground">
               {viewMode === 'my'
