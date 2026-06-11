@@ -91,6 +91,20 @@ export default function PostCard({
             )}
             <span className="font-medium">{username}</span>
             <span>· {formatDate(timestamp)}</span>
+            {!isOwner && (
+              <button
+                type="button"
+                className="ml-auto flex items-center gap-1.5 hover:text-destructive"
+                aria-label="신고"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReportOpen(true);
+                }}
+              >
+                <TriangleAlert className="h-3.5 w-3.5" />
+                신고
+              </button>
+            )}
           </div>
 
           {/* 제목 */}
@@ -105,24 +119,23 @@ export default function PostCard({
             {content}
           </p>
 
-          <div className="flex justify-between border-t border-border mt-3">
-            {/* 하단 액션 */}
-            <div className="mt-3 flex items-center gap-4  text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Heart className="h-3.5 w-3.5" />
-                {likeCount}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <MessageSquare className="h-3.5 w-3.5" />
-                {commentCount}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5" />
-                {views.toLocaleString()}
-              </span>
-              {isLoggedIn && (
-                <>
-                  {/* <button
+          {/* 하단 액션 */}
+          <div className="mt-5 flex border-t border-border pt-2 items-end justify-end gap-4  text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Heart className="h-3.5 w-3.5" />
+              {likeCount}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5" />
+              {commentCount}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Eye className="h-3.5 w-3.5" />
+              {views.toLocaleString()}
+            </span>
+            {isLoggedIn && (
+              <>
+                {/* <button
                   type="button"
                   className="flex items-center gap-1.5 hover:text-foreground"
                   onClick={(e) => e.stopPropagation()}
@@ -130,48 +143,8 @@ export default function PostCard({
                   <Bookmark className="h-3.5 w-3.5" />
                   북마크
                 </button> */}
-
-                  {!isOwner && (
-                    <button
-                      type="button"
-                      className="ml-auto flex items-center gap-1.5 hover:text-destructive"
-                      aria-label="신고"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setReportOpen(true);
-                      }}
-                    >
-                      <TriangleAlert className="h-3.5 w-3.5" />
-                      신고
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-            <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-              {isOwner && (
-                <>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 hover:text-foreground"
-                    onClick={goToEdit}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    수정
-                  </button>
-                  {onDeleted ? (
-                    <button
-                      type="button"
-                      className="flex items-center gap-1.5 hover:text-destructive"
-                      onClick={handleDeleteCard}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      삭제
-                    </button>
-                  ) : null}
-                </>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </article>
