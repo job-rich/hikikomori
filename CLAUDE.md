@@ -91,6 +91,7 @@ docker compose down -v
 계층형 아키텍처: **Controller → Service → Repository → Entity** + Batch
 - 패키지 루트: `org.hikikomori.community`
 - 배치 정리 작업: 매일 자정 전일 데이터 자동 삭제 (Comment → Post 순서)
+- 검색은 `search/` 자기완결 모듈(controller·facade·service·dto·engine·model 내부 레이어링, JPA 미사용 raw SQL 엔진 포트)로 batch처럼 분리
 - 상세 아키텍처 및 컨벤션은 [`backend/CLAUDE.md`](backend/CLAUDE.md) 참고
 
 ### Frontend (Next.js App Router)
