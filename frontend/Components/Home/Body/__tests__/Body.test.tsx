@@ -24,6 +24,10 @@ const mockPosts = [
     title: '전체 게시글',
     content: '내용1',
     tag: 'VOID',
+    commentCount: 0,
+    viewCount: 0,
+    likeCount: 0,
+    likedByMe: false,
     createdAt: '2026-03-01T08:00:00',
   },
   {
@@ -33,6 +37,10 @@ const mockPosts = [
     title: '다른 게시글',
     content: '내용2',
     tag: 'VOID',
+    commentCount: 0,
+    viewCount: 0,
+    likeCount: 0,
+    likedByMe: false,
     createdAt: '2026-03-01T09:00:00',
   },
 ];
@@ -45,6 +53,10 @@ const mockMyPosts = [
     title: '내 게시글',
     content: '내용1',
     tag: 'VOID',
+    commentCount: 0,
+    viewCount: 0,
+    likeCount: 0,
+    likedByMe: false,
     createdAt: '2026-03-01T08:00:00',
   },
 ];
@@ -114,7 +126,12 @@ describe('Body - 내가 쓴 게시글 기능', () => {
     await screen.findByText('전체 게시글');
     fireEvent.click(screen.getByRole('button', { name: '내가 쓴 글' }));
 
-    expect(postsApi.getMyPosts).toHaveBeenCalledWith(12345, 0);
+    expect(postsApi.getMyPosts).toHaveBeenCalledWith(
+      12345,
+      0,
+      6,
+      'createdAt,desc'
+    );
   });
 
   it('"내가 쓴 글" 모드에서 PostForm이 표시되지 않아야 한다', async () => {
@@ -249,6 +266,11 @@ describe('Body - 무한 스크롤', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '내가 쓴 글' }));
 
-    expect(postsApi.getMyPosts).toHaveBeenCalledWith(12345, 0);
+    expect(postsApi.getMyPosts).toHaveBeenCalledWith(
+      12345,
+      0,
+      6,
+      'createdAt,desc'
+    );
   });
 });

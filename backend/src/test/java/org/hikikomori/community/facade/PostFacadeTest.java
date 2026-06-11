@@ -15,9 +15,11 @@ import org.hikikomori.community.domain.Post;
 import org.hikikomori.community.domain.PostTag;
 import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
+import org.hikikomori.community.repository.PostLikeRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
+import org.hikikomori.community.service.PostLikeService;
 import org.hikikomori.community.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +48,9 @@ class PostFacadeTest {
     @Spy
     private BanService banService = new BanService();
 
+    @Spy
+    private PostLikeService postLikeService = new PostLikeService();
+
     @Mock
     private PostRepositoryImpl postRepository;
 
@@ -54,6 +59,9 @@ class PostFacadeTest {
 
     @Mock
     private BanRepositoryImpl banRepository;
+
+    @Mock
+    private PostLikeRepositoryImpl postLikeRepository;
 
     private static final UUID POST_ID = UUID.randomUUID();
     private static final UUID COMMENT_ID = UUID.randomUUID();
@@ -87,7 +95,7 @@ class PostFacadeTest {
         Pageable pageable = PageRequest.of(0, 10);
         given(postRepository.findAll(pageable)).willReturn(page);
 
-        Page<PostDto.Response> result = postFacade.getPosts(pageable);
+        Page<PostDto.Response> result = postFacade.getPosts(pageable, null);
 
         assertThat(result.getContent()).hasSize(2);
         verify(postRepository).findAll(pageable);
@@ -99,7 +107,7 @@ class PostFacadeTest {
         Post post = Post.builder().title("제목").content("내용").build();
         given(postRepository.getVisibleById(POST_ID)).willReturn(post);
 
-        PostDto.Response result = postFacade.getPost(POST_ID);
+        PostDto.Response result = postFacade.getPost(POST_ID, null);
 
         assertThat(result.title()).isEqualTo("제목");
         verify(postRepository).getVisibleById(POST_ID);
@@ -111,7 +119,7 @@ class PostFacadeTest {
         UUID notFoundId = UUID.randomUUID();
         given(postRepository.getVisibleById(notFoundId)).willThrow(new IllegalArgumentException("게시글을 찾을 수 없습니다: " + notFoundId));
 
-        assertThatThrownBy(() -> postFacade.getPost(notFoundId))
+        assertThatThrownBy(() -> postFacade.getPost(notFoundId, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시글을 찾을 수 없습니다");
     }
@@ -152,8 +160,52 @@ class PostFacadeTest {
 
         postFacade.deletePost(POST_ID, 1L);
 
+        verify(postLikeRepository).deleteAllByPostId(POST_ID);
         verify(commentRepository).deleteAllByPostId(POST_ID);
         verify(postRepository).deleteById(POST_ID);
+    }
+
+    @Test
+    @DisplayName("좋아요 토글 - 최초 좋아요")
+    void toggleLikeOn() {
+        Post post = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").tag(PostTag.ETC).build();
+        Post updated = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").tag(PostTag.ETC).build();
+        given(postRepository.getVisibleById(POST_ID)).willReturn(post);
+        given(postLikeRepository.existsByUserIdAndPostId(2L, POST_ID)).willReturn(false);
+        given(postRepository.getById(POST_ID)).willReturn(updated);
+
+        PostDto.LikeToggleResponse result = postFacade.toggleLike(POST_ID, 2L);
+
+        assertThat(result.liked()).isTrue();
+        verify(postLikeRepository).save(any());
+        verify(postRepository).incrementLikeCount(POST_ID);
+    }
+
+    @Test
+    @DisplayName("좋아요 토글 - 좋아요 취소")
+    void toggleLikeOff() {
+        Post post = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").tag(PostTag.ETC).build();
+        Post updated = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").tag(PostTag.ETC).build();
+        given(postRepository.getVisibleById(POST_ID)).willReturn(post);
+        given(postLikeRepository.existsByUserIdAndPostId(2L, POST_ID)).willReturn(true);
+        given(postRepository.getById(POST_ID)).willReturn(updated);
+
+        PostDto.LikeToggleResponse result = postFacade.toggleLike(POST_ID, 2L);
+
+        assertThat(result.liked()).isFalse();
+        verify(postLikeRepository).deleteByUserIdAndPostId(2L, POST_ID);
+        verify(postRepository).decrementLikeCount(POST_ID);
+    }
+
+    @Test
+    @DisplayName("본인 게시글 좋아요 시 예외")
+    void toggleLikeSelfThrowsException() {
+        Post post = Post.builder().userId(1L).nickName("작성자").title("제목").content("내용").tag(PostTag.ETC).build();
+        given(postRepository.getVisibleById(POST_ID)).willReturn(post);
+
+        assertThatThrownBy(() -> postFacade.toggleLike(POST_ID, 1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인의 게시글에는 좋아요를 할 수 없습니다");
     }
 
     @Test

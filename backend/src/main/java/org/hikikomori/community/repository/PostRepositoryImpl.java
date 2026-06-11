@@ -52,6 +52,10 @@ public class PostRepositoryImpl {
         jpaRepository.incrementLikeCount(id);
     }
 
+    public void decrementLikeCount(UUID id) {
+        jpaRepository.decrementLikeCount(id);
+    }
+
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }

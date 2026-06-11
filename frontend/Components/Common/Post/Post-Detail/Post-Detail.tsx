@@ -4,8 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  ArrowUp,
-  ArrowDown,
   MessageSquare,
   Eye,
   TriangleAlert,
@@ -31,6 +29,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { isEmpty } from '@/lib/utils/isEmpty';
 import { TAGS, TAG_STYLES } from '@/lib/utils/tagColors';
 import ReportModal from '@/Components/Common/Modals/Report';
+import PostLikeButton from '@/Components/Common/Post/Post-Like-Button/Post-Like-Button';
 import { isApiError } from '@/lib/api/client';
 
 interface PostDetailProps {
@@ -303,9 +302,10 @@ export default function PostDetail({ postId }: PostDetailProps) {
   }, [postId]);
 
   const reloadPost = useCallback(async () => {
-    const data = await getPost(postId);
+    const viewerId = !isEmpty(snowflakeId) ? snowflakeId! : undefined;
+    const data = await getPost(postId, viewerId);
     setPost(data);
-  }, [postId]);
+  }, [postId, snowflakeId]);
 
   useEffect(() => {
     async function fetchPost() {
@@ -449,26 +449,8 @@ export default function PostDetail({ postId }: PostDetailProps) {
       </button>
 
       <article className="rounded-md border border-border bg-card">
-        <div className="flex p-5">
-          <div className="flex flex-col items-center gap-1 pr-5 border-r border-border">
-            <button
-              type="button"
-              className="p-1 text-muted-foreground hover:text-foreground"
-              aria-label="추천"
-            >
-              <ArrowUp className="h-5 w-5" />
-            </button>
-            <span className="text-sm font-medium text-muted-foreground">0</span>
-            <button
-              type="button"
-              className="p-1 text-muted-foreground hover:text-foreground"
-              aria-label="비추천"
-            >
-              <ArrowDown className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="flex-1 min-w-0 pl-5">
+        <div className="p-5">
+          <div className="min-w-0">
             <div className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <span className="font-medium">{post.nickName}</span>
@@ -570,26 +552,45 @@ export default function PostDetail({ postId }: PostDetailProps) {
               </>
             )}
 
-            <div className="mt-5 flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
-              <div className="flex items-center gap-1.5">
-                <MessageSquare className="h-3.5 w-3.5" />
-                <span>{post.commentCount}</span>
+            {!isEditing && (
+              <div className="mt-5 border-t border-border pt-3">
+                <div className="flex items-start justify-end gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Eye className="h-3.5 w-3.5" />
+                    {post.viewCount.toLocaleString()}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {post.commentCount}
+                  </span>
+                  {!isOwner && (
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 hover:text-destructive"
+                      aria-label="신고"
+                      onClick={() => setPostReportOpen(true)}
+                    >
+                      <TriangleAlert className="h-3.5 w-3.5" />
+                      신고
+                    </button>
+                  )}
+                </div>
+                <div className="mt-4 flex justify-center">
+                  <PostLikeButton
+                    postId={postId}
+                    likeCount={post.likeCount}
+                    likedByMe={post.likedByMe}
+                    authorUserId={post.userId}
+                    size="lg"
+                    onToggled={(liked, likeCount) =>
+                      setPost((prev) =>
+                        prev ? { ...prev, likedByMe: liked, likeCount } : prev
+                      )
+                    }
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5" />
-                <span>{post.viewCount.toLocaleString()}</span>
-              </div>
-              {!isOwner && (
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 hover:text-destructive ml-auto"
-                  aria-label="신고"
-                  onClick={() => setPostReportOpen(true)}
-                >
-                  <TriangleAlert className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </article>

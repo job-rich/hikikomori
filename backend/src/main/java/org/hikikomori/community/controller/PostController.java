@@ -30,21 +30,27 @@ public class PostController {
     private final PostFacade postFacade;
 
     @GetMapping
-    public ResponseEntity<Page<PostDto.Response>> getPosts(@PageableDefault(size = 6) Pageable pageable) {
-        return ResponseEntity.ok(postFacade.getPosts(pageable));
+    public ResponseEntity<Page<PostDto.Response>> getPosts(
+            @PageableDefault(size = 6) Pageable pageable,
+            @RequestParam(required = false) Long viewerId) {
+        return ResponseEntity.ok(postFacade.getPosts(pageable, viewerId));
     }
 
     @GetMapping("/my/{userId}")
     public ResponseEntity<Page<PostDto.Response>> getMyPosts(
             @PathVariable Long userId,
-            @PageableDefault(size = 6) Pageable pageable
+            @PageableDefault(size = 6) Pageable pageable,
+            @RequestParam(required = false) Long viewerId
     ) {
-        return ResponseEntity.ok(postFacade.getMyPosts(userId, pageable));
+        Long resolvedViewer = viewerId != null ? viewerId : userId;
+        return ResponseEntity.ok(postFacade.getMyPosts(userId, pageable, resolvedViewer));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto.Response> getPost(@PathVariable UUID id) {
-        return ResponseEntity.ok(postFacade.getPost(id));
+    public ResponseEntity<PostDto.Response> getPost(
+            @PathVariable UUID id,
+            @RequestParam(required = false) Long viewerId) {
+        return ResponseEntity.ok(postFacade.getPost(id, viewerId));
     }
 
     @PostMapping
@@ -67,9 +73,10 @@ public class PostController {
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> like(@PathVariable UUID id) {
-        postFacade.likePost(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<PostDto.LikeToggleResponse> toggleLike(
+            @PathVariable UUID id,
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(postFacade.toggleLike(id, userId));
     }
 
     @DeleteMapping("/{id}")

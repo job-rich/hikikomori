@@ -11,9 +11,11 @@ import org.hikikomori.community.dto.PostDto;
 import org.hikikomori.community.exception.BannedUserException;
 import org.hikikomori.community.repository.BanRepositoryImpl;
 import org.hikikomori.community.repository.CommentRepositoryImpl;
+import org.hikikomori.community.repository.PostLikeRepositoryImpl;
 import org.hikikomori.community.repository.PostRepositoryImpl;
 import org.hikikomori.community.service.BanService;
 import org.hikikomori.community.service.CommentService;
+import org.hikikomori.community.service.PostLikeService;
 import org.hikikomori.community.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,13 +29,17 @@ class PostFacadeBanTest {
     @Mock PostRepositoryImpl postRepository;
     @Mock CommentRepositoryImpl commentRepository;
     @Mock BanRepositoryImpl banRepository;
+    @Mock PostLikeRepositoryImpl postLikeRepository;
 
     PostService postService = new PostService();
     CommentService commentService = new CommentService();
+    PostLikeService postLikeService = new PostLikeService();
     BanService banService = new BanService();
 
     PostFacade facade() {
-        return new PostFacade(postService, commentService, banService, postRepository, commentRepository, banRepository);
+        return new PostFacade(
+                postService, commentService, postLikeService, banService,
+                postRepository, commentRepository, banRepository, postLikeRepository);
     }
 
     @Test

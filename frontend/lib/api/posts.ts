@@ -1,5 +1,5 @@
 import { displayTagFromApi, toApiTag } from '@/lib/utils/postTagApi';
-import { apiClient } from './client';
+import { ApiError, apiClient } from './client';
 
 function mapPost(p: PostResponse): PostResponse {
   return { ...p, tag: displayTagFromApi(p.tag) };
@@ -23,7 +23,13 @@ export interface PostResponse {
   commentCount: number;
   viewCount: number;
   likeCount: number;
+  likedByMe: boolean;
   createdAt: string;
+}
+
+export interface LikeToggleResponse {
+  liked: boolean;
+  likeCount: number;
 }
 
 export interface PageResponse<T> {
@@ -65,10 +71,12 @@ export interface CommentCreateRequest {
 export async function getPosts(
   page = 0,
   size = 6,
-  sort?: string
+  sort?: string,
+  viewerId?: number
 ): Promise<PageResponse<PostResponse>> {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
   if (sort) params.append('sort', sort);
+  if (viewerId != null) params.append('viewerId', String(viewerId));
   const data = await apiClient<PageResponse<PostResponse>>(
     `/api/posts?${params}`
   );
@@ -79,10 +87,12 @@ export async function getMyPosts(
   userId: number,
   page = 0,
   size = 6,
-  sort?: string
+  sort?: string,
+  viewerId?: number
 ): Promise<PageResponse<PostResponse>> {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
   if (sort) params.append('sort', sort);
+  if (viewerId != null) params.append('viewerId', String(viewerId));
   const data = await apiClient<PageResponse<PostResponse>>(
     `/api/posts/my/${userId}?${params}`
   );
@@ -92,8 +102,13 @@ export async function getMyPosts(
 // 포스트 상세 화면
 
 // 포스트 조회
-export async function getPost(id: string): Promise<PostResponse> {
-  const raw = await apiClient<PostResponse>(`/api/posts/${id}`);
+export async function getPost(
+  id: string,
+  viewerId?: string
+): Promise<PostResponse> {
+  const q =
+    viewerId != null ? `?viewerId=${encodeURIComponent(viewerId)}` : '';
+  const raw = await apiClient<PostResponse>(`/api/posts/${id}${q}`);
   return mapPost(raw);
 }
 
@@ -126,8 +141,22 @@ export function recordView(id: string): Promise<void> {
   return apiClient<void>(`/api/posts/${id}/view`, { method: 'POST' });
 }
 
-export function likePost(id: string): Promise<void> {
-  return apiClient<void>(`/api/posts/${id}/like`, { method: 'POST' });
+export async function toggleLike(
+  id: string,
+  userId: string
+): Promise<LikeToggleResponse> {
+  const q = new URLSearchParams({ userId });
+  const result = await apiClient<LikeToggleResponse | undefined>(
+    `/api/posts/${id}/like?${q}`,
+    { method: 'POST' }
+  );
+  if (!result) {
+    throw new ApiError(
+      204,
+      '좋아요 API 응답이 비어 있습니다. 백엔드를 재시작했는지 확인해 주세요.'
+    );
+  }
+  return result;
 }
 
 // 댓글 목록 조회
